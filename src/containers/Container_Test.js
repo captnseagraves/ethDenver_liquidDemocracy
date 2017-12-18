@@ -8,6 +8,7 @@ class Test extends Component {
   render() {
 
     console.log('test', this.props.web3);
+    console.log('props.myContract', this.props.myContract);
 
     return(
       <div>
@@ -17,8 +18,8 @@ class Test extends Component {
   }
 }
 
-function mapStateToProps({ web3 }) {
-  return { web3 }
+function mapStateToProps(state) {
+  return state
 }
 
-export default connect(mapStateToProps, { fetchWeb3 })(Test)
+export default connect(mapStateToProps)(Test)
