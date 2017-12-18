@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
-import SimpleStorageContract from '../../build/contracts/TokenizedTicket.json'
-// import getWeb3 from '../utils/getWeb3'
 
 import CompApp from '../components/Component_App'
 import { fetchWeb3 } from '../actions'
@@ -119,7 +117,10 @@ class App extends Component {
 
 render() {
 
-  console.log('this.props', this.props.web3);
+  console.log('this.props', this.props);
+  console.log('this.props.web3', this.props.web3);
+  console.log('this.props.myContract', this.props.myContract);
+
 
   return(
     <CompApp storageValue={this.state.storageValue} />
@@ -129,8 +130,8 @@ render() {
 
 }
 
-function mapStateToProps({ web3 }) {
-  return { web3 }
+function mapStateToProps(state) {
+  return state
 }
 
 export default connect(mapStateToProps, { fetchWeb3 })(App)

@@ -46,30 +46,28 @@ export function fetchWeb3() {
   }
 }
 
-export function instantiateContract() {
+export function instantiateContract(web3Instance) {
+  return dispatch => {
+  // var myContract;
 
-  let myContract;
+    const contract = require('truffle-contract')
+    const tokenizedTicket = contract(TokenizedTicket)
+    tokenizedTicket.setProvider(web3Instance.currentProvider)
 
-  const contract = require('truffle-contract')
-  const tokenizedTicket = contract(TokenizedTicket)
-  tokenizedTicket.setProvider(this.props.web3.currentProvider)
+    web3Instance.eth.getAccounts((error, accounts) => {
+      tokenizedTicket.deployed().then((instance) => {
 
-  // Declaring this for later so we can chain functions on SimpleStorage.
-  // var simpleStorageInstance
+        dispatch(returnContract(instance))
 
-  // Get accounts.
-  this.props.web3.eth.getAccounts((error, accounts) => {
-    tokenizedTicket.deployed().then((instance) => {
-      // simpleStorageInstance = instance
-
-      let myContract = instance;
-
+      })
     })
-  })
+  }
+}
+
+function returnContract(contractResult) {
 
   return {
     type: INSTANTIATE_CONTRACT,
-    payload: myContract
+    payload: contractResult
   }
-
 }
