@@ -217,16 +217,16 @@ contract liquidTest {
     uint emptyVotes = 0;
     uint countedYeas = 0;
     uint countedNays = 0;
-    uint totalVotes = countYeas.add(countedNays)
+    uint totalVotes = countYeas.add(countedNays);
 
     for(i = 0; i < registeredVoters.length; i++){
 
-      if(readVote(registeredVoters[i]) == (0, registeredVoters[i]){
-        countYeas.add(1);
+      if(readVote(registeredVoters[i]) == 0){
+        emptyVotes.add(1);
       }
-      if(readVote(registeredVoters[i]) == (1, registeredVoters[i]){
+      if(readVote(registeredVoters[i]) == 1){
         countedYeas.add(1);
-      } else if(readVote(registeredVoters[i]) == (2, registeredVoters[i]){
+      } else if(readVote(registeredVoters[i]) == 2{
         countedNays.add(1);
       }
 

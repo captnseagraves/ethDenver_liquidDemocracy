@@ -6,9 +6,11 @@ const ChaiAsPromised = require("chai-as-promised");
 const ChaiBigNumber = require("chai-bignumber");
 const Web3 = require("web3");
 const ABIDecoder = require("abi-decoder");
+const timestamp = require("unix-timestamp");
 
 
-const liquidDemocracy = artifacts.require("./liquidDemocracy.sol");
+
+const LiquidDemocracy = artifacts.require("./liquidDemocracy.sol");
 
 const INVALID_OPCODE = "invalid opcode";
 const REVERT_ERROR = "revert";
@@ -26,10 +28,10 @@ BigNumber.config({  EXPONENTIAL_AT: 1000  });
 // const LogApproval = require("./utils/logs").LogApproval;
 
 // Import truffle contract instance
-const liquidDemocracy = artifacts.require("newEvent");
+const liquidDemocracyContract = artifacts.require("liquidDemocracy");
 
 // Initialize ABI Decoder for deciphering log receipts
-ABIDecoder.addABI(liquidDemocracy.abi);
+ABIDecoder.addABI(liquidDemocracyContract.abi);
 
 contract("Liquid Democracy Proposal", (ACCOUNTS) => {
     let liquidProposal;
@@ -49,8 +51,9 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
     const deployProposal = async () => {
 
         const instance =
-            await liquidDemocracy.new(
-                true, false, 6000, 05, EMPTY_BYTES32_HASH, 10, TX_DEFAULTS);
+            await liquidDemocracyContract.new(
+                timestamp.fromDate(new Date(2018, 02, 17, 17, 00, 00)), timestamp.fromDate(new Date(2018, 02, 17, 18, 00, 00)), timestamp.fromDate(new Date(2018, 02, 17, 19, 00, 00)),
+                50, EMPTY_BYTES32_HASH, TX_DEFAULTS);
 
         // The generated contract typings we use ingest raw Web3 contract instances,
         // so we create a Web3 contract instance from the Truffle contract instance
@@ -58,7 +61,7 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
         const web3ContractInstance =
             web3.eth.contract(instance.abi).at(instance.address);
 
-        liquidProposal = new liquidDemocracy(
+        liquidProposal = new LiquidDemocracy(
             web3ContractInstance, TX_DEFAULTS);
 
 
@@ -67,10 +70,14 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
     before(deployProposal);
 
-    describe("Flags", () => {
-        it("should expose implementsERC721 method", async () => {
-          console.log(await liquidProposal.implementsERC721.call());
-            await expect(liquidProposal.implementsERC721.call()).to.eventually.equal(true);
+    describe("liquid Democracy Proposal", () => {
+        it("should deploy contract", async () => {
+          console.log('now', timestamp.now());
+          console.log('5:00', timestamp.fromDate(new Date(2018, 02, 17, 17, 00, 00)));
+
+          console.log(await liquidProposal.delegatePeriodEnd.call())
+
+
         });
     });
 

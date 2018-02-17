@@ -3,7 +3,7 @@ pragma solidity ^0.4.17;
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
-contract liquidTest {
+contract liquidDemocracy {
   using SafeMath for uint;
 
 
@@ -55,6 +55,10 @@ contract liquidTest {
   /*counts number of votes delegate manages*/
   mapping (address => uint) internal delegateeToVotesManaged;
 
+  /*holds value of votes managed if personal vote has been delegated*/
+  mapping (address => uint) internal delegatedHold;
+
+
   mapping (address => bool) internal willingToBeDelegate;
 
 
@@ -92,13 +96,13 @@ contract liquidTest {
     _;
   }
 
-  function liquidTest(
+  function liquidDemocracy(
     uint _delegatePeriodEnd,
     uint _votePeriodEnd,
     uint _countPeriodEnd,
     uint _pctQuorum,
     bytes32 _proposalMetaData
-    ) internal {
+    ) public {
       delegatePeriodEnd = _delegatePeriodEnd;
       votePeriodEnd = _votePeriodEnd;
       countPeriodEnd = _countPeriodEnd;
@@ -154,6 +158,13 @@ contract liquidTest {
   isValidDelegate(_delegateAddress)
   delegatePeriodOpen()
   {
+    require(_delegateAddress != _userAddress);
+
+    /*if (userVotes[_delegateAddress] == 3) {
+      readVote
+    } */
+
+    /*need to consider a delegate delegating their vote and holding number of managed votes while passing those votes on to new delegate*/
 
     userToDelegate[_userAddress] == _delegateAddress;
     userVotes[_userAddress] == 3;
@@ -165,6 +176,20 @@ contract liquidTest {
   }
 
   function readVote(address _userAddress)
+  view
+  public
+  returns (uint _userVote)
+  {
+
+    if (userVotes[_userAddress] != 3) {
+      return (userVotes[_userAddress]);
+    } else if (userVotes[userToDelegate[_userAddress]] == 3) {
+       readVote(userToDelegate[_userAddress]);
+    }
+  }
+
+  function readEndVoter(address _userAddress)
+  view
   public
   returns (uint _userVote, address _endVoterAddress)
   {
@@ -181,6 +206,8 @@ contract liquidTest {
   isRegisteredVoter(_userAddress)
   votePeriodOpen()
   {
+
+    /*need to consider delegate who has delegated vote regaining managed votes while new delegate losing votes*/
 
     userVotes[_userAddress] = 0;
     /*userToDelegate[_userAddress] = 0;*/
