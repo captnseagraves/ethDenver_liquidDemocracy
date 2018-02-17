@@ -38,13 +38,16 @@ contract liquidTest {
   uint public votePeriodEnd;
   uint public countPeriodEnd;
   uint public pctQuorum;
-  uint public countedYeas;
-  uint public countedNays;
   bytes32 public proposalMetaData;
 
 
+/*need to account for circlular delgeation*/
+/*if delgegate delegates needs to pass on votes
+  if delegate delegates and then revokes need to track votes between parties.
+*/
+
   /*tracks user registration and single signup*/
-  mapping (address => bool) internal registeredVoters;
+  address[] internal registeredVoters;
 
   /*0 equals no vote, 1 equals yea, 2 equals nay, 3 equals delegated vote*/
   mapping (address => uint) internal userVotes;
@@ -132,7 +135,6 @@ contract liquidTest {
   {
 
     userVotes[_userAddress] = 1;
-    countedYeas.add(1);
 
   }
 
@@ -144,7 +146,6 @@ contract liquidTest {
   {
 
     userVotes[_userAddress] = 2;
-    countedNays.add(1);
 
   }
 
@@ -191,7 +192,9 @@ contract liquidTest {
 
   }
 
-  function countDelegateVotes(address _userAddress)
+  /*may not need this with the iterative process*/
+
+  /*function countDelegateVotes(address _userAddress)
     external
     isValidDelegate(_userAddress)
     countPeriodOpen()
@@ -203,15 +206,34 @@ contract liquidTest {
     }
 
     delegateeToVotesManaged[_userAddress] = 0;
-  }
+  }*/
 
   function decision()
   view
   external
-  returns (uint _yeas, uint _nays, uint _pctQuorum, uint _theDecision)
+  returns (uint _yeas, uint _nays, uint _emptyVotes, uint _pctQuorum, uint _theDecision)
   {
 
-    uint _decision;
+    uint emptyVotes = 0;
+    uint countedYeas = 0;
+    uint countedNays = 0;
+    uint totalVotes = countYeas.add(countedNays)
+
+    for(i = 0; i < registeredVoters.length; i++){
+
+      if(readVote(registeredVoters[i]) == (0, registeredVoters[i]){
+        countYeas.add(1);
+      }
+      if(readVote(registeredVoters[i]) == (1, registeredVoters[i]){
+        countedYeas.add(1);
+      } else if(readVote(registeredVoters[i]) == (2, registeredVoters[i]){
+        countedNays.add(1);
+      }
+
+
+    }
+
+    /*uint _decision;
     uint _totalVotes = countedYeas.add(countedNays);
     uint _pctYeas = _totalVotes.div(countedYeas);
     uint _pctNays = _totalVotes.div(countedNays);
@@ -222,8 +244,7 @@ contract liquidTest {
       _decision = 2;
     } else if (_pctYeas == _pctNays) {
       _decision = 3;
-    }
-
+    }*/
     return (countedYeas, countedNays, pctQuorum, _decision);
   }
 
