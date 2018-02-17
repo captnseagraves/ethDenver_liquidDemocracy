@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './Proposal.css';
-import CreateProposal from '../CreateProposal/CreateProposal';
+import { CreateProposal } from '../CreateProposal/CreateProposal';
 
 class Proposal extends Component {
   render() {

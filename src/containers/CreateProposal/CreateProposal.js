@@ -1,21 +1,25 @@
-import React, { Component } from 'react'
-import './CreateProposal.css'
+import React, { Component } from 'react';
+import './CreateProposal.css';
+import { connect } from 'react-redux';
 
-class CreateProposal extends Component {
+export class CreateProposal extends Component {
   constructor() {
-    super();
-    this.state: {
+    super()
+    this.state= {
       title: '',
       description: ''
     }
   }
 
-  sendProposal = () => {
+  // sendProposal = (proposal) => {
 
-  }
+  // }
 
   handleChange= (e) => {
-    console.log(e.target.value)
+    // console.log(e.target);
+    const { name, value } = e.target;
+    this.setState({ [name]: value });
+    console.log(this.state)
   }
   
   render() {
@@ -32,5 +36,8 @@ class CreateProposal extends Component {
   }
 }
 
+// export const mapDispatchtoProps(dispatch) {
+//   addProposal: dispatch(addProposal(proposal))
+// }
 
-export default CreateProposal;
+// export default connect(mapStateToProps, mapDispatchtoProps)(CreateProposal)
