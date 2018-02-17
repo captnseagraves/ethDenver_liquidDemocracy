@@ -1,6 +1,6 @@
 import Web3 from 'web3'
 
-import TokenizedTicket from '../../build/contracts/TokenizedTicket.json'
+// import TokenizedTicket from '../../build/contracts/TokenizedTicket.json'
 
 
 export const GET_WEB3 = 'get_web3'
@@ -47,21 +47,21 @@ export function fetchWeb3() {
 }
 
 export function instantiateContract(web3Instance) {
-  return dispatch => {
-  // var myContract;
+  // return dispatch => {
+  // // var myContract;
 
-    const contract = require('truffle-contract')
-    const tokenizedTicket = contract(TokenizedTicket)
-    tokenizedTicket.setProvider(web3Instance.currentProvider)
+  //   const contract = require('truffle-contract')
+  //   const tokenizedTicket = contract(TokenizedTicket)
+  //   tokenizedTicket.setProvider(web3Instance.currentProvider)
 
-    web3Instance.eth.getAccounts((error, accounts) => {
-      tokenizedTicket.deployed().then((instance) => {
+  //   web3Instance.eth.getAccounts((error, accounts) => {
+  //     tokenizedTicket.deployed().then((instance) => {
 
-        dispatch(returnContract(instance))
+  //       dispatch(returnContract(instance))
 
-      })
-    })
-  }
+  //     })
+  //   })
+  // }
 }
 
 function returnContract(contractResult) {
