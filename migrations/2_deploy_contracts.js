@@ -1,6 +1,6 @@
-var TokenizedTicket = artifacts.require("./TokenizedTicket.sol");
+var liquidDemocracy = artifacts.require("./liquidDemocracy.sol");
 
 
 module.exports = function(deployer) {
-  deployer.deploy(TokenizedTicket);
+  deployer.deploy(liquidDemocracy);
 };
