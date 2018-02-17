@@ -5,7 +5,7 @@ class Proposal extends Component {
   render() {
     return (
       <div className="Proposal">
-        <p>I'm a Proposal!</p>
+        <h2>Show Proposal Here</h2>
       </div>
     );
   }

@@ -2,10 +2,20 @@ import React, { Component } from 'react'
 import './CreateProposal.css'
 
 class CreateProposal extends Component {
+
+  handleChange= (e) => {
+    console.log(e.target.value)
+  }
+  
   render() {
     return (
       <div className="CreateProposal">
-        <p>I'm a CreateProposal!</p>
+        <h2>Create Proposal</h2>
+        <form>
+          <input type='text' name='name' onChange={this.handleChange}/>
+          <input type='text' name='description' onChange={this.handleChange}/>
+          <input type='submit' />
+        </form>
       </div>
     );
   }
