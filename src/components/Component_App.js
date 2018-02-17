@@ -1,4 +1,11 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import { Route } from 'react-router-dom';
+import Proposal from '../containers/Proposal/Proposal';
+import Register from '../containers/Register/Register';
+import Vote from '../containers/Vote/Vote';
+import VoteStatus from '../containers/VoteStatus/VoteStatus';
+import FinalView from '../containers/FinalView/FinalView';
+import Count from '../containers/Count/Count';
 
 import '../css/oswald.css'
 import '../css/open-sans.css'
@@ -10,20 +17,16 @@ class CompApp extends Component {
     return (
       <div className="App">
         <nav className="navbar pure-menu pure-menu-horizontal">
-            <a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
+
         </nav>
 
         <main className="container">
-          <div className="pure-g">
-            <div className="pure-u-1-1">
-              <h1>Good to Go!</h1>
-              <p>Your Truffle Box is installed and ready.</p>
-              <h2>Smart Contract Example</h2>
-              <p>If your contracts compiled and migrated successfully, below will show a stored value of 5 (by default).</p>
-              <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
-              <p>The stored value is: {this.props.storageValue}</p>
-            </div>
-          </div>
+          <Route exact path='/' component={Proposal} />
+          <Route exact path='/register' component={Register} />
+          <Route exact path='/vote' component={Vote} />
+          <Route exact path='/votestatus' component={VoteStatus} />
+          <Route exact path='/count' component={Count} />
+          <Route exact path='/finalview' component={FinalView} />
         </main>
       </div>
     );

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import '../ChooseYourDelegate.css'
+import './ChooseYourDelegate.css'
 
 class ChooseYourDelegate extends Component {
   render() {
