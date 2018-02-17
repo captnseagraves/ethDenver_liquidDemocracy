@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import '../VoteStatus.css'
+import './VoteStatus.css'
 
 class VoteStatus extends Component {
   render() {

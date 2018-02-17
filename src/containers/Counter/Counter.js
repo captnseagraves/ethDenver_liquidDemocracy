@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import '../Counter.css'
+import './Counter.css'
 
 class Counter extends Component {
   render() {
