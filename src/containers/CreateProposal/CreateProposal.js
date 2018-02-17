@@ -2,6 +2,17 @@ import React, { Component } from 'react'
 import './CreateProposal.css'
 
 class CreateProposal extends Component {
+  constructor() {
+    super();
+    this.state: {
+      title: '',
+      description: ''
+    }
+  }
+
+  sendProposal = () => {
+
+  }
 
   handleChange= (e) => {
     console.log(e.target.value)
@@ -20,5 +31,6 @@ class CreateProposal extends Component {
     );
   }
 }
+
 
 export default CreateProposal;
