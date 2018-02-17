@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import '../FinalResult.css'
+import './FinalResult.css'
 
 class FinalResult extends Component {
   render() {

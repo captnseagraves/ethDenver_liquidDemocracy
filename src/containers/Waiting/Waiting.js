@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import '../Waiting.css'
+import './Waiting.css'
 
 class Waiting extends Component {
   render() {

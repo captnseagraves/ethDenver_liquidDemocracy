@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import '../CreateProposal.css'
+import './CreateProposal.css'
 
 class CreateProposal extends Component {
   render() {

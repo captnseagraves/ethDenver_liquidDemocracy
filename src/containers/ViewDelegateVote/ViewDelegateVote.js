@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import '../ViewDelegateVote.css'
+import './ViewDelegateVote.css'
 
 class ViewDelegateVote extends Component {
   render() {

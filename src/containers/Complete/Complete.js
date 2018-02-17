@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import '../Complete.css'
+import './Complete.css'
 
 class Complete extends Component {
   render() {
