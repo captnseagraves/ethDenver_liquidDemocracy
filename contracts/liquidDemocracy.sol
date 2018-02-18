@@ -180,9 +180,10 @@ contract liquidDemocracy {
 
   function tally()
   external
-  returns (uint _yeas, uint _nays, uint _totalVotes, uint _pctQuorum, uint _decision)
+  returns (uint _yeas, uint _nays, uint _totalVotes, uint _emptyVotes, uint _pctQuorum, uint _decision)
   {
     uint decision;
+    uint emptyVotes = 0;
     uint countedYeas = 0;
     uint countedNays = 0;
     uint totalVotes = 0;
@@ -193,8 +194,8 @@ contract liquidDemocracy {
         countedYeas++;
       } else if(readVote(registeredVotersArray[i]) == 2) {
         countedNays++;
-      } else if(readVote(registeredVotersArray[i]) == 2) {
-        countedNays++;
+      } else if(readVote(registeredVotersArray[i]) == 0) {
+        emptyVotes++;
       }
     }
 
@@ -207,7 +208,7 @@ contract liquidDemocracy {
 
     }
 
-    return (countedYeas, countedNays, totalVotes, pctQuorum, decision);
+    return (countedYeas, countedNays, totalVotes, emptyVotes, pctQuorum, decision);
   }
 
   function _isVoteDelegated(address _userAddress)

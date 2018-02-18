@@ -176,9 +176,11 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
           await liquidProposal.voteNay.sendTransaction(VOTER_2, TX_DEFAULTS)
 
+          await liquidProposal.voteNay.sendTransaction(VOTER_4, TX_DEFAULTS)
+
           await expect( liquidProposal.readVote.call(VOTER_2)).to.eventually.bignumber.equal(2);
 
-          await liquidProposal.voteNay.sendTransaction(VOTER_4, TX_DEFAULTS)
+          await expect( liquidProposal.readVote.call(VOTER_4)).to.eventually.bignumber.equal(2);
 
 
         });
@@ -198,10 +200,17 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
           console.log('delegate',  await liquidProposal.readDelegate.call(VOTER_3));
 
-            console.log( await liquidProposal.readVote.call(VOTER_3));
-            console.log( await liquidProposal.readEndVoter.call(VOTER_3));
+          console.log( await liquidProposal.readVote.call(VOTER_3));
+          console.log( await liquidProposal.readEndVoter.call(VOTER_3));
 
+          await expect( liquidProposal.readVote.call(VOTER_1)).to.eventually.bignumber.equal(1);
+          await expect( liquidProposal.readVote.call(VOTER_5)).to.eventually.bignumber.equal(1);
+          await expect( liquidProposal.readVote.call(VOTER_8)).to.eventually.bignumber.equal(1);
           await expect( liquidProposal.readVote.call(VOTER_3)).to.eventually.bignumber.equal(1);
+          await expect( liquidProposal.readVote.call(VOTER_6)).to.eventually.bignumber.equal(1);
+
+          await expect( liquidProposal.readVote.call(VOTER_7)).to.eventually.bignumber.equal(1);
+          await expect( liquidProposal.readVote.call(VOTER_9)).to.eventually.bignumber.equal(1);
 
           await expect( liquidProposal.readEndVoter.call(VOTER_3)).to.eventually.bignumber.equal(VOTER_8);
 
@@ -236,8 +245,9 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
             await expect(result[0].toNumber()).to.equal(6);
             await expect(result[1].toNumber()).to.equal(2);
             await expect(result[2].toNumber()).to.equal(8);
-            await expect(result[3].toNumber()).to.equal(51);
-            await expect(result[4].toNumber()).to.equal(1);
+            await expect(result[3].toNumber()).to.equal(1);
+            await expect(result[4].toNumber()).to.equal(51);
+            await expect(result[5].toNumber()).to.equal(1);
 
 
         });
