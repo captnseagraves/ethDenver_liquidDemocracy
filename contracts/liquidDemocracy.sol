@@ -13,7 +13,7 @@ contract liquidDemocracy {
   uint public votePeriodEnd;
   /*percentage needed to acheive successful vote*/
   uint public pctQuorum;
-  /*number of delegates removed from original user*/
+  /*limits number of delegates removed from original user*/
   uint public delegationDepth;
   /*tracks recursion against delegationDepth*/
   uint public recursionCount;
@@ -83,6 +83,7 @@ contract liquidDemocracy {
       recursionCount = 0;
   }
 
+  /*allows voter to register for proposal*/
   function registerVoter(address _userAddress)
   external
   {
@@ -94,6 +95,7 @@ contract liquidDemocracy {
 
   }
 
+  /*allows user to offer themselves as a delegate*/
   function becomeDelegate(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
@@ -101,6 +103,7 @@ contract liquidDemocracy {
     willingToBeDelegate[_userAddress] = true;
   }
 
+  /*allows user to vote yea*/
   function voteYea(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
@@ -112,6 +115,7 @@ contract liquidDemocracy {
 
   }
 
+  /*allows user to vote nay*/
   function voteNay(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
@@ -123,6 +127,7 @@ contract liquidDemocracy {
 
   }
 
+  /* allows user to delegate their vote to another user who is a valid delegeate*/
   function delegateVote(address _userAddress, address _delegateAddress)
   external
   isRegisteredVoter(_userAddress)
@@ -135,6 +140,7 @@ contract liquidDemocracy {
 
   }
 
+  /*allows user to read their vote or their delegate's vote*/
   function readVote(address _userAddress)
   public
   returns (uint _userVote)
@@ -149,6 +155,7 @@ contract liquidDemocracy {
     }
   }
 
+  /*allows user to read user they delegated their vote to*/
   function readDelegate(address _userAddress)
   external
   returns (address _delegateAddress)
@@ -156,6 +163,7 @@ contract liquidDemocracy {
     return userToDelegate[_userAddress];
   }
 
+  /*allows user to read end of delegate chain and see delegate that ultimately cast their vote*/
   function readEndVoter(address _userAddress)
   view
   public
@@ -171,6 +179,7 @@ contract liquidDemocracy {
     }
   }
 
+  /*allows user to revoke their delegation if they disagree with delegates vote*/
   function revokeDelegation(address _userAddress)
   public
   isRegisteredVoter(_userAddress)
@@ -182,7 +191,7 @@ contract liquidDemocracy {
 
   }
 
-
+  /*allows user tally votes at any point in proposal*/
   function tally()
   external
   returns (uint _yeas, uint _nays, uint _totalVotes, uint _emptyVotes, uint _pctQuorum, uint _decision)
