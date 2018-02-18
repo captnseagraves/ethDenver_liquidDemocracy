@@ -6,32 +6,6 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
 contract liquidTest {
   using SafeMath for uint;
 
-
-  /*needs to:
-   register user/generate vote
-   count yea
-   count nay
-   count total votes
-   allow user to vote yea
-   allow user to vote nay
-   allow user to delegate vote
-   allow user to recall delegation
-   translate delegates vote into user's vote
-   read delegated vote
-   3 periods in vote schedule
-    - discussion period
-    - delegation period
-    - vote period
-
-
-   pct for quorum
-   fallback that reverts if any ether is sent to contract
-   Ownable
-   SafeMath
-
-  */
-
-
   /* written as seconds since unix epoch*/
   uint public delegatePeriodEnd;
   /* written as seconds since unix epoch*/
@@ -56,7 +30,7 @@ contract liquidTest {
   mapping (address => address) internal userToDelegate;
 
   /*counts number of votes delegate manages*/
-  mapping (address => uint) internal delegateeToVotesManaged;
+  /*mapping (address => uint) internal delegateeToVotesManaged;*/
 
   mapping (address => bool) internal willingToBeDelegate;
 
@@ -79,22 +53,20 @@ contract liquidTest {
       _;
     }
 
-  modifier isRegisteredVoter(address _userAddress) {
-    require(registeredVoters[_userAddress] == true);
-    _;
-  }
+    modifier isRegisteredVoter(address _userAddress) {
+        require(_isRegisteredVoter(_userAddress) == true);
+      _;
+    }
 
-  modifier isValidDelegate(address _userAddress) {
-    require(willingToBeDelegate[_userAddress] == true);
-    _;
-  }
+    modifier isValidDelegate(address _userAddress) {
+      require(_isValidDelegate(_userAddress) == true);
+      _;
+    }
 
-/*still need to figure this out*/
-  modifier isVoteDelegated(address _userAddress) {
-    require(_isVoteDelegated(_userAddress) == false);
-    _;
-  }
-
+    modifier isVoteDelegated(address _userAddress) {
+      require(_isVoteDelegated(_userAddress) == false);
+      _;
+    }
   function liquidTest(
     uint _delegatePeriodEnd,
     uint _votePeriodEnd,
@@ -159,19 +131,34 @@ contract liquidTest {
     userToDelegate[_userAddress] == _delegateAddress;
     userVotes[_userAddress] == 3;
 
-    uint prevDelegateCount = delegateeToVotesManaged[_delegateAddress];
+    /*may not need this vote count*/
 
-    delegateeToVotesManaged[_delegateAddress] = prevDelegateCount.add(1);
+    /*uint prevDelegateCount = delegateeToVotesManaged[_delegateAddress];
+
+    delegateeToVotesManaged[_delegateAddress] = prevDelegateCount.add(1);*/
 
   }
 
   function readVote(address _userAddress)
+  view
+  public
+  returns (uint _userVote)
+  {
+    if (userVotes[_userAddress] != 3) {
+      return (userVotes[_userAddress]);
+    } else if (userVotes[userToDelegate[_userAddress]] == 3) {
+       readVote(userToDelegate[_userAddress]);
+    }
+  }
+
+  function readEndVoter(address _userAddress)
+  view
   public
   returns (uint _userVote, address _endVoterAddress)
   {
 
     if (userVotes[_userAddress] != 3) {
-      return (userVotes[_userAddress], _userAddress);
+      return (_userAddress);
     } else if (userVotes[userToDelegate[_userAddress]] == 3) {
        readVote(userToDelegate[_userAddress]);
     }
@@ -184,11 +171,13 @@ contract liquidTest {
   {
 
     userVotes[_userAddress] = 0;
-    /*userToDelegate[_userAddress] = 0;*/
+    userToDelegate[_userAddress] = 0;
 
-    uint prevDelegateCount = delegateeToVotesManaged[_delegateAddress];
+    /*may not need this count mechanism*/
 
-    delegateeToVotesManaged[_delegateAddress] = prevDelegateCount.sub(1);
+    /*uint prevDelegateCount = delegateeToVotesManaged[_delegateAddress];
+
+    delegateeToVotesManaged[_delegateAddress] = prevDelegateCount.sub(1);*/
 
   }
 
@@ -211,9 +200,10 @@ contract liquidTest {
   function decision()
   view
   external
-  returns (uint _yeas, uint _nays, uint _emptyVotes, uint _pctQuorum, uint _theDecision)
+  returns (uint _yeas, uint _nays, uint _totalVotes uint _emptyVotes, uint _pctQuorum, uint _decision)
   {
 
+    uint decision;
     uint emptyVotes = 0;
     uint countedYeas = 0;
     uint countedNays = 0;
@@ -223,29 +213,21 @@ contract liquidTest {
 
       if(readVote(registeredVoters[i]) == 0){
         emptyVotes.add(1);
-      }
-      if(readVote(registeredVoters[i]) == 1){
+      } else if(readVote(registeredVoters[i]) == 1){
         countedYeas.add(1);
-      } else if(readVote(registeredVoters[i]) == 2{
+      } else if(readVote(registeredVoters[i]) == 2 {
         countedNays.add(1);
       }
-
-
     }
 
-    /*uint _decision;
-    uint _totalVotes = countedYeas.add(countedNays);
-    uint _pctYeas = _totalVotes.div(countedYeas);
-    uint _pctNays = _totalVotes.div(countedNays);
+    if (countedYeas > totalVotes.div(pctQuorum)){
+      decision = 1;
+    } else {
+      desicion = 2;
+    }
 
-    if (_pctYeas > _pctQuorum) {
-      _decision = 1;
-    } else if (_pctNays > _pctQuorum) {
-      _decision = 2;
-    } else if (_pctYeas == _pctNays) {
-      _decision = 3;
-    }*/
-    return (countedYeas, countedNays, pctQuorum, _decision);
+
+    return (countedYeas, countedNays, totalVotes, emptyVotes, pctQuorum, decision);
   }
 
   function _isVoteDelegated(address _userAddress)
@@ -253,6 +235,28 @@ contract liquidTest {
    internal
    returns (bool _voteStatus){
     if (userVotes[_userAddress] == 3) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function _isRegisteredVoter(address _userAddress)
+  view
+   public
+   returns (bool _voterRegistration){
+    if (registeredVoters[_userAddress] == true) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function _isValidDelegate(address _userAddress)
+  view
+   public
+   returns (bool _delegateStatus){
+    if (willingToBeDelegate[_userAddress] == true) {
       return true;
     } else {
       return false;

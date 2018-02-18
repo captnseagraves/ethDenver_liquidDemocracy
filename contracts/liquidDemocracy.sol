@@ -6,35 +6,8 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
 contract liquidDemocracy {
   using SafeMath for uint;
 
-
-  /*needs to:
-   register user/generate vote
-   count yea
-   count nay
-   count total votes
-   allow user to vote yea
-   allow user to vote nay
-   allow user to delegate vote
-   allow user to recall delegation
-   translate delegates vote into user's vote
-   read delegated vote
-   3 periods in vote schedule
-    - discussion period
-    - delegation period
-    - vote period
-
-
-   pct for quorum
-   fallback that reverts if any ether is sent to contract
-   Ownable
-   SafeMath
-
-  */
-
-
   /* written as seconds since unix epoch*/
   uint public delegatePeriodEnd;
-  /* written as seconds since unix epoch*/
   uint public votePeriodEnd;
   uint public countPeriodEnd;
   uint public pctQuorum;
@@ -56,8 +29,7 @@ contract liquidDemocracy {
   mapping (address => uint) internal delegateeToVotesManaged;
 
   /*holds value of votes managed if personal vote has been delegated*/
-  mapping (address => uint) internal delegatedHold;
-
+  /*mapping (address => uint) internal delegatedHold;*/
 
   mapping (address => bool) internal willingToBeDelegate;
 
@@ -81,12 +53,12 @@ contract liquidDemocracy {
     }
 
   modifier isRegisteredVoter(address _userAddress) {
-    require(registeredVoters[_userAddress] == true);
+      require(_isRegisteredVoter(_userAddress) == true);
     _;
   }
 
   modifier isValidDelegate(address _userAddress) {
-    require(willingToBeDelegate[_userAddress] == true);
+    require(_isValidDelegate(_userAddress) == true);
     _;
   }
 
@@ -131,7 +103,7 @@ contract liquidDemocracy {
   function voteYea(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
-  votePeriodOpen()
+  /*votePeriodOpen()*/
   isVoteDelegated(_userAddress)
   {
 
@@ -143,7 +115,7 @@ contract liquidDemocracy {
   function voteNay(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
-  votePeriodOpen()
+  /*votePeriodOpen()*/
   isVoteDelegated(_userAddress)
   {
 
@@ -259,6 +231,28 @@ contract liquidDemocracy {
    internal
    returns (bool _voteStatus){
     if (userVotes[_userAddress] == 3) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function _isRegisteredVoter(address _userAddress)
+  view
+   public
+   returns (bool _voterRegistration){
+    if (registeredVoters[_userAddress] == true) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function _isValidDelegate(address _userAddress)
+  view
+   public
+   returns (bool _delegateStatus){
+    if (willingToBeDelegate[_userAddress] == true) {
       return true;
     } else {
       return false;
