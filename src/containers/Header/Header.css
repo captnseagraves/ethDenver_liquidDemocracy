@@ -1,0 +1,25 @@
+.nav-menu {
+  background-color: #122227;
+  display: flex;
+  padding: 10px 10px;
+  justify-content: space-around;
+  min-height: 20px;
+  position: relative;
+  font-family: 'Roboto', sans-serif;
+  box-shadow: 3px 3px 3px grey; 
+}
+
+.nav {
+  color: white;
+  text-decoration: none;
+  background: #122227;
+}
+
+button {
+  border: none;
+  text-decoration: none;
+  color: white;
+  background: none;
+  font-size: 16px;
+  font-family: 'Roboto', sans-serif;
+}

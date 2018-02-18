@@ -5,6 +5,7 @@ import Register from '../containers/Register/Register';
 import Vote from '../containers/Vote/Vote';
 import VoteStatus from '../containers/VoteStatus/VoteStatus';
 import FinalView from '../containers/FinalView/FinalView';
+import Header from '../containers/Header/Header'
 import Count from '../containers/Count/Count';
 
 import '../css/oswald.css'
@@ -16,10 +17,7 @@ class CompApp extends Component {
   render() {
     return (
       <div className="App">
-        <nav className="navbar pure-menu pure-menu-horizontal">
-
-        </nav>
-
+        <Header />
         <main className="container">
           <Route exact path='/proposal' component={Proposal} />
           <Route exact path='/register' component={Register} />
