@@ -25,7 +25,7 @@ class Vote extends Component {
       <div className="Vote">
         <span className="voteOrDelegate">
           <form className="voteInput" onSubmit={ this.handleVoteSubmission }>
-            <p className="center">Should team liquidDemocracy win the smart contract bounty?</p>
+            <p className="center">Should the liquid democracy group win the bounty??</p>
             <div>
               <button onClick={ this.handleVoteSubmission } type="submit" className="yes" name="yes">Yes</button>
               <button onClick={ this.handleVoteSubmission } type="submit" className="no" name="no">No</button>
