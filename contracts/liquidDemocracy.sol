@@ -10,7 +10,7 @@ contract liquidDemocracy {
   uint public delegatePeriodEnd;
   /* written as seconds since unix epoch*/
   uint public votePeriodEnd;
-  /*uint public countPeriodEnd;*/
+  uint public delegationDepth;
   uint public pctQuorum;
   uint public recursionCount;
   bytes32 public proposalMetaData;
@@ -65,11 +65,13 @@ contract liquidDemocracy {
   function liquidDemocracy(
     uint _delegatePeriodEnd,
     uint _votePeriodEnd,
+    uint _delegationDepth,
     uint _pctQuorum,
     bytes32 _proposalMetaData
     ) public {
       delegatePeriodEnd = _delegatePeriodEnd;
       votePeriodEnd = _votePeriodEnd;
+      delegationDepth = _delegationDepth;
       pctQuorum = _pctQuorum;
       proposalMetaData = _proposalMetaData;
       recursionCount = 0;
@@ -84,10 +86,9 @@ contract liquidDemocracy {
     registeredVotersArray.push(_userAddress);
     registeredVotersMap[_userAddress] = true;
 
-
   }
 
-  function allowDelegation(address _userAddress)
+  function becomeDelegate(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
   {
@@ -132,7 +133,7 @@ contract liquidDemocracy {
   public
   returns (uint _userVote)
   {
-    require(recursionCount < 6);
+    require(recursionCount <= delegationDepth);
 
     if (userVotes[_userAddress] != 3) {
       return (userVotes[_userAddress]);
@@ -156,7 +157,7 @@ contract liquidDemocracy {
   public
   returns (address _endVoterAddress)
   {
-    require(recursionCount < 6);
+    require(recursionCount <= delegationDepth);
 
     if (userVotes[_userAddress] != 3) {
       return (_userAddress);
