@@ -9,7 +9,14 @@ class Register extends Component {
   render() {
     return (
       <div className="Register">
-        <p>I'm a Register!</p>
+        <p>Register for this proposal here</p>
+        <form>
+          <input type="text"/>
+          <input type="text"/>
+          <input type="submit" name="register"/>
+        </form>
+
+
       </div>
     );
   }
