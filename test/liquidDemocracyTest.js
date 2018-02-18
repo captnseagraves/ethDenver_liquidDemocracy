@@ -40,9 +40,15 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
     const VOTER_1 = ACCOUNTS[1];
     const VOTER_2 = ACCOUNTS[2];
     const VOTER_3 = ACCOUNTS[3];
+    const VOTER_4 = ACCOUNTS[4];
+    const VOTER_5 = ACCOUNTS[5];
+    const VOTER_6 = ACCOUNTS[6];
+    const VOTER_7 = ACCOUNTS[7];
+    const VOTER_8 = ACCOUNTS[8];
+    const VOTER_9 = ACCOUNTS[9];
 
     const DELEGATE_PERIOD = timestamp.fromDate(new Date(2018, 01, 17, 17, 00, 00));
-    const VOTE_PERIOD = timestamp.fromDate(new Date(2018, 01, 17, 18, 00, 00));
+    const VOTE_PERIOD = timestamp.fromDate(new Date(2018, 01, 18, 17, 00, 00))
     // const COUNT_PERIOD = timestamp.fromDate(new Date(2018, 01, 17, 19, 00, 00));
 
     const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -69,26 +75,22 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
     describe("Create Proposal", () => {
       // these tests are returning weird numbers..... Having real issues with period timing
 
-        // it("should return correct delegationPeriodEnd", async () => {
-        //
-        // await expect( liquidProposal.delegatePeriodEnd.call()).to.eventually.bignumber.equal(DELEGATE_PERIOD);
-        //
-        // });
+        it("should return correct delegationPeriodEnd", async () => {
+
+        await expect( liquidProposal.delegatePeriodEnd.call()).to.eventually.bignumber.equal(DELEGATE_PERIOD);
+
+        });
 
 
-        // it("should return correct votePeriodEnd", async () => {
-        //
-        // await expect( liquidProposal.delegatePeriodEnd.call()).to.eventually.bignumber.equal(VOTE_PERIOD);
-        //
-        // });
-        //
-        // it("should return correct countPeriodEnd", async () => {
-        //
-        // await expect( liquidProposal.delegatePeriodEnd.call()).to.eventually.bignumber.equal(COUNT_PERIOD);
+        it("should return correct votePeriodEnd", async () => {
 
-        // });
+        await expect( liquidProposal.delegatePeriodEnd.call()).to.eventually.bignumber.equal(VOTE_PERIOD);
+
+        });
 
         it("should return correct pctQuorum", async () => {
+
+          console.log(await liquidProposal.pctQuorum.call());
 
           await expect( liquidProposal.pctQuorum.call()).to.eventually.bignumber.equal(51);
 
@@ -107,6 +109,15 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
           await liquidProposal.registerVoter.sendTransaction(VOTER_1, TX_DEFAULTS)
 
           await expect( liquidProposal._isRegisteredVoter.call(VOTER_1)).to.eventually.equal(true);
+
+          await liquidProposal.registerVoter.sendTransaction(VOTER_3, TX_DEFAULTS)
+          await liquidProposal.registerVoter.sendTransaction(VOTER_4, TX_DEFAULTS)
+          await liquidProposal.registerVoter.sendTransaction(VOTER_5, TX_DEFAULTS)
+          await liquidProposal.registerVoter.sendTransaction(VOTER_6, TX_DEFAULTS)
+          await liquidProposal.registerVoter.sendTransaction(VOTER_7, TX_DEFAULTS)
+          await liquidProposal.registerVoter.sendTransaction(VOTER_8, TX_DEFAULTS)
+          await liquidProposal.registerVoter.sendTransaction(VOTER_9, TX_DEFAULTS)
+
 
         });
 
@@ -127,6 +138,10 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
           await expect( liquidProposal._isValidDelegate.call(VOTER_1)).to.eventually.equal(true);
 
+          await liquidProposal.allowDelegation.sendTransaction(VOTER_7, TX_DEFAULTS)
+          await liquidProposal.allowDelegation.sendTransaction(VOTER_8, TX_DEFAULTS)
+          await liquidProposal.allowDelegation.sendTransaction(VOTER_9, TX_DEFAULTS)
+
         });
 
         it("should fail when unregistered user tries to become delegate", async () => {
@@ -145,6 +160,9 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
           await expect( liquidProposal.readVote.call(VOTER_1)).to.eventually.bignumber.equal(1);
 
+          await liquidProposal.voteYea.sendTransaction(VOTER_5, TX_DEFAULTS)
+          await liquidProposal.voteYea.sendTransaction(VOTER_8, TX_DEFAULTS)
+
         });
 
     });
@@ -160,6 +178,9 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
           await expect( liquidProposal.readVote.call(VOTER_2)).to.eventually.bignumber.equal(2);
 
+          await liquidProposal.voteNay.sendTransaction(VOTER_4, TX_DEFAULTS)
+
+
         });
 
     });
@@ -169,9 +190,11 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
     describe("#delegateVote()", () => {
         it("should allow user to delegate their vote", async () => {
 
-          await liquidProposal.registerVoter.sendTransaction(VOTER_3, TX_DEFAULTS)
 
-          await liquidProposal.delegateVote.sendTransaction(VOTER_3, VOTER_1, TX_DEFAULTS)
+          await liquidProposal.delegateVote.sendTransaction(VOTER_3, VOTER_7, TX_DEFAULTS)
+          await liquidProposal.delegateVote.sendTransaction(VOTER_6, VOTER_7, TX_DEFAULTS)
+          await liquidProposal.delegateVote.sendTransaction(VOTER_7, VOTER_9, TX_DEFAULTS)
+          await liquidProposal.delegateVote.sendTransaction(VOTER_9, VOTER_8, TX_DEFAULTS)
 
           console.log('delegate',  await liquidProposal.readDelegate.call(VOTER_3));
 
@@ -180,7 +203,7 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
           await expect( liquidProposal.readVote.call(VOTER_3)).to.eventually.bignumber.equal(1);
 
-          await expect( liquidProposal.readEndVoter.call(VOTER_3)).to.eventually.bignumber.equal(VOTER_1);
+          await expect( liquidProposal.readEndVoter.call(VOTER_3)).to.eventually.bignumber.equal(VOTER_8);
 
         });
 
@@ -202,11 +225,17 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
     });
 
+    // there are still some bugs in the math for tally i think, but it's mostly there. Also having the bignumber issue that doesnt seem to have a clear solution.
     describe("#decision()", () => {
         it("should allow user to delegate their vote", async () => {
 
-          console.log(await liquidProposal.decision.call())
+          let result = await liquidProposal.tally.call()
 
+          console.log(result);
+
+            // await expect(result[0]).to.eventually.bignumber.equal(6);
+            // await expect(result[1]).to.eventually.bignumber.equal(2);
+            // await expect(result[2]).to.eventually.bignumber.equal(8);
 
 
         });

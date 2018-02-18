@@ -12,7 +12,7 @@ contract liquidDemocracy {
   uint public votePeriodEnd;
   /*uint public countPeriodEnd;*/
   uint public pctQuorum;
-  uint public count;
+  uint public recursionCount;
   bytes32 public proposalMetaData;
 
 
@@ -72,7 +72,7 @@ contract liquidDemocracy {
       votePeriodEnd = _votePeriodEnd;
       pctQuorum = _pctQuorum;
       proposalMetaData = _proposalMetaData;
-      count = 0;
+      recursionCount = 0;
   }
 
   function registerVoter(address _userAddress)
@@ -132,12 +132,12 @@ contract liquidDemocracy {
   public
   returns (uint _userVote)
   {
-    require(count < 1);
+    require(recursionCount < 6);
 
     if (userVotes[_userAddress] != 3) {
       return (userVotes[_userAddress]);
     } else {
-      count.add(1);
+      recursionCount.add(1);
        return readVote(userToDelegate[_userAddress]);
     }
 
@@ -156,12 +156,12 @@ contract liquidDemocracy {
   public
   returns (address _endVoterAddress)
   {
-    require(count < 6);
+    require(recursionCount < 6);
 
     if (userVotes[_userAddress] != 3) {
       return (_userAddress);
     } else {
-      count.add(1);
+      recursionCount.add(1);
        return readEndVoter(userToDelegate[_userAddress]);
     }
   }
@@ -178,35 +178,36 @@ contract liquidDemocracy {
   }
 
 
-  function decision()
+  function tally()
   external
-  returns (uint _yeas, uint _nays, uint _totalVotes, uint _emptyVotes, uint _pctQuorum, uint _decision)
+  returns (uint _yeas, uint _nays, uint _totalVotes, uint _pctQuorum, uint _decision)
   {
-
     uint decision;
-    uint emptyVotes = 0;
     uint countedYeas = 0;
     uint countedNays = 0;
-    uint totalVotes = countedYeas.add(countedNays);
+    uint totalVotes = 0;
 
     for (uint i = 0; i < registeredVotersArray.length; i++){
 
-      if(readVote(registeredVotersArray[i]) == 0){
-        emptyVotes.add(1);
-      } else if(readVote(registeredVotersArray[i]) == 1) {
-        countedYeas.add(1);
+      if(readVote(registeredVotersArray[i]) == 1) {
+        countedYeas++;
       } else if(readVote(registeredVotersArray[i]) == 2) {
-        countedNays.add(1);
+        countedNays++;
+      } else if(readVote(registeredVotersArray[i]) == 2) {
+        countedNays++;
       }
     }
 
-    if (countedYeas > totalVotes.div(pctQuorum)){
+    totalVotes = countedYeas.add(countedNays);
+
+    if (countedYeas >= (totalVotes * pctQuorum).div(100)){
       decision = 1;
     } else {
       decision = 2;
+
     }
 
-    return (countedYeas, countedNays, totalVotes, emptyVotes, pctQuorum, decision);
+    return (countedYeas, countedNays, totalVotes, pctQuorum, decision);
   }
 
   function _isVoteDelegated(address _userAddress)
