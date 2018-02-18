@@ -12,8 +12,8 @@ class Register extends Component {
       <div className="delegateVoteView">
         <p>Register for this proposal here</p>
         <form className="delegateVoteView">
-          <input type="text" className="input"/>
-          <input type="text" className="input"/>
+          <input type="text" className="input text "/>
+          <input type="text" className="input text "/>
           <input type="submit" name="register" className="cta-button"/>
         </form>
       </div>
