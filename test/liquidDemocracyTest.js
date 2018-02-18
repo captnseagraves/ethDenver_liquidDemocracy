@@ -259,20 +259,4 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
         });
     });
 
-    describe("second proposal with edge cases", () => {
-
-
-        it("should allow user to delegate their vote", async () => {
-
-          let result = await liquidProposal.tally.call()
-
-            await expect(result[0].toNumber()).to.equal(6);
-            await expect(result[1].toNumber()).to.equal(2);
-            await expect(result[2].toNumber()).to.equal(8);
-            await expect(result[3].toNumber()).to.equal(1);
-            await expect(result[4].toNumber()).to.equal(51);
-            await expect(result[5].toNumber()).to.equal(1);
-        });
-    });
-
 });
