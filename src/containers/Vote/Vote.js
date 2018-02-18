@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import './Vote.css';
 
+// conditionally render the delegates
+
 class Vote extends Component {
 
   handleVoteSubmission = (e) => {
