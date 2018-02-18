@@ -3,6 +3,7 @@ import './CreateProposal.css';
 import { connect } from 'react-redux';
 import { addProposal } from '../../actions/index.js';
 import { withRouter } from 'react-router-dom';
+import '../../App.css';
 
 export class CreateProposal extends Component {
   constructor(props) {
@@ -42,7 +43,7 @@ export class CreateProposal extends Component {
         <form onSubmit = {this.sendProposal}>
           <input type='text' name='title' onChange={this.handleChange}/>
           <input type='text' name='description' onChange={this.handleChange}/>
-          <input type='submit' />
+          <input type='submit' className="cta-button"/>
         </form>
       </div>
     );
