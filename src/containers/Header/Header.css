@@ -1,25 +1,14 @@
-body
-{
-  margin: 0;
-  padding: 0;
-  
-  /* make it look decent enough */
-  /*background: #232323;*/
-  color: #cdcdcd;
-  font-family: "Avenir Next", "Avenir", sans-serif;
-}
-
 a
 {
   text-decoration: none;
-  color: #232323;
+  color: #586268;
   
   transition: color 0.3s ease;
 }
 
 a:hover
 {
-  color: tomato;
+  color: #74C5DE;
 }
 
 /*.menuFlex {
@@ -71,7 +60,6 @@ img {
   height: 4px;
   margin-bottom: 5px;
   position: relative;
-  
   background: #cdcdcd;
   border-radius: 3px;
   

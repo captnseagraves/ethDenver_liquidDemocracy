@@ -3,10 +3,12 @@
 body,
 .pure-g [class*=pure-u] {
   font-family: 'Open Sans', sans-serif;
+  color: #586268;
 }
 
 body{
   background-color: #F9FCFD;
+  color: #586268;
 }
 
 h1, h2, h3 {
@@ -109,4 +111,12 @@ code {
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
+}
+
+.text {
+  border-color: #99A0A2;
+  border-radius: 5px;
+  border-style: solid;
+  /*box-shadow: none;*/
+  /*border-style: none;*/
 }
