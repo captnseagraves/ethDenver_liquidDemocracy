@@ -47,9 +47,9 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
     const VOTER_8 = ACCOUNTS[8];
     const VOTER_9 = ACCOUNTS[9];
 
-    const DELEGATE_PERIOD = timestamp.fromDate(new Date(2018, 01, 17, 17, 00, 00));
-    const VOTE_PERIOD = timestamp.fromDate(new Date(2018, 01, 18, 17, 00, 00))
-    // const COUNT_PERIOD = timestamp.fromDate(new Date(2018, 01, 17, 19, 00, 00));
+    const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-02-18T10:24:00'));
+    const VOTE_PERIOD = timestamp.fromDate(new Date('2018-02-18T11:24:00'))
+    // const COUNT_PERIOD = timestamp.fromDate(new Date(2018, 01, 17, 19, 00, 00));x  x
 
     const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -84,7 +84,7 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
         it("should return correct votePeriodEnd", async () => {
 
-        await expect( liquidProposal.delegatePeriodEnd.call()).to.eventually.bignumber.equal(VOTE_PERIOD);
+        await expect( liquidProposal.votePeriodEnd.call()).to.eventually.bignumber.equal(VOTE_PERIOD);
 
         });
 
