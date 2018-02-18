@@ -10,7 +10,7 @@ body{
 }
 
 h1, h2, h3 {
-  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-family: 'Open Sans';
 }
 
 code {
@@ -71,6 +71,24 @@ code {
   margin-right: 10px;
 }
 
+.yes {
+  border-radius: 20px;
+  color: #64D094;
+  padding:0.7em 1.7em;
+  margin:0 0.3em 0.3em 0;
+  border-color: #DDDDDD;
+  background-color: white;
+}
+
+.no {
+  border-radius: 1.5em !important;
+  color: #EB7E7B;
+  padding:0.7em 1.7em;
+  margin:0 0.3em 0.3em 0;
+  border-color: #DDDDDD;
+  background-color: white;
+}
+
 .cta-button {
   color: white;
   background: #66e3e1; /* Old browsers */
@@ -86,20 +104,9 @@ code {
   border-radius:0.2em;
 }
 
-.yes {
-  border-radius: 20px ;
-  color: #64D094;
-  padding:0.7em 1.7em;
-  margin:0 0.3em 0.3em 0;
-  border-color: #DDDDDD;
-  background-color: white;
-}
-
-.no {
-  border-radius: 1.5em !important;
-  color: #EB7E7B;
-  padding:0.7em 1.7em;
-  margin:0 0.3em 0.3em 0;
-  border-color: #DDDDDD;
-  background-color: white;
+.delegateVoteView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
 }

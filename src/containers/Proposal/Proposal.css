@@ -1,0 +1,33 @@
+#progressbar1,
+#progressbar2,
+#progressbar3 {
+  background-color: #CDCDCD;
+  border-radius: 13px; /* (height of inner div) / 2 + padding */
+  padding: 3px;
+}
+
+#progressbar > div {
+   background-color: #64D094;
+   width: 80%; /* Adjust with JavaScript */
+   height: 20px;
+   border-radius: 10px;
+}
+
+#progressbar1 > div {
+   background-color: #64D094;
+   width: 90%; /* Adjust with JavaScript */
+   height: 20px;
+   border-radius: 10px;
+}
+#progressbar2 > div {
+   background-color: #64D094;
+   width: 50%; /* Adjust with JavaScript */
+   height: 20px;
+   border-radius: 10px;
+}
+#progressbar3 > div {
+   background-color: #64D094;
+   width: 60%; /* Adjust with JavaScript */
+   height: 20px;
+   border-radius: 10px;
+}
