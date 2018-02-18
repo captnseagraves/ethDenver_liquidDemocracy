@@ -20,8 +20,12 @@ contract liquidTest {
   if delegate delegates and then revokes need to track votes between parties.
 */
 
+
   /*tracks user registration and single signup*/
-  address[] internal registeredVoters;
+  mapping (address => bool) internal registeredVotersMap;
+
+  /*allows contract to iterate over voters to tally votes and follow delegation chains*/
+  address[] internal registeredVotersArray;
 
   /*0 equals no vote, 1 equals yea, 2 equals nay, 3 equals delegated vote*/
   mapping (address => uint) internal userVotes;
@@ -79,16 +83,17 @@ contract liquidTest {
       countPeriodEnd = _countPeriodEnd;
       pctQuorum = _pctQuorum;
       proposalMetaData = _proposalMetaData;
-      countedYeas = 0;
-      countedNays = 0;
   }
 
   function registerVoter(address _userAddress)
   external
   {
-    require(registeredVoters[_userAddress] == false);
 
-    registeredVoters[_userAddress] = true;
+    require(registeredVotersMap[_userAddress] == false);
+
+    registeredVotersArray.push(_userAddress);
+    registeredVotersMap[_userAddress] = true;
+
 
   }
 
@@ -154,7 +159,7 @@ contract liquidTest {
   function readEndVoter(address _userAddress)
   view
   public
-  returns (uint _userVote, address _endVoterAddress)
+  returns (address _endVoterAddress)
   {
 
     if (userVotes[_userAddress] != 3) {
@@ -164,7 +169,7 @@ contract liquidTest {
     }
   }
 
-  function revokeDelegation(address _userAddress, address _delegateAddress)
+  function revokeDelegation(address _userAddress)
   public
   isRegisteredVoter(_userAddress)
   votePeriodOpen()
@@ -181,41 +186,26 @@ contract liquidTest {
 
   }
 
-  /*may not need this with the iterative process*/
-
-  /*function countDelegateVotes(address _userAddress)
-    external
-    isValidDelegate(_userAddress)
-    countPeriodOpen()
-  {
-    if (userVotes[_userAddress] == 1) {
-      countedYeas.add(delegateeToVotesManaged[_userAddress]);
-    } else if (userVotes[_userAddress] == 2) {
-        countedNays.add(delegateeToVotesManaged[_userAddress]);
-    }
-
-    delegateeToVotesManaged[_userAddress] = 0;
-  }*/
 
   function decision()
   view
   external
-  returns (uint _yeas, uint _nays, uint _totalVotes uint _emptyVotes, uint _pctQuorum, uint _decision)
+  returns (uint _yeas, uint _nays, uint _totalVotes, uint _emptyVotes, uint _pctQuorum, uint _decision)
   {
 
     uint decision;
     uint emptyVotes = 0;
     uint countedYeas = 0;
     uint countedNays = 0;
-    uint totalVotes = countYeas.add(countedNays);
+    uint totalVotes = countedYeas.add(countedNays);
 
-    for(i = 0; i < registeredVoters.length; i++){
+    for (uint i = 0; i < registeredVotersArray.length; i++){
 
-      if(readVote(registeredVoters[i]) == 0){
+      if(readVote(registeredVotersArray[i]) == 0){
         emptyVotes.add(1);
-      } else if(readVote(registeredVoters[i]) == 1){
+      } else if(readVote(registeredVotersArray[i]) == 1) {
         countedYeas.add(1);
-      } else if(readVote(registeredVoters[i]) == 2 {
+      } else if(readVote(registeredVotersArray[i]) == 2) {
         countedNays.add(1);
       }
     }
@@ -223,7 +213,7 @@ contract liquidTest {
     if (countedYeas > totalVotes.div(pctQuorum)){
       decision = 1;
     } else {
-      desicion = 2;
+      decision = 2;
     }
 
 
@@ -245,7 +235,7 @@ contract liquidTest {
   view
    public
    returns (bool _voterRegistration){
-    if (registeredVoters[_userAddress] == true) {
+    if (registeredVotersMap[_userAddress] == true) {
       return true;
     } else {
       return false;
