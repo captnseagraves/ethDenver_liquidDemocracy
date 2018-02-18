@@ -10,7 +10,7 @@ contract liquidDemocracy {
   uint public delegatePeriodEnd;
   /* written as seconds since unix epoch*/
   uint public votePeriodEnd;
-  /*uint public countPeriodEnd;*/
+  uint public delegationDepth;
   uint public pctQuorum;
   uint public recursionCount;
   bytes32 public proposalMetaData;
@@ -65,11 +65,13 @@ contract liquidDemocracy {
   function liquidDemocracy(
     uint _delegatePeriodEnd,
     uint _votePeriodEnd,
+    uint _delegationDepth,
     uint _pctQuorum,
     bytes32 _proposalMetaData
     ) public {
       delegatePeriodEnd = _delegatePeriodEnd;
       votePeriodEnd = _votePeriodEnd;
+      delegationDepth = _delegationDepth;
       pctQuorum = _pctQuorum;
       proposalMetaData = _proposalMetaData;
       recursionCount = 0;
@@ -84,10 +86,9 @@ contract liquidDemocracy {
     registeredVotersArray.push(_userAddress);
     registeredVotersMap[_userAddress] = true;
 
-
   }
 
-  function allowDelegation(address _userAddress)
+  function becomeDelegate(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
   {
@@ -97,7 +98,7 @@ contract liquidDemocracy {
   function voteYea(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
-  /*votePeriodOpen()*/
+  votePeriodOpen()
   isVoteDelegated(_userAddress)
   {
 
@@ -108,7 +109,7 @@ contract liquidDemocracy {
   function voteNay(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
-  /*votePeriodOpen()*/
+  votePeriodOpen()
   isVoteDelegated(_userAddress)
   {
 
@@ -120,7 +121,7 @@ contract liquidDemocracy {
   external
   isRegisteredVoter(_userAddress)
   isValidDelegate(_delegateAddress)
-  /*delegatePeriodOpen()*/
+  delegatePeriodOpen()
   {
 
     userVotes[_userAddress] = 3;
@@ -132,7 +133,7 @@ contract liquidDemocracy {
   public
   returns (uint _userVote)
   {
-    require(recursionCount < 6);
+    require(recursionCount <= delegationDepth);
 
     if (userVotes[_userAddress] != 3) {
       return (userVotes[_userAddress]);
@@ -156,7 +157,7 @@ contract liquidDemocracy {
   public
   returns (address _endVoterAddress)
   {
-    require(recursionCount < 6);
+    require(recursionCount <= delegationDepth);
 
     if (userVotes[_userAddress] != 3) {
       return (_userAddress);
@@ -169,7 +170,7 @@ contract liquidDemocracy {
   function revokeDelegation(address _userAddress)
   public
   isRegisteredVoter(_userAddress)
-  /*votePeriodOpen()*/
+  votePeriodOpen()
   {
 
     userVotes[_userAddress] = 0;
@@ -180,9 +181,10 @@ contract liquidDemocracy {
 
   function tally()
   external
-  returns (uint _yeas, uint _nays, uint _totalVotes, uint _pctQuorum, uint _decision)
+  returns (uint _yeas, uint _nays, uint _totalVotes, uint _emptyVotes, uint _pctQuorum, uint _decision)
   {
     uint decision;
+    uint emptyVotes = 0;
     uint countedYeas = 0;
     uint countedNays = 0;
     uint totalVotes = 0;
@@ -193,8 +195,8 @@ contract liquidDemocracy {
         countedYeas++;
       } else if(readVote(registeredVotersArray[i]) == 2) {
         countedNays++;
-      } else if(readVote(registeredVotersArray[i]) == 2) {
-        countedNays++;
+      } else if(readVote(registeredVotersArray[i]) == 0) {
+        emptyVotes++;
       }
     }
 
@@ -207,7 +209,7 @@ contract liquidDemocracy {
 
     }
 
-    return (countedYeas, countedNays, totalVotes, pctQuorum, decision);
+    return (countedYeas, countedNays, totalVotes, emptyVotes, pctQuorum, decision);
   }
 
   function _isVoteDelegated(address _userAddress)

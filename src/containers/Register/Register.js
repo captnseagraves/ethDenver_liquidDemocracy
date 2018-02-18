@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
-import './Register.css'
+import './Register.css';
+import '../../App.css';
 
 class Register extends Component {
 
@@ -8,15 +9,13 @@ class Register extends Component {
   }
   render() {
     return (
-      <div className="Register">
+      <div className="delegateVoteView">
         <p>Register for this proposal here</p>
-        <form>
-          <input type="text"/>
-          <input type="text"/>
-          <input type="submit" name="register"/>
+        <form className="delegateVoteView">
+          <input type="text" className="input"/>
+          <input type="text" className="input"/>
+          <input type="submit" name="register" className="cta-button"/>
         </form>
-
-
       </div>
     );
   }
