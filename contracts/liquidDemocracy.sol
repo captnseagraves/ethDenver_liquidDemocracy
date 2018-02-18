@@ -3,22 +3,18 @@ pragma solidity ^0.4.17;
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
-contract liquidTest {
+contract liquidDemocracy {
   using SafeMath for uint;
 
   /* written as seconds since unix epoch*/
   uint public delegatePeriodEnd;
   /* written as seconds since unix epoch*/
   uint public votePeriodEnd;
-  uint public countPeriodEnd;
+  /*uint public countPeriodEnd;*/
   uint public pctQuorum;
+  uint public count;
   bytes32 public proposalMetaData;
 
-
-/*need to account for circlular delgeation*/
-/*if delgegate delegates needs to pass on votes
-  if delegate delegates and then revokes need to track votes between parties.
-*/
 
 
   /*tracks user registration and single signup*/
@@ -32,9 +28,6 @@ contract liquidTest {
 
   /*points to voter delegate*/
   mapping (address => address) internal userToDelegate;
-
-  /*counts number of votes delegate manages*/
-  /*mapping (address => uint) internal delegateeToVotesManaged;*/
 
   mapping (address => bool) internal willingToBeDelegate;
 
@@ -51,12 +44,6 @@ contract liquidTest {
     _;
   }
 
-  /*verifies count period open*/
-    modifier countPeriodOpen(){
-      require(block.timestamp < countPeriodEnd);
-      _;
-    }
-
     modifier isRegisteredVoter(address _userAddress) {
         require(_isRegisteredVoter(_userAddress) == true);
       _;
@@ -71,18 +58,21 @@ contract liquidTest {
       require(_isVoteDelegated(_userAddress) == false);
       _;
     }
-  function liquidTest(
+
+    event voteRead(address _userAddress);
+
+
+  function liquidDemocracy(
     uint _delegatePeriodEnd,
     uint _votePeriodEnd,
-    uint _countPeriodEnd,
     uint _pctQuorum,
     bytes32 _proposalMetaData
-    ) internal {
+    ) public {
       delegatePeriodEnd = _delegatePeriodEnd;
       votePeriodEnd = _votePeriodEnd;
-      countPeriodEnd = _countPeriodEnd;
       pctQuorum = _pctQuorum;
       proposalMetaData = _proposalMetaData;
+      count = 0;
   }
 
   function registerVoter(address _userAddress)
@@ -107,7 +97,7 @@ contract liquidTest {
   function voteYea(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
-  votePeriodOpen()
+  /*votePeriodOpen()*/
   isVoteDelegated(_userAddress)
   {
 
@@ -118,7 +108,7 @@ contract liquidTest {
   function voteNay(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
-  votePeriodOpen()
+  /*votePeriodOpen()*/
   isVoteDelegated(_userAddress)
   {
 
@@ -130,30 +120,35 @@ contract liquidTest {
   external
   isRegisteredVoter(_userAddress)
   isValidDelegate(_delegateAddress)
-  delegatePeriodOpen()
+  /*delegatePeriodOpen()*/
   {
 
-    userToDelegate[_userAddress] == _delegateAddress;
-    userVotes[_userAddress] == 3;
-
-    /*may not need this vote count*/
-
-    /*uint prevDelegateCount = delegateeToVotesManaged[_delegateAddress];
-
-    delegateeToVotesManaged[_delegateAddress] = prevDelegateCount.add(1);*/
+    userVotes[_userAddress] = 3;
+    userToDelegate[_userAddress] = _delegateAddress;
 
   }
 
   function readVote(address _userAddress)
-  view
   public
   returns (uint _userVote)
   {
+    require(count < 1);
+
     if (userVotes[_userAddress] != 3) {
       return (userVotes[_userAddress]);
-    } else if (userVotes[userToDelegate[_userAddress]] == 3) {
-       readVote(userToDelegate[_userAddress]);
+    } else {
+      count.add(1);
+       return readVote(userToDelegate[_userAddress]);
     }
+
+    voteRead(_userAddress);
+  }
+
+  function readDelegate(address _userAddress)
+  external
+  returns (address _delegateAddress)
+  {
+    return userToDelegate[_userAddress];
   }
 
   function readEndVoter(address _userAddress)
@@ -161,34 +156,29 @@ contract liquidTest {
   public
   returns (address _endVoterAddress)
   {
+    require(count < 6);
 
     if (userVotes[_userAddress] != 3) {
       return (_userAddress);
-    } else if (userVotes[userToDelegate[_userAddress]] == 3) {
-       readVote(userToDelegate[_userAddress]);
+    } else {
+      count.add(1);
+       return readEndVoter(userToDelegate[_userAddress]);
     }
   }
 
   function revokeDelegation(address _userAddress)
   public
   isRegisteredVoter(_userAddress)
-  votePeriodOpen()
+  /*votePeriodOpen()*/
   {
 
     userVotes[_userAddress] = 0;
     userToDelegate[_userAddress] = 0;
 
-    /*may not need this count mechanism*/
-
-    /*uint prevDelegateCount = delegateeToVotesManaged[_delegateAddress];
-
-    delegateeToVotesManaged[_delegateAddress] = prevDelegateCount.sub(1);*/
-
   }
 
 
   function decision()
-  view
   external
   returns (uint _yeas, uint _nays, uint _totalVotes, uint _emptyVotes, uint _pctQuorum, uint _decision)
   {
@@ -215,7 +205,6 @@ contract liquidTest {
     } else {
       decision = 2;
     }
-
 
     return (countedYeas, countedNays, totalVotes, emptyVotes, pctQuorum, decision);
   }
