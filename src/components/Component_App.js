@@ -19,7 +19,7 @@ class CompApp extends Component {
       <div className="App">
         <Header />
         <main className="container">
-          <Route exact path='/proposal' component={Proposal} />
+          <Route exact path='/' component={Proposal} />
           <Route exact path='/register' component={Register} />
           <Route exact path='/vote' component={Vote} />
           <Route exact path='/votestatus' component={VoteStatus} />

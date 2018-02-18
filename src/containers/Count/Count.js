@@ -5,7 +5,7 @@ class Count extends Component {
   render() {
     return (
       <div className="Count">
-        <p>I'm a Count View!</p>
+        <button>Submit my delegate votes</button>
       </div>
     );
   }
