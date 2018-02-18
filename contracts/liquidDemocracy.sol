@@ -5,7 +5,6 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract liquidDemocracy {
   using SafeMath for uint;
-  /*need to examine all math usage. Used SafeMath when it worked as expected, used brute math when encoutered errors*/
 
   /* times written as seconds since unix epoch*/
   /*end of delegate period*/
@@ -158,7 +157,6 @@ contract liquidDemocracy {
 
   /*allows user to read user they delegated their vote to*/
   function readDelegate(address _userAddress)
-  view
   external
   returns (address _delegateAddress)
   {
@@ -193,7 +191,7 @@ contract liquidDemocracy {
 
   }
 
-  /*allows user tally votes at any point in proposal*/
+  /*allows user tally votes at */
   function tally()
   external
   returns (uint _yeas, uint _nays, uint _totalVotes, uint _emptyVotes, uint _pctQuorum, uint _decision)
