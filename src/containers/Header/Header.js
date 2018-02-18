@@ -16,11 +16,12 @@ class Header extends Component {
             <span></span>
 
           <ul id="menu">
-              <li><NavLink to='/'>Proposals</NavLink></li>
-              <li><NavLink to='/vote'>Vote</NavLink></li>
-              <li><NavLink to='/votestatus'>My Vote Status</NavLink></li>
-              <li><NavLink to='/votestatus'>Submit Delegate Votes</NavLink></li>
-              <li><NavLink to='/votestatus'>Status</NavLink></li>
+            <li><NavLink to='/'>Proposals</NavLink></li>
+            <li><NavLink to='/register'>Register</NavLink></li>
+            <li><NavLink to='/vote'>Vote</NavLink></li>
+            <li><NavLink to='/votestatus'>My Vote Status</NavLink></li>
+            <li><NavLink to='/count'>Submit Delegate Count</NavLink></li>
+            <li><NavLink to='/finalview'>Check Status</NavLink></li>
           </ul>
         </div>
         </nav>
