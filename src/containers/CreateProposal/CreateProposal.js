@@ -1,33 +1,46 @@
 import React, { Component } from 'react';
 import './CreateProposal.css';
 import { connect } from 'react-redux';
+import { addProposal } from '../../actions/index.js';
+import { withRouter } from 'react-router-dom';
 
 export class CreateProposal extends Component {
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
+
     this.state= {
       title: '',
       description: ''
     }
   }
 
-  // sendProposal = (proposal) => {
+    // state= {
+    //   title: '',
+    //   description: ''
+    // }
 
-  // }
+  sendProposal = (e) => {
+    e.preventDefault();
+    const {title, description} = this.state;
+    const proposal = { 
+      title:this.state.title,
+      description:this.state.description 
+     };
+    // this.props.addProposal(proposal)
+  }
 
-  handleChange= (e) => {
-    // console.log(e.target);
+  handleChange = (e) => {
+    e.preventDefault();
     const { name, value } = e.target;
     this.setState({ [name]: value });
-    console.log(this.state)
   }
   
   render() {
     return (
       <div className="CreateProposal">
         <h2>Create Proposal</h2>
-        <form>
-          <input type='text' name='name' onChange={this.handleChange}/>
+        <form onSubmit = {this.sendProposal}>
+          <input type='text' name='title' onChange={this.handleChange}/>
           <input type='text' name='description' onChange={this.handleChange}/>
           <input type='submit' />
         </form>
@@ -36,8 +49,12 @@ export class CreateProposal extends Component {
   }
 }
 
-// export const mapDispatchtoProps(dispatch) {
-//   addProposal: dispatch(addProposal(proposal))
-// }
+// export const mapStateToProps = (store) => ({
+//  proposal: store.proposal
+// })
 
-// export default connect(mapStateToProps, mapDispatchtoProps)(CreateProposal)
+// export const mapDispatchToProps = (dispatch) => ({
+//   addProposal: (proposal) => dispatch(addProposal(proposal))
+// })
+
+// export default connect(null, mapDispatchToProps)(CreateProposal)
