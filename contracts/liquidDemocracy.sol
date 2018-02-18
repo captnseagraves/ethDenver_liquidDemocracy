@@ -6,16 +6,22 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
 contract liquidDemocracy {
   using SafeMath for uint;
 
-  /* written as seconds since unix epoch*/
+  /* times written as seconds since unix epoch*/
+  /*end of delegate period*/
   uint public delegatePeriodEnd;
-  /* written as seconds since unix epoch*/
+  /*end of vote period*/
   uint public votePeriodEnd;
-  uint public delegationDepth;
+  /*percentage needed to acheive successful vote*/
   uint public pctQuorum;
+  /*number of delegates removed from original user*/
+  uint public delegationDepth;
+  /*tracks recursion against delegationDepth*/
   uint public recursionCount;
+  /*possible IPFS hash of proposal metadata*/
   bytes32 public proposalMetaData;
 
 
+  /*redundant voter registers solve for different major issues when each is used individually*/
 
   /*tracks user registration and single signup*/
   mapping (address => bool) internal registeredVotersMap;
@@ -29,38 +35,38 @@ contract liquidDemocracy {
   /*points to voter delegate*/
   mapping (address => address) internal userToDelegate;
 
+  /* mapping of valid delegates */
   mapping (address => bool) internal willingToBeDelegate;
 
 
-/*verifies delegate period open*/
+  /*verifies delegate period open*/
   modifier delegatePeriodOpen(){
     require(block.timestamp < delegatePeriodEnd);
     _;
   }
 
-/*verifies vote period open*/
+  /*verifies vote period open*/
   modifier votePeriodOpen(){
     require(block.timestamp < votePeriodEnd);
     _;
   }
 
+  /*would clean and reduce modifiers and helper functions for production*/
+  /*verifies voter is registered*/
     modifier isRegisteredVoter(address _userAddress) {
         require(_isRegisteredVoter(_userAddress) == true);
       _;
     }
-
+    /*verifies delegate is valid*/
     modifier isValidDelegate(address _userAddress) {
       require(_isValidDelegate(_userAddress) == true);
       _;
     }
-
+    /*verifies if vote is delegated*/
     modifier isVoteDelegated(address _userAddress) {
       require(_isVoteDelegated(_userAddress) == false);
       _;
     }
-
-    event voteRead(address _userAddress);
-
 
   function liquidDemocracy(
     uint _delegatePeriodEnd,
@@ -141,8 +147,6 @@ contract liquidDemocracy {
       recursionCount.add(1);
        return readVote(userToDelegate[_userAddress]);
     }
-
-    voteRead(_userAddress);
   }
 
   function readDelegate(address _userAddress)
@@ -211,6 +215,8 @@ contract liquidDemocracy {
 
     return (countedYeas, countedNays, totalVotes, emptyVotes, pctQuorum, decision);
   }
+
+  /*these addtional functions allow me to test contract. would remove bottom two for production and implement in modifier*/
 
   function _isVoteDelegated(address _userAddress)
   view
