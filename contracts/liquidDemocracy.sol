@@ -97,7 +97,7 @@ contract liquidDemocracy {
   function voteYea(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
-  /*votePeriodOpen()*/
+  votePeriodOpen()
   isVoteDelegated(_userAddress)
   {
 
@@ -108,7 +108,7 @@ contract liquidDemocracy {
   function voteNay(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
-  /*votePeriodOpen()*/
+  votePeriodOpen()
   isVoteDelegated(_userAddress)
   {
 
@@ -120,7 +120,7 @@ contract liquidDemocracy {
   external
   isRegisteredVoter(_userAddress)
   isValidDelegate(_delegateAddress)
-  /*delegatePeriodOpen()*/
+  delegatePeriodOpen()
   {
 
     userVotes[_userAddress] = 3;
@@ -169,7 +169,7 @@ contract liquidDemocracy {
   function revokeDelegation(address _userAddress)
   public
   isRegisteredVoter(_userAddress)
-  /*votePeriodOpen()*/
+  votePeriodOpen()
   {
 
     userVotes[_userAddress] = 0;

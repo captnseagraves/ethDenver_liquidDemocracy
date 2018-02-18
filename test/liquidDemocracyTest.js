@@ -233,9 +233,11 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
           console.log(result);
 
-            // await expect(result[0]).to.eventually.bignumber.equal(6);
-            // await expect(result[1]).to.eventually.bignumber.equal(2);
-            // await expect(result[2]).to.eventually.bignumber.equal(8);
+            await expect(result[0].toNumber()).to.equal(6);
+            await expect(result[1].toNumber()).to.equal(2);
+            await expect(result[2].toNumber()).to.equal(8);
+            await expect(result[3].toNumber()).to.equal(51);
+            await expect(result[4].toNumber()).to.equal(1);
 
 
         });
