@@ -39,6 +39,11 @@ a:hover
   user-select: none;
 }
 
+img {
+  height: 40px;
+  width: 40px;
+}
+
 #menuToggle input
 {
   display: block;
@@ -155,8 +160,15 @@ a:hover
   transform: none;
 }
 
+.delegateSection {
+  display: flex;
+  flex-direction: column;
+}
 
-
+.delegateContainer {
+  display: flex;
+  flex-direction: row;
+}
 
 
 

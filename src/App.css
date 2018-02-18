@@ -71,10 +71,8 @@ code {
   margin-right: 10px;
 }
 
-
-
 .yes {
-  border-radius: 20px ;
+  border-radius: 20px;
   color: #64D094;
   padding:0.7em 1.7em;
   margin:0 0.3em 0.3em 0;
@@ -104,4 +102,11 @@ code {
   padding:0.7em 1.7em;
   margin:0 0.3em 0.3em 0;
   border-radius:0.2em;
+}
+
+.delegateVoteView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
 }
