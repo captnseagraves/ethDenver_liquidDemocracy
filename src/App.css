@@ -108,5 +108,58 @@ code {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
+}
+
+.delegateSection2 {
+  display: flex;
+  flex-direction: column;
+  margin: 20px 3px;
+  justify-content: space-between;
+}
+
+.delegateContainer2 {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+}
+
+#delegate {
+  height: 75px;
+  width: 75px;
+}
+
+.input {
+  margin: 10px 10px 20px 10px;
+}
+
+.small {
+  font-size: 10px;
+}
+
+.no-pad {
+  margin: 0;
+  padding: 0;
+}
+
+#submit2 {
+  height: 50px;
+}
+
+.center {
+  text-align: center;
+}
+
+.VoteStatus {
+  margin: 20px 5px;
+}
+
+.voteInput {
+  margin: 15px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
 }
