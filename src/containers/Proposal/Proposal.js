@@ -1,11 +1,13 @@
-import React, { Component } from 'react'
-import './Proposal.css'
+import React, { Component } from 'react';
+import './Proposal.css';
+import { CreateProposal } from '../CreateProposal/CreateProposal';
 
 class Proposal extends Component {
   render() {
     return (
       <div className="Proposal">
-        <p>I'm a Proposal!</p>
+        <h2>Show Proposal Here</h2>
+        <CreateProposal />
       </div>
     );
   }

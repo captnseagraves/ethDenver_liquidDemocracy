@@ -47,21 +47,21 @@ export function fetchWeb3() {
 }
 
 export function instantiateContract(web3Instance) {
-  // return dispatch => {
-  // // var myContract;
+  return dispatch => {
+  // var myContract;
 
-  //   const contract = require('truffle-contract')
-  //   const tokenizedTicket = contract(TokenizedTicket)
-  //   tokenizedTicket.setProvider(web3Instance.currentProvider)
+    // const contract = require('truffle-contract')
+    // const tokenizedTicket = contract(TokenizedTicket)
+    // tokenizedTicket.setProvider(web3Instance.currentProvider)
 
-  //   web3Instance.eth.getAccounts((error, accounts) => {
-  //     tokenizedTicket.deployed().then((instance) => {
+    // web3Instance.eth.getAccounts((error, accounts) => {
+    //   tokenizedTicket.deployed().then((instance) => {
 
-  //       dispatch(returnContract(instance))
+        // dispatch(returnContract(instance))
 
-  //     })
-  //   })
-  // }
+      // })
+    // })
+  }
 }
 
 function returnContract(contractResult) {
@@ -71,3 +71,8 @@ function returnContract(contractResult) {
     payload: contractResult
   }
 }
+
+export const addProposal = (proposal) => ({
+  type: 'ADD_PROPOSAL',
+  proposal
+})
