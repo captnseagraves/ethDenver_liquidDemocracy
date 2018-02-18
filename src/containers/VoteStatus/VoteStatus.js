@@ -23,7 +23,7 @@ class VoteStatus extends Component {
       <div className="VoteStatus">
        <div className="delegateVoteView">
           <p>Your delegate voted...</p>
-          <p>YES</p>
+          <h2>YES</h2>
           <p>on the 'Should we win?' community proposal</p>
           <div>
             <button onClick={ this.acceptDelegation } type="submit" className="yes" name="accept">Accept</button>
