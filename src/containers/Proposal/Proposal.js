@@ -11,6 +11,7 @@ class Proposal extends Component {
         <body>
         <div className="Proposal">
           <div className="proposal-card">
+            <h2> Current Proposals</h2>
             <h3>Winner</h3>
             <p> Should the liquid democracy group win the bounty? </p>
             <div id="progressbar1">
@@ -31,7 +32,6 @@ class Proposal extends Component {
               <div></div>
             </div>
           </div>
-          <h2>Show Proposal Here</h2>
           <CreateProposal />
         </div>
         </body>

@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 import { addProposal } from '../../actions/index.js';
 import { withRouter } from 'react-router-dom';
 import '../../App.css';
+import './CreateProposal.css';
+
 
 export class CreateProposal extends Component {
   constructor(props) {
@@ -40,10 +42,10 @@ export class CreateProposal extends Component {
     return (
       <div className="CreateProposal">
         <h2>Create Proposal</h2>
-        <form onSubmit = {this.sendProposal}>
-          <input type='text' name='title' onChange={this.handleChange}/>
-          <input type='text' name='description' onChange={this.handleChange}/>
-          <input type='submit' className="cta-button"/>
+        <form onSubmit = {this.sendProposal} className='form'>
+          <input type='text' className='text' name='title' onChange={this.handleChange}/>
+          <input type='text' className='text' name='description' onChange={this.handleChange}/>
+          <input type='submit' className="cta-button" id="submit-button"/>
         </form>
       </div>
     );
