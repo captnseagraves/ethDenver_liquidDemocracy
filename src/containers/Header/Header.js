@@ -20,7 +20,6 @@ class Header extends Component {
             <li><NavLink to='/register'>Register</NavLink></li>
             <li><NavLink to='/vote'>Vote</NavLink></li>
             <li><NavLink to='/votestatus'>My Vote Status</NavLink></li>
-            <li><NavLink to='/count'>Submit Delegate Count</NavLink></li>
             <li><NavLink to='/finalview'>Check Status</NavLink></li>
           </ul>
         </div>

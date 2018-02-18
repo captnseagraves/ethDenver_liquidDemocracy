@@ -11,7 +11,7 @@ class FinalView extends Component {
       <div className="delegateSection3 ">
           <h3> 11 community members and 3 delegates voted.</h3>
           <h1>Congratulations!</h1>
-          <h3 className="completeMessage">The proposal passed. Thank you for participating in our community!</h3>
+          <h3 className="completeMessage" id="green">'Should the liquid democracy group win the bounty?' passed. Thank you for participating in our community!</h3>
           <p>Create a new proposal here</p>
           <button className="cta-button">Create</button>
       </div>
