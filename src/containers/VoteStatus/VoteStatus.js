@@ -24,7 +24,7 @@ class VoteStatus extends Component {
        <div className="delegateVoteView">
           <p>Your delegate voted...</p>
           <h2>YES</h2>
-          <p>on the 'Should we win?' community proposal</p>
+          <p>on the 'Should the liquid democracy group win the bounty?' community proposal</p>
           <div>
             <button onClick={ this.acceptDelegation } type="submit" className="yes" name="accept">Accept</button>
             <button type="submit" className="no" name="revoke">Revoke</button>
