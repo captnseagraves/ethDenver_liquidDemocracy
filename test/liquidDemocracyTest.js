@@ -25,6 +25,7 @@ chai.should();
 
 BigNumber.config({  EXPONENTIAL_AT: 1000  });
 
+
 // const LogApproval = require("./utils/logs").LogApproval;
 
 // Import truffle contract instance
@@ -46,6 +47,8 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
     const VOTER_7 = ACCOUNTS[7];
     const VOTER_8 = ACCOUNTS[8];
     const VOTER_9 = ACCOUNTS[9];
+
+    // MUST ADJUST TIME TO SUIT TESTS. OTHERWISE TESTS WILL FAIL.
 
     const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-02-18T10:24:00'));
     const VOTE_PERIOD = timestamp.fromDate(new Date('2018-02-18T11:24:00'))
