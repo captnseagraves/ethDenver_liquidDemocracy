@@ -1,6 +1,6 @@
 pragma spragma solidity ^0.4.17;
 
-import "browser/SafeMath.sol";
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
 contract liquidDemocracy {
@@ -15,9 +15,11 @@ contract liquidDemocracy {
   uint public pctQuorum;
   /*limits number of delegates removed from original user*/
   uint public delegationDepth;
-
   /*possible IPFS hash of proposal metadata*/
   bytes32 public proposalMetaData;
+  /*256 bit array that holds the validity of each possible vote option. Options are referenced and defined in poll metadata. */
+  bytes32 public validVoteArray;
+
 
 
   /*redundant voter registers solve for different major issues when each is used individually*/
@@ -28,8 +30,10 @@ contract liquidDemocracy {
   /*allows contract to iterate over voters to tally votes and follow delegation chains*/
   address[] internal registeredVotersArray;
 
-  /*0 equals no vote, 1 equals yea, 2 equals nay, 3 equals delegated vote*/
+  /*0 equals no vote, other values will equate to those set in vote initialization*/
   mapping (address => uint) public userVotes;
+
+
 
   /*points to voter delegate*/
   mapping (address => address) public userToDelegate;
@@ -67,18 +71,36 @@ contract liquidDemocracy {
       _;
     }
 
+    /*Common Vote Option Values Are:
+    *** All options assume 0 index is used for a null vote ***
+    *** See pattern below to extrapolate correct hex value for n options ***
+    Zero Options = 0x8000000000000000000000000000000000000000000000000000000000000000 (Null Vote)
+    One option = 0xc000000000000000000000000000000000000000000000000000000000000000
+    Two options = 0xe000000000000000000000000000000000000000000000000000000000000000 (Binary Vote)
+    Three options = 0xf000000000000000000000000000000000000000000000000000000000000000
+    Four options = 0xf800000000000000000000000000000000000000000000000000000000000000
+    Five options = 0xfc00000000000000000000000000000000000000000000000000000000000000
+    Six options = 0xfe00000000000000000000000000000000000000000000000000000000000000
+    Seven options = 0xfd00000000000000000000000000000000000000000000000000000000000000
+    Eight options = 0xff00000000000000000000000000000000000000000000000000000000000000
+    Sixteen options = 0xffff000000000000000000000000000000000000000000000000000000000000
+    255 options = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    */
+
   function liquidDemocracy(
     uint _delegatePeriodEnd,
     uint _votePeriodEnd,
     uint _delegationDepth,
     uint _pctQuorum,
-    bytes32 _proposalMetaData
+    bytes32 _proposalMetaData,
+    bytes32 _validVoteArray
     ) public {
       delegatePeriodEnd = _delegatePeriodEnd;
       votePeriodEnd = _votePeriodEnd;
       delegationDepth = _delegationDepth;
       pctQuorum = _pctQuorum;
       proposalMetaData = _proposalMetaData;
+      validVoteArray = _validVoteArray;
 
   }
 
@@ -103,8 +125,6 @@ contract liquidDemocracy {
   }
 
   /*allows user to vote a value
-  todo: add option validation(is this a valid vote)
-  todo: and initialization(how do we set the valid votes)
   todo: rewrite tests for voting*/
   function vote(address _userAddress, uint _value)
   external
@@ -112,10 +132,12 @@ contract liquidDemocracy {
   votePeriodOpen()
   isVoteDelegated(_userAddress)
   {
-    require(_value < 255);
+    require(_isValidVote(_value));
     userVotes[_userAddress] = _value;
 
   }
+
+  /*need to verify chain depth and check circular delegation*/
 
   /* allows user to delegate their vote to another user who is a valid delegeate*/
   function delegateVote(address _userAddress, address _delegateAddress)
@@ -219,10 +241,17 @@ contract liquidDemocracy {
 
     }
 
-
-
     return (_votes, _totalVotes, _emptyVotes);
   }
+
+
+ function _isValidVote(uint _vote) public view returns(bool){
+      byte MyByte = validVoteArray[_vote / 8];
+      uint MyPosition = 7 - (_vote % 8);
+
+     return  2**MyPosition == uint8(MyByte & byte(2**MyPosition));
+
+ }
 
   /*these addtional functions allow me to test contract. would remove bottom two for production and implement in modifier*/
 
@@ -230,7 +259,7 @@ contract liquidDemocracy {
   view
    internal
    returns (bool _voteStatus){
-    if (userVotes[_userAddress] == 3) {
+    if (userToDelegate[_userAddress] != 0x0) {
       return true;
     } else {
       return false;
