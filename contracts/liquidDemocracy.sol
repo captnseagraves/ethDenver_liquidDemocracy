@@ -70,6 +70,17 @@ contract liquidDemocracy {
       require(_isVoteDelegated(_userAddress) == false);
       _;
     }
+    /*verifies if vote is delegated*/
+    modifier isValidVoteOption(uint _vote) {
+      require(_isValidVote(_value) == true);
+      _;
+    }
+    modifier isValidChainDepthAndNonCircular(address _userAddress) {
+      bool bValid;
+      (bValid,,) =_isValidChainDepthAndNonCircular(_userAddress, 0);
+      require(bValid);
+      _;
+    }
 
     /*Common Vote Option Values Are:
     *** All options assume 0 index is used for a null vote ***
@@ -129,10 +140,10 @@ contract liquidDemocracy {
   function vote(address _userAddress, uint _value)
   external
   isRegisteredVoter(_userAddress)
-  votePeriodOpen()
   isVoteDelegated(_userAddress)
+  isValidVoteOption(uint _value)
+  votePeriodOpen()
   {
-    require(_isValidVote(_value));
     userVotes[_userAddress] = _value;
 
   }
@@ -144,6 +155,7 @@ contract liquidDemocracy {
   external
   isRegisteredVoter(_userAddress)
   isValidDelegate(_delegateAddress)
+  isValidChainDepthAndNonCircular(_userAddress)
   delegatePeriodOpen()
   {
 
@@ -254,7 +266,7 @@ contract liquidDemocracy {
   }
 
 
- function _isValidVote(uint _vote) public view returns(bool){
+ function _isValidVoteOption(uint _vote) public view returns(bool){
       byte MyByte = validVoteArray[_vote / 8];
       uint MyPosition = 7 - (_vote % 8);
 
@@ -262,16 +274,24 @@ contract liquidDemocracy {
 
  }
 
- function _isValidChainDepth(address _userAddress, uint _recursionCount) public view returns(bool){
+ function _isValidChainDepthAndNonCircular(address _userAddress, uint _recursionCount) public view returns(bool Valid, bool VDepth, bool VCircle){
 
    if(_recursionCount > delegationDepth){
-    return false;
+     VDepth = true;
+     Valid = false;
+     return;
    }
 
    if (userToDelegate[_userAddress] != 0x0) {
+     if (userToDelegate[_userAddress] == _userAddress) {
+       Valid = false;
+       bVCircle = true;
+       return;
+     }
      return readChainDepth(userToDelegate[_userAddress], _recursionCount + 1);
    } else {
-     return true;
+     bValid = true;
+     return;
    }
  }
 
