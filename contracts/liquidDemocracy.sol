@@ -182,6 +182,15 @@ contract liquidDemocracy {
     }
   }
 
+
+  /*allows user to read user they delegated their vote to*/
+  function readDelegate(address _userAddress)
+  external
+  returns (address _delegateAddress)
+  {
+    return userToDelegate[_userAddress];
+  }
+
   /*allows user to revoke their delegation if they disagree with delegates vote*/
   function revokeDelegation(address _userAddress)
   public
@@ -251,6 +260,19 @@ contract liquidDemocracy {
 
      return  2**MyPosition == uint8(MyByte & byte(2**MyPosition));
 
+ }
+
+ function _isValidChainDepth(address _userAddress, uint _recursionCount) public view returns(bool){
+
+   if(_recursionCount > delegationDepth){
+    return false;
+   }
+
+   if (userToDelegate[_userAddress] != 0x0) {
+     return readChainDepth(userToDelegate[_userAddress], _recursionCount + 1);
+   } else {
+     return true;
+   }
  }
 
   /*these addtional functions allow me to test contract. would remove bottom two for production and implement in modifier*/
