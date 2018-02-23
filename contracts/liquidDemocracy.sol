@@ -6,13 +6,42 @@ import "zeppelin-solidity/contracts/math/SafeMath.sol";
 contract liquidDemocracy {
   using SafeMath for uint;
 
+  /*
+  Glossary:
+
+  Common Vote Option Values Are:
+  *** All options assume 0 index is used for a null vote ***
+  *** See pattern below to extrapolate correct hex value for n options ***
+  Zero Options = 0x8000000000000000000000000000000000000000000000000000000000000000 (Null Vote)
+  One option = 0xc000000000000000000000000000000000000000000000000000000000000000
+  Two options = 0xe000000000000000000000000000000000000000000000000000000000000000 (Binary Vote)
+  Three options = 0xf000000000000000000000000000000000000000000000000000000000000000
+  Four options = 0xf800000000000000000000000000000000000000000000000000000000000000
+  Five options = 0xfc00000000000000000000000000000000000000000000000000000000000000
+  Six options = 0xfe00000000000000000000000000000000000000000000000000000000000000
+  Seven options = 0xfd00000000000000000000000000000000000000000000000000000000000000
+  Eight options = 0xff00000000000000000000000000000000000000000000000000000000000000
+  Sixteen options = 0xffff000000000000000000000000000000000000000000000000000000000000
+  81 options = 0xffffffffffffffffffffc0000000000000000000000000000000000000000000
+  255 options = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+
+  pctQuorum: Percentage of registered voters who have responded in order to consider the poll valid.
+
+  threshold: Percentage of votes needed toward a particular option to make that option successful.
+
+  Absolute Thresahold (potential feature): ex. 51% of 100 voters, or 100% of 51 voters
+
+  */
+
   /* times written as seconds since unix epoch*/
   /*end of delegate period*/
   uint public delegatePeriodEnd;
   /*end of vote period*/
   uint public votePeriodEnd;
-  /*percentage needed to acheive successful vote*/
+  /*percentage of registered voters rsponding needed to acheive valid poll*/
   uint public pctQuorum;
+  /*percentage of votes toward a particular option needed to acheive successful option*/
+  uint public pctThreshold;
   /*limits number of delegates removed from original user*/
   uint public delegationDepth;
   /*possible IPFS hash of proposal metadata*/
@@ -81,28 +110,19 @@ contract liquidDemocracy {
       require(bValid);
       _;
     }
-
-    /*Common Vote Option Values Are:
-    *** All options assume 0 index is used for a null vote ***
-    *** See pattern below to extrapolate correct hex value for n options ***
-    Zero Options = 0x8000000000000000000000000000000000000000000000000000000000000000 (Null Vote)
-    One option = 0xc000000000000000000000000000000000000000000000000000000000000000
-    Two options = 0xe000000000000000000000000000000000000000000000000000000000000000 (Binary Vote)
-    Three options = 0xf000000000000000000000000000000000000000000000000000000000000000
-    Four options = 0xf800000000000000000000000000000000000000000000000000000000000000
-    Five options = 0xfc00000000000000000000000000000000000000000000000000000000000000
-    Six options = 0xfe00000000000000000000000000000000000000000000000000000000000000
-    Seven options = 0xfd00000000000000000000000000000000000000000000000000000000000000
-    Eight options = 0xff00000000000000000000000000000000000000000000000000000000000000
-    Sixteen options = 0xffff000000000000000000000000000000000000000000000000000000000000
-    255 options = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    */
+    modifier isVoterDelegateAndDelegatePeriodOpen(address _userAddress) {
+      if (willingToBeDelegate[_userAddress] == true) {
+        require(block.timestamp < delegatePeriodEnd);
+      }
+      _;
+    }
 
   function liquidDemocracy(
     uint _delegatePeriodEnd,
     uint _votePeriodEnd,
     uint _delegationDepth,
     uint _pctQuorum,
+    uint _pctThreshold,
     bytes32 _proposalMetaData,
     bytes32 _validVoteArray
     ) public {
@@ -110,6 +130,7 @@ contract liquidDemocracy {
       votePeriodEnd = _votePeriodEnd;
       delegationDepth = _delegationDepth;
       pctQuorum = _pctQuorum;
+      pctThreshold = _pctThreshold;
       proposalMetaData = _proposalMetaData;
       validVoteArray = _validVoteArray;
 
@@ -135,13 +156,15 @@ contract liquidDemocracy {
     willingToBeDelegate[_userAddress] = true;
   }
 
+  /*Instead of using bytes32 as 256 bit array, could potentially use enums... not sure pros/cons of each*/
   /*allows user to vote a value
   todo: rewrite tests for voting*/
   function vote(address _userAddress, uint _value)
   external
   isRegisteredVoter(_userAddress)
   isVoteDelegated(_userAddress)
-  isValidVoteOption(uint _value)
+  isVoterDelegateAndDelegatePeriodOpen(_userAddress)
+  isValidVoteOption(_value)
   votePeriodOpen()
   {
     userVotes[_userAddress] = _value;
@@ -217,7 +240,10 @@ contract liquidDemocracy {
 
 
   //todo: how to handle final decision and runoff conditions
-  function finalTally() public{
+  function finalDecision()
+  public
+  returns (uint _finalDecision, uint _finalDecisionTally)
+  {
 
     uint totalVotes;
     uint emptyVotes;
@@ -227,20 +253,30 @@ contract liquidDemocracy {
 
 
     if ((totalVotes * 100) / (registeredVotersArray.length) < pctQuorum) {
-      //decision = 0;
-    }
-    else{
-        /*
-        //todo: threshold
-        for (i = 0; i < _votes.length; i++){
-            if(decision == 0 || votes[i] > decisionVotes){
-                decision = i;
-                decisionVotes = votes[i];
-            }
-        }
-        */
-    }
+      _finalDecision = 0;
+      _finalDecisionTally = 0;
+    } else {
 
+      uint highestVoteHold = 0;
+      uint highestVoteValueHold = 0;
+
+        for (uint i = 0; i < _votes.length; i++) {
+          if (_votes[i] > highestVoteValueHold) {
+            highestVoteValueHold = _votes[i];
+            highestVoteHold = i;
+          }
+        }
+
+        if ((highestVoteValueHold * 100) / totalVotes) > pctThreshold) {
+          _finalDecision = highestVoteHold;
+          _finalDecisionTally = highestVoteValueHold;
+          return;
+        } else {
+          _finalDecision = 0;
+          _finalDecisionTally = 0;
+          return;
+        }
+    }
   }
 
   /*allows user tally votes at */
@@ -265,7 +301,6 @@ contract liquidDemocracy {
     return (_votes, _totalVotes, _emptyVotes);
   }
 
-
  function _isValidVoteOption(uint _vote) public view returns(bool){
       byte MyByte = validVoteArray[_vote / 8];
       uint MyPosition = 7 - (_vote % 8);
@@ -274,23 +309,23 @@ contract liquidDemocracy {
 
  }
 
- function _isValidChainDepthAndNonCircular(address _userAddress, uint _recursionCount) public view returns(bool Valid, bool VDepth, bool VCircle){
+ function _isValidChainDepthAndNonCircular(address _userAddress, uint _recursionCount) public view returns(bool _valid, bool _vDepth, bool _vCircle){
 
    if(_recursionCount > delegationDepth){
-     VDepth = true;
-     Valid = false;
+     _vDepth = true;
+     _valid = false;
      return;
    }
 
    if (userToDelegate[_userAddress] != 0x0) {
      if (userToDelegate[_userAddress] == _userAddress) {
-       Valid = false;
-       bVCircle = true;
+       _valid = false;
+       _vCircle = true;
        return;
      }
      return readChainDepth(userToDelegate[_userAddress], _recursionCount + 1);
    } else {
-     bValid = true;
+     _valid = true;
      return;
    }
  }
