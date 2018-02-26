@@ -1,9 +1,10 @@
-pragma spragma solidity ^0.4.17;
+pragma solidity ^0.4.17;
 
+import "./ldInterface.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
-contract liquidDemocracy {
+contract liquidDemocracy is ldInterface {
   using SafeMath for uint;
 
   /*
@@ -101,7 +102,7 @@ contract liquidDemocracy {
     }
     /*verifies if vote is delegated*/
     modifier isValidVoteOption(uint _vote) {
-      require(_isValidVote(_value) == true);
+      require(_isValidVoteOption(_vote) == true);
       _;
     }
     modifier isValidChainDepthAndNonCircular(address _userAddress) {
@@ -249,9 +250,9 @@ contract liquidDemocracy {
 
     uint totalVotes;
     uint emptyVotes;
-    uint[256] memory votes;
+    uint[256] memory _votes;
 
-    (votes, totalVotes, emptyVotes) = tally();
+    (_votes, totalVotes, emptyVotes) = tally();
 
 
     if ((totalVotes * 100) / (registeredVotersArray.length) < pctQuorum) {
@@ -325,7 +326,7 @@ contract liquidDemocracy {
        _vCircle = true;
        return;
      }
-     return readChainDepth(userToDelegate[_userAddress], _recursionCount + 1);
+     return _isValidChainDepthAndNonCircular(userToDelegate[_userAddress], _recursionCount + 1);
    } else {
      _valid = true;
      return;

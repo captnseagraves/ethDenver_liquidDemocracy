@@ -1,4 +1,4 @@
-pragma spragma solidity ^0.4.17;
+pragma solidity ^0.4.17;
 
 
 
@@ -11,7 +11,7 @@ contract ldInterface {
   function delegateVote(address _userAddress, address _delegateAddress) external;
   function readVote(address _userAddress, uint _recursionCount) public view returns (uint);
   function readEndVoter(address _userAddress, uint _recursionCount) public view returns(address);
-  function readDelegate(address _userAddress) external;
+  function readDelegate(address _userAddress) external returns (address _delegateAddress);
   function revokeDelegation(address _userAddress) public;
   function finalDecision() public view returns (uint _finalDecision, uint _finalDecisionTally);
   function tally() public view returns (uint[256] _votes, uint _totalVotes, uint _emptyVotes);
