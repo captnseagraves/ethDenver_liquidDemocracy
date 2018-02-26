@@ -240,8 +240,10 @@ contract liquidDemocracy {
 
 
   //todo: how to handle final decision and runoff conditions
+  /*if we can make this a view functtion, that would be ideal*/
   function finalDecision()
   public
+  view
   returns (uint _finalDecision, uint _finalDecisionTally)
   {
 
@@ -267,7 +269,7 @@ contract liquidDemocracy {
           }
         }
 
-        if ((highestVoteValueHold * 100) / totalVotes) > pctThreshold) {
+        if (((highestVoteValueHold * 100) / totalVotes) > pctThreshold) {
           _finalDecision = highestVoteHold;
           _finalDecisionTally = highestVoteValueHold;
           return;
