@@ -239,7 +239,7 @@ contract liquidDemocracy {
 
 
   //todo: how to handle final decision and runoff conditions
-  /*if we can make this a view functtion, that would be ideal*/
+  /*if we can make this a view function, that would be ideal*/
   function finalDecision()
   public
   view
@@ -296,9 +296,7 @@ contract liquidDemocracy {
       } else {
           _emptyVotes++;
       }
-
     }
-
     return (_votes, _totalVotes, _emptyVotes);
   }
 
@@ -307,7 +305,6 @@ contract liquidDemocracy {
       uint MyPosition = 7 - (_vote % 8);
 
      return  2**MyPosition == uint8(MyByte & byte(2**MyPosition));
-
  }
 
  function _isValidChainDepthAndNonCircular(address _userAddress, uint _recursionCount) public view returns(bool _valid, bool _vDepth, bool _vCircle){
