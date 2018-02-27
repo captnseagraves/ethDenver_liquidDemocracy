@@ -1,10 +1,10 @@
 pragma solidity ^0.4.17;
 
-import "./ldInterface.sol";
+/*import "./ldInterface.sol";*/
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
-contract liquidDemocracy is ldInterface {
+contract liquidDemocracy {
   using SafeMath for uint;
 
   /*
@@ -20,8 +20,8 @@ contract liquidDemocracy is ldInterface {
   Four options = 0xf800000000000000000000000000000000000000000000000000000000000000
   Five options = 0xfc00000000000000000000000000000000000000000000000000000000000000
   Six options = 0xfe00000000000000000000000000000000000000000000000000000000000000
-  Seven options = 0xfd00000000000000000000000000000000000000000000000000000000000000
-  Eight options = 0xff00000000000000000000000000000000000000000000000000000000000000
+  Seven options = 0xff00000000000000000000000000000000000000000000000000000000000000
+  Eight options = 0xff80000000000000000000000000000000000000000000000000000000000000
   Sixteen options = 0xffff000000000000000000000000000000000000000000000000000000000000
   81 options = 0xffffffffffffffffffffc0000000000000000000000000000000000000000000
   255 options = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -62,8 +62,6 @@ contract liquidDemocracy is ldInterface {
 
   /*0 equals no vote, other values will equate to those set in vote initialization*/
   mapping (address => uint) public userVotes;
-
-
 
   /*points to voter delegate*/
   mapping (address => address) public userToDelegate;
@@ -134,7 +132,6 @@ contract liquidDemocracy is ldInterface {
       pctThreshold = _pctThreshold;
       proposalMetaData = _proposalMetaData;
       validVoteArray = _validVoteArray;
-
   }
 
   /*allows voter to register for proposal*/
@@ -205,7 +202,7 @@ contract liquidDemocracy is ldInterface {
     }
   }
 
-  function readEndVoter(address _userAddress, uint _recursionCount) public view returns(address){
+  function readEndVoter(address _userAddress, uint _recursionCount) public view returns (address){
 
     if(_recursionCount > delegationDepth){
      return 0x0;
@@ -222,6 +219,7 @@ contract liquidDemocracy is ldInterface {
   /*allows user to read user they delegated their vote to*/
   function readDelegate(address _userAddress)
   external
+  view
   returns (address _delegateAddress)
   {
     return userToDelegate[_userAddress];
@@ -291,7 +289,7 @@ contract liquidDemocracy is ldInterface {
     //todo: how to handle vote validation and initialization
     for (uint i = 0; i < registeredVotersArray.length; i++){
       uint vote = readVote(registeredVotersArray[i], 0);
-      _votes[vote + 1]++;
+      _votes[vote]++;
 
       if(vote > 0){
           _totalVotes++;

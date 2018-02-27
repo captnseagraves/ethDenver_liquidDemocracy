@@ -50,18 +50,18 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
     // MUST ADJUST TIME TO SUIT TESTS. OTHERWISE TESTS WILL FAIL.
 
-    const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-02-18T10:24:00'));
-    const VOTE_PERIOD = timestamp.fromDate(new Date('2018-02-18T11:24:00'))
-    // const COUNT_PERIOD = timestamp.fromDate(new Date(2018, 01, 17, 19, 00, 00));x  x
+    const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-02-27T10:24:00'));
+    const VOTE_PERIOD = timestamp.fromDate(new Date('2018-02-27T11:24:00'))
 
     const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
+    const EIGHT_OPTION_VOTE_ARRAY = '0xff80000000000000000000000000000000000000000000000000000000000000'
 
     const TX_DEFAULTS = { from: PROPOSAL_OWNER, gas: 4000000 };
 
     const deployProposal = async () => {
 
         const instance =
-            await liquidDemocracyContract.new( DELEGATE_PERIOD, VOTE_PERIOD, 5, 51, EMPTY_BYTES32_HASH, TX_DEFAULTS);
+            await liquidDemocracyContract.new( DELEGATE_PERIOD, VOTE_PERIOD, 5, 75, 51, EMPTY_BYTES32_HASH, EIGHT_OPTION_VOTE_ARRAY, TX_DEFAULTS);
 
         const web3ContractInstance =
             web3.eth.contract(instance.abi).at(instance.address);
@@ -99,13 +99,25 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
         it("should return correct pctQuorum", async () => {
 
-          await expect( liquidProposal.pctQuorum.call()).to.eventually.bignumber.equal(51);
+          await expect( liquidProposal.pctQuorum.call()).to.eventually.bignumber.equal(75);
+
+        });
+
+        it("should return correct pctThreshold", async () => {
+
+          await expect( liquidProposal.pctThreshold.call()).to.eventually.bignumber.equal(51);
 
         });
 
         it("should return correct proposalMetaData", async () => {
 
           await expect( liquidProposal.proposalMetaData.call()).to.eventually.equal(EMPTY_BYTES32_HASH);
+
+        });
+
+        it("should return correct validVoteArray", async () => {
+
+          await expect( liquidProposal.validVoteArray.call()).to.eventually.equal(EIGHT_OPTION_VOTE_ARRAY);
 
         });
     });
@@ -117,6 +129,7 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
           await expect( liquidProposal._isRegisteredVoter.call(VOTER_1)).to.eventually.equal(true);
 
+          await liquidProposal.registerVoter.sendTransaction(VOTER_2, TX_DEFAULTS)
           await liquidProposal.registerVoter.sendTransaction(VOTER_4, TX_DEFAULTS)
           await liquidProposal.registerVoter.sendTransaction(VOTER_5, TX_DEFAULTS)
           await liquidProposal.registerVoter.sendTransaction(VOTER_6, TX_DEFAULTS)
@@ -150,60 +163,41 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
         it("should fail when unregistered user tries to become delegate", async () => {
 
-          await expect(liquidProposal.becomeDelegate.sendTransaction(VOTER_2, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+          await expect(liquidProposal.becomeDelegate.sendTransaction(VOTER_3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
 
         });
     });
 
-    describe("#voteYea()", () => {
-        it("should allow user to vote yea", async () => {
+    describe("#vote()", () => {
+        it("should allow user to vote", async () => {
 
-          // the votePeriodOpen modifier is broken :(
+          await liquidProposal.vote.sendTransaction(VOTER_1, 1, TX_DEFAULTS)
 
-          await liquidProposal.voteYea.sendTransaction(VOTER_1, TX_DEFAULTS)
+          await expect( liquidProposal.readVote.call(VOTER_1, 0)).to.eventually.bignumber.equal(1);
 
-          await expect( liquidProposal.readVote.call(VOTER_1)).to.eventually.bignumber.equal(1);
+          await liquidProposal.vote.sendTransaction(VOTER_2, 2, TX_DEFAULTS)
+          await liquidProposal.vote.sendTransaction(VOTER_4, 4, TX_DEFAULTS)
+          await liquidProposal.vote.sendTransaction(VOTER_5, 5, TX_DEFAULTS)
+          await liquidProposal.vote.sendTransaction(VOTER_6, 6, TX_DEFAULTS)
+          await expect( liquidProposal.readVote.call(VOTER_6, 0)).to.eventually.bignumber.equal(6);
 
-          await liquidProposal.voteYea.sendTransaction(VOTER_5, TX_DEFAULTS)
-          await liquidProposal.voteYea.sendTransaction(VOTER_8, TX_DEFAULTS)
-
-        });
-
-        it("should fail when unregistered user tries to vote yea", async () => {
-
-          await expect(liquidProposal.voteYea.sendTransaction(VOTER_2, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
-
-        });
-
-    });
-
-    describe("#voteNay()", () => {
-        it("should allow user to vote nay", async () => {
-
-          // the votePeriodOpen modifier is broken :(
-
-          await liquidProposal.registerVoter.sendTransaction(VOTER_2, TX_DEFAULTS)
-
-          await liquidProposal.voteNay.sendTransaction(VOTER_2, TX_DEFAULTS)
-
-          await liquidProposal.voteNay.sendTransaction(VOTER_4, TX_DEFAULTS)
-
-          await expect( liquidProposal.readVote.call(VOTER_2)).to.eventually.bignumber.equal(2);
-
-          await expect( liquidProposal.readVote.call(VOTER_4)).to.eventually.bignumber.equal(2);
+          await liquidProposal.vote.sendTransaction(VOTER_7, 7, TX_DEFAULTS)
+          await liquidProposal.vote.sendTransaction(VOTER_8, 8, TX_DEFAULTS)
+          await liquidProposal.vote.sendTransaction(VOTER_9, 7, TX_DEFAULTS)
 
         });
 
-        it("should fail when unregistered user tries to vote nay", async () => {
+        it("should fail when unregistered user tries to vote", async () => {
 
-          await expect(liquidProposal.voteYea.sendTransaction(VOTER_3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+          await expect(liquidProposal.vote.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
 
         });
 
     });
 
 
-    // readVote returns 0 and readEndVoter returns 0x000... , recursion is having problems, so cannot test delegateVote()
+
+
     describe("#delegateVote()", () => {
         it("should allow user to delegate their vote", async () => {
 
@@ -214,24 +208,22 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
           await liquidProposal.delegateVote.sendTransaction(VOTER_7, VOTER_9, TX_DEFAULTS)
           await liquidProposal.delegateVote.sendTransaction(VOTER_9, VOTER_8, TX_DEFAULTS)
 
-          await expect( liquidProposal.readVote.call(VOTER_3)).to.eventually.bignumber.equal(1);
-          await expect( liquidProposal.readVote.call(VOTER_6)).to.eventually.bignumber.equal(1);
-          await expect( liquidProposal.readVote.call(VOTER_7)).to.eventually.bignumber.equal(1);
-          await expect( liquidProposal.readVote.call(VOTER_9)).to.eventually.bignumber.equal(1);
+          await expect( liquidProposal.readVote.call(VOTER_3, 0)).to.eventually.bignumber.equal(8);
+          await expect( liquidProposal.readVote.call(VOTER_6, 0)).to.eventually.bignumber.equal(8);
+          await expect( liquidProposal.readVote.call(VOTER_7, 0)).to.eventually.bignumber.equal(8);
+          await expect( liquidProposal.readVote.call(VOTER_9, 0)).to.eventually.bignumber.equal(8);
 
           await expect( liquidProposal.readDelegate.call(VOTER_3)).to.eventually.bignumber.equal(VOTER_7);
           await expect( liquidProposal.readDelegate.call(VOTER_6)).to.eventually.bignumber.equal(VOTER_7);
           await expect( liquidProposal.readDelegate.call(VOTER_7)).to.eventually.bignumber.equal(VOTER_9);
           await expect( liquidProposal.readDelegate.call(VOTER_9)).to.eventually.bignumber.equal(VOTER_8);
 
-          await expect( liquidProposal.readEndVoter.call(VOTER_3)).to.eventually.bignumber.equal(VOTER_8);
-          await expect( liquidProposal.readEndVoter.call(VOTER_6)).to.eventually.bignumber.equal(VOTER_8);
-          await expect( liquidProposal.readEndVoter.call(VOTER_7)).to.eventually.bignumber.equal(VOTER_8);
-          await expect( liquidProposal.readEndVoter.call(VOTER_9)).to.eventually.bignumber.equal(VOTER_8);
-
+          await expect( liquidProposal.readEndVoter.call(VOTER_3, 0)).to.eventually.bignumber.equal(VOTER_8);
+          await expect( liquidProposal.readEndVoter.call(VOTER_6, 0)).to.eventually.bignumber.equal(VOTER_8);
+          await expect( liquidProposal.readEndVoter.call(VOTER_7, 0)).to.eventually.bignumber.equal(VOTER_8);
+          await expect( liquidProposal.readEndVoter.call(VOTER_9, 0)).to.eventually.bignumber.equal(VOTER_8);
 
         });
-
     });
 
     describe("#revokeDelegation()", () => {
@@ -239,26 +231,29 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
           await liquidProposal.revokeDelegation.sendTransaction(VOTER_3, TX_DEFAULTS)
 
-          await expect( liquidProposal.readVote.call(VOTER_3)).to.eventually.bignumber.equal(0);
+          await expect( liquidProposal.readVote.call(VOTER_3, 0)).to.eventually.bignumber.equal(0);
 
-          await expect( liquidProposal.readEndVoter.call(VOTER_3)).to.eventually.bignumber.equal(VOTER_3);
+          await expect( liquidProposal.readEndVoter.call(VOTER_3, 0)).to.eventually.bignumber.equal(VOTER_3);
 
         });
 
     });
 
-    // there are still some bugs in the math for tally i think, but it's mostly there. Also having the bignumber issue that doesnt seem to have a clear solution.
-    describe("#decision()", () => {
+    describe("#tally()", () => {
         it("should allow user to delegate their vote", async () => {
 
           let result = await liquidProposal.tally.call()
 
-            await expect(result[0].toNumber()).to.equal(6);
-            await expect(result[1].toNumber()).to.equal(2);
-            await expect(result[2].toNumber()).to.equal(8);
-            await expect(result[3].toNumber()).to.equal(1);
-            await expect(result[4].toNumber()).to.equal(51);
-            await expect(result[5].toNumber()).to.equal(1);
+            await expect(result[0][0].toNumber()).to.equal(1);
+            await expect(result[0][1].toNumber()).to.equal(1);
+            await expect(result[0][2].toNumber()).to.equal(1);
+            await expect(result[0][4].toNumber()).to.equal(1);
+            await expect(result[0][5].toNumber()).to.equal(1);
+            await expect(result[0][8].toNumber()).to.equal(4);
+
+            await expect(result[1].toNumber()).to.equal(8);
+            await expect(result[2].toNumber()).to.equal(1);
+
         });
     });
 
