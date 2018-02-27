@@ -1,4 +1,6 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.17;
+
+import "./LiquidDemocracyPoll.sol";
 
 contract LiquidDemocracyForum {
 
@@ -16,9 +18,15 @@ uint public pollId;
 
 mapping (address => bool) internal registeredVotersMap;
 
-mapping (address => userDelegation) public userToDelegate;
+address[] internal registeredVotersArray;
 
-mapping (address => bool) public willingToBeDelegate;
+mapping (address => topicToDelegate) public userToTopicDelegation;
+
+mapping (uint => userDelegation) public topicToDelegate;
+
+/*mapping (address => userDelegation) public userToDelegate;*/
+
+mapping (address => uint) public willingToBeDelegateToTopic;
 
 struct pollInfo {
   address pollAddress;
@@ -30,36 +38,67 @@ struct userDelegation {
   uint delegationExpiration;
 }
 
-function LiquidDemocracyForum(bytes32 _validTopicArray) {
+/*struct userDelegation {
+  address delegateAddress;
+  uint delegationExpiration;
+  uint[] topicsDelegated;
+}*/
+
+function LiquidDemocracyForum(bytes32 _validTopicArray) public {
   validTopicArray = _validTopicArray;
   pollId = 0;
 }
 
-function createTopic() {
+function createNewTopic(bytes32 _newValidTopicArray) public {
+  validTopicArray = _newValidTopicArray;
+}
+
+/*import './Child.sol';
+
+mapping(bytes32 => Child) childList;
+
+function spawnChild(bytes32 childId) {
+    Child current = new Child();
+    childList[childId] = current;
+}
+
+function callChildFunction(bytes32 childId) {
+    childList[childId].theChildfunction();
+}
+*/
+
+function createPoll() public {
 
 }
 
-function createPoll() {
+function registerVoter(address _userAddress)
+external
+{
+
+  require(registeredVotersMap[_userAddress] == false);
+
+  registeredVotersArray.push(_userAddress);
+  registeredVotersMap[_userAddress] = true;
 
 }
 
-function registerUser() {
+  /*allows user to offer themselves as a delegate*/
+function becomeDelegate(address _userAddress)
+external
+isRegisteredVoter(_userAddress)
+{
+  willingToBeDelegate[_userAddress] = true;
+}
+
+function withdrawAsDelegate() public {
 
 }
 
-function becomeDelegate() {
+function delegateVote() public {
 
 }
 
-function withdrawAsDelegate() {
-
-}
-
-function delegateVote() {
-
-}
-
-function revokeDelegation() {
+function revokeDelegation() public {
 
 }
 

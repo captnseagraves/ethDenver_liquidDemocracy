@@ -4,7 +4,7 @@ pragma solidity ^0.4.17;
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
-contract liquidDemocracy {
+contract LiquidDemocracyPoll {
   using SafeMath for uint;
 
   /*
@@ -116,7 +116,7 @@ contract liquidDemocracy {
       _;
     }
 
-  function liquidDemocracy(
+  function LiquidDemocracyPoll(
     uint _delegatePeriodEnd,
     uint _votePeriodEnd,
     uint _delegationDepth,
@@ -134,7 +134,7 @@ contract liquidDemocracy {
       validVoteArray = _validVoteArray;
   }
 
-  /*allows voter to register for proposal*/
+  /*allows voter to register for poll*/
   function registerVoter(address _userAddress)
   external
   {

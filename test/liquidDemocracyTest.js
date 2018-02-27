@@ -10,7 +10,7 @@ const timestamp = require("unix-timestamp");
 
 
 
-const LiquidDemocracy = artifacts.require("./liquidDemocracy.sol");
+const LiquidDemocracy = artifacts.require("./LiquidDemocracyPoll.sol");
 
 const INVALID_OPCODE = "invalid opcode";
 const REVERT_ERROR = "revert";
@@ -29,7 +29,7 @@ BigNumber.config({  EXPONENTIAL_AT: 1000  });
 // const LogApproval = require("./utils/logs").LogApproval;
 
 // Import truffle contract instance
-const liquidDemocracyContract = artifacts.require("liquidDemocracy");
+const liquidDemocracyContract = artifacts.require("LiquidDemocracyPoll");
 
 // Initialize ABI Decoder for deciphering log receipts
 ABIDecoder.addABI(liquidDemocracyContract.abi);
@@ -50,8 +50,8 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
     // MUST ADJUST TIME TO SUIT TESTS. OTHERWISE TESTS WILL FAIL.
 
-    const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-02-27T10:24:00'));
-    const VOTE_PERIOD = timestamp.fromDate(new Date('2018-02-27T11:24:00'))
+    const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-02-28T10:24:00'));
+    const VOTE_PERIOD = timestamp.fromDate(new Date('2018-02-28T11:24:00'))
 
     const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
     const EIGHT_OPTION_VOTE_ARRAY = '0xff80000000000000000000000000000000000000000000000000000000000000'
