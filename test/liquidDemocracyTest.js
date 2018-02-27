@@ -204,21 +204,25 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
           await liquidProposal.registerVoter.sendTransaction(VOTER_3, TX_DEFAULTS)
 
           await liquidProposal.delegateVote.sendTransaction(VOTER_3, VOTER_7, TX_DEFAULTS)
+          await liquidProposal.delegateVote.sendTransaction(VOTER_5, VOTER_9, TX_DEFAULTS)
           await liquidProposal.delegateVote.sendTransaction(VOTER_6, VOTER_7, TX_DEFAULTS)
           await liquidProposal.delegateVote.sendTransaction(VOTER_7, VOTER_9, TX_DEFAULTS)
           await liquidProposal.delegateVote.sendTransaction(VOTER_9, VOTER_8, TX_DEFAULTS)
 
           await expect( liquidProposal.readVote.call(VOTER_3, 0)).to.eventually.bignumber.equal(8);
+          await expect( liquidProposal.readVote.call(VOTER_5, 0)).to.eventually.bignumber.equal(8);
           await expect( liquidProposal.readVote.call(VOTER_6, 0)).to.eventually.bignumber.equal(8);
           await expect( liquidProposal.readVote.call(VOTER_7, 0)).to.eventually.bignumber.equal(8);
           await expect( liquidProposal.readVote.call(VOTER_9, 0)).to.eventually.bignumber.equal(8);
 
           await expect( liquidProposal.readDelegate.call(VOTER_3)).to.eventually.bignumber.equal(VOTER_7);
+          await expect( liquidProposal.readDelegate.call(VOTER_5)).to.eventually.bignumber.equal(VOTER_9);
           await expect( liquidProposal.readDelegate.call(VOTER_6)).to.eventually.bignumber.equal(VOTER_7);
           await expect( liquidProposal.readDelegate.call(VOTER_7)).to.eventually.bignumber.equal(VOTER_9);
           await expect( liquidProposal.readDelegate.call(VOTER_9)).to.eventually.bignumber.equal(VOTER_8);
 
           await expect( liquidProposal.readEndVoter.call(VOTER_3, 0)).to.eventually.bignumber.equal(VOTER_8);
+          await expect( liquidProposal.readEndVoter.call(VOTER_5, 0)).to.eventually.bignumber.equal(VOTER_8);
           await expect( liquidProposal.readEndVoter.call(VOTER_6, 0)).to.eventually.bignumber.equal(VOTER_8);
           await expect( liquidProposal.readEndVoter.call(VOTER_7, 0)).to.eventually.bignumber.equal(VOTER_8);
           await expect( liquidProposal.readEndVoter.call(VOTER_9, 0)).to.eventually.bignumber.equal(VOTER_8);
@@ -240,7 +244,7 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
     });
 
     describe("#tally()", () => {
-        it("should allow user to delegate their vote", async () => {
+        it("should correctly tally votes from poll", async () => {
 
           let result = await liquidProposal.tally.call()
 
@@ -248,11 +252,21 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
             await expect(result[0][1].toNumber()).to.equal(1);
             await expect(result[0][2].toNumber()).to.equal(1);
             await expect(result[0][4].toNumber()).to.equal(1);
-            await expect(result[0][5].toNumber()).to.equal(1);
-            await expect(result[0][8].toNumber()).to.equal(4);
+            await expect(result[0][8].toNumber()).to.equal(5);
 
             await expect(result[1].toNumber()).to.equal(8);
             await expect(result[2].toNumber()).to.equal(1);
+
+        });
+    });
+
+    describe("#finalDecision()", () => {
+        it("should correctly show final decision of poll", async () => {
+
+          let result = await liquidProposal.finalDecision.call()
+
+            await expect(result[0].toNumber()).to.equal(8);
+            await expect(result[1].toNumber()).to.equal(5);
 
         });
     });
