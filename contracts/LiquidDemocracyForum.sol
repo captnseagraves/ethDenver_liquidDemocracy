@@ -18,30 +18,32 @@ bytes32 public topicMetaData;
 uint public delegationDepth;
 uint public pollId;
 
-/*why store this as bytes32 vs address*/
-mapping(bytes32 => LiquidDemocracyPoll) pollList;
+mapping(uint => LiquidDemocracyPoll) pollList;
 
-mapping (address => bool) internal f_registeredVotersMap;
+mapping (address => bool) internal registeredVotersMap;
 
-address[] internal f_registeredVotersArray;
+address[] internal registeredVotersArray;
 
-mapping (address => f_topicToDelegate) public f_userToTopicDelegation;
+/*mapping (address => topicToDelegate) public userToTopicDelegation;*/
 
-mapping (uint => userDelegation) public f_topicToDelegate;
+mapping (address => mapping (uint => address)) public userToTopicToDelegateAddress;
+
+
+/*mapping (uint => userDelegation) public topicToDelegate;*/
 
 /*mapping (address => userDelegation) public userToDelegate;*/
 
-mapping (address => uint) public f_willingToBeDelegateToTopic;
+mapping (address => mapping (uint => bool)) public willingToBeDelegateToTopicToBool;
 
-struct pollInfo {
+/*struct pollInfo {
   address pollAddress;
   uint topic;
-}
+}*/
 
-struct userDelegation {
+/*struct userDelegation {
   address delegateAddress;
   uint delegationExpiration;
-}
+}*/
 
 /*struct userDelegation {
   address delegateAddress;
@@ -51,23 +53,23 @@ struct userDelegation {
 
 /*would clean and reduce modifiers and helper functions for production*/
 /*verifies voter is registered*/
-  modifier f_isRegisteredVoter(address _userAddress) {
-      require(_f_isRegisteredVoter(_userAddress));
+  modifier isRegisteredVoter(address _userAddress) {
+      require(_isRegisteredVoter(_userAddress));
     _;
   }
   /*verifies delegate is valid*/
-  modifier f_isValidDelegate(address _userAddress) {
-    require(_f_isValidDelegate(_userAddress));
+  modifier isValidDelegateForTopic(address _userAddress, uint _topic) {
+    require(_isValidDelegateForTopic(_userAddress, _topic));
     _;
   }
   /*verifies if vote is delegated*/
-  modifier f_isValidTopicOption(uint _topic) {
-    require(_f_isValidTopicOption(_topic));
+  modifier isValidTopicOption(uint _topic) {
+    require(_isValidTopicOption(_topic));
     _;
   }
-  modifier f_isValidChainDepthAndNonCircular(address _userAddress) {
+  modifier isValidChainDepthAndNonCircular(address _userAddress, uint _topic) {
     bool bValid;
-    (bValid,,) =_f_isValidChainDepthAndNonCircular(_userAddress, 0);
+    (bValid,,) =_isValidChainDepthAndNonCircular(_userAddress, _topic, 0);
     require(bValid);
     _;
   }
@@ -80,7 +82,7 @@ function LiquidDemocracyForum(bytes32 _validTopicArray, bytes32 _topicMetaData, 
   pollId = 0;
 }
 
-function f_createNewTopic(bytes32 _newValidTopicArray, bytes32 _newTopicMetaData)
+function createNewTopic(bytes32 _newValidTopicArray, bytes32 _newTopicMetaData)
 public
 {
 
@@ -103,7 +105,7 @@ function callChildFunction(bytes32 childId) {
 }
 */
 
-function f_createPoll(
+function createPoll(
   uint _delegatePeriodEnd,
   uint _votePeriodEnd,
   uint _delegationDepth,
@@ -116,51 +118,61 @@ function f_createPoll(
 {
 
   LiquidDemocracyPoll current = new LiquidDemocracyPoll(
-      uint _delegatePeriodEnd,
-      uint _votePeriodEnd,
-      uint _delegationDepth,
-      uint _pctQuorum,
-      uint _pctThreshold,
-      bytes32 _proposalMetaData,
-      bytes32 _validVoteArray
+    _delegatePeriodEnd,
+    _votePeriodEnd,
+    _delegationDepth,
+    _pctQuorum,
+    _pctThreshold,
+    _proposalMetaData,
+    _validVoteArray
       );
+
   pollList[pollId] = current;
   pollId++;
 
 }
 
-function f_registerVoter(address _userAddress)
+function registerVoter(address _userAddress)
 external
 {
 
-  require(fRegisteredVotersMap[_userAddress] == false);
+  require(registeredVotersMap[_userAddress] == false);
 
-  fRegisteredVotersArray.push(_userAddress);
-  fRegisteredVotersMap[_userAddress] = true;
+  registeredVotersArray.push(_userAddress);
+  registeredVotersMap[_userAddress] = true;
 
 }
 
   /*allows user to offer themselves as a delegate*/
-function f_becomeDelegate(address _userAddress)
+function becomeDelegateForTopic(address _userAddress, uint _topic)
 external
-f_isRegisteredVoter(_userAddress)
+isRegisteredVoter(_userAddress)
+isValidTopicOption(_topic)
 {
-  fWillingToBeDelegate[_userAddress] = true;
+  willingToBeDelegateToTopicToBool[_userAddress[_topic]] = true;
+
 }
 
 /*Allows user to withdraw as a delegate in all future polls. All polls where they are currently a delegate they will remain a delegate until the poll closes*/
-function f_withdrawAsDelegate() public {
-
+function withdrawAsDelegateForTopic(address _userAddress, uint _topic)
+external
+isRegisteredVoter(_userAddress)
+isValidDelegateForTopic(_userAddress, _topic)
+{
+  willingToBeDelegateToTopicToBool[_userAddress[_topic]] = false;
 }
 
-function f_delegateVote(address _userAddress, address _delegateAddress)
+function delegateVote(address _userAddress,uint _topic, address _delegateAddress)
 external
-f_isRegisteredVoter(_userAddress)
-f_isValidDelegate(_delegateAddress)
-f_isValidChainDepthAndNonCircular(_userAddress)
+isRegisteredVoter(_userAddress)
+isValidDelegateForTopic(_delegateAddress, _topic)
+isValidTopicOption(_topic)
+isValidChainDepthAndNonCircular(_userAddress)
 {
 
-  userToDelegate[_userAddress] = _delegateAddress;
+  userToTopicToDelegateAddress[_userAddress[_topic]] = _delegateAddress;
+
+  /*userToDelegate[_userAddress] = _delegateAddress;*/
 
 }
 
@@ -168,24 +180,24 @@ f_isValidChainDepthAndNonCircular(_userAddress)
 
 }*/
 
-function f_revokeDelegation(address _userAddress)
+function revokeDelegation(address _userAddress, uint _topic)
 public
-f_isRegisteredVoter(_userAddress)
+isRegisteredVoter(_userAddress)
+isValidTopicOption(_topic)
 {
 
-  userVotes[_userAddress] = 0;
-  userToDelegate[_userAddress] = 0;
+  userToTopicToDelegateAddress[_userAddress[_topic]] = 0x0;
 
 }
 
-function _f_isValidTopicOption(uint _topic) public view returns(bool){
+function _isValidTopicOption(uint _topic) public view returns(bool){
      byte MyByte = validTopicArray[_topic / 8];
-     uint MyPosition = 7 - (_vote % 8);
+     uint MyPosition = 7 - (_topic % 8);
 
     return  2**MyPosition == uint8(MyByte & byte(2**MyPosition));
 }
 
-function _f_isValidChainDepthAndNonCircular(address _userAddress, uint _recursionCount) public view returns(bool _valid, bool _vDepth, bool _vCircle){
+function _isValidChainDepthAndNonCircular(address _userAddress, uint _topic, uint _recursionCount) public view returns(bool _valid, bool _vDepth, bool _vCircle){
 
   if(_recursionCount > delegationDepth){
     _vDepth = true;
@@ -193,39 +205,36 @@ function _f_isValidChainDepthAndNonCircular(address _userAddress, uint _recursio
     return;
   }
 
-  if (userToDelegate[_userAddress] != 0x0) {
-    if (userToDelegate[_userAddress] == _userAddress) {
+  if (userToTopicToDelegateAddress[_userAddress[_topic]] != 0x0) {
+    if (userToTopicToDelegateAddress[_userAddress[_topic]] == _userAddress) {
       _valid = false;
       _vCircle = true;
       return;
     }
-    return _f_isValidChainDepthAndNonCircular(userToDelegate[_userAddress], _recursionCount + 1);
+    return _isValidChainDepthAndNonCircular(userToTopicToDelegateAddress[_userAddress[_topic]], _topic, _recursionCount + 1);
   } else {
     _valid = true;
     return;
   }
 }
 
- /*these addtional functions allow me to test contract. would remove bottom two for production and implement in modifier*/
 
-
-
- function _f_isRegisteredVoter(address _userAddress)
+ function _isRegisteredVoter(address _userAddress)
  view
   public
   returns (bool _voterRegistration){
-   if (f_registeredVotersMap[_userAddress] == true) {
+   if (registeredVotersMap[_userAddress] == true) {
      return true;
    } else {
      return false;
    }
  }
 
- function _f_isValidDelegate(address _userAddress)
+ function _isValidDelegateForTopic(address _userAddress, uint _topic)
  view
   public
   returns (bool _delegateStatus){
-   if (f_willingToBeDelegate[_userAddress] == true) {
+   if (willingToBeDelegateToTopicToBool[_userAddress[_topic]] == true) {
      return true;
    } else {
      return false;
