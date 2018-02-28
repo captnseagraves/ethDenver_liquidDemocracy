@@ -85,22 +85,22 @@ contract LiquidDemocracyPoll {
   /*would clean and reduce modifiers and helper functions for production*/
   /*verifies voter is registered*/
     modifier isRegisteredVoter(address _userAddress) {
-        require(_isRegisteredVoter(_userAddress));
+        require(_isRegisteredVoter(_userAddress) == true);
       _;
     }
     /*verifies delegate is valid*/
     modifier isValidDelegate(address _userAddress) {
-      require(_isValidDelegate(_userAddress));
+      require(_isValidDelegate(_userAddress) == true);
       _;
     }
     /*verifies if vote is delegated*/
     modifier isVoteDelegated(address _userAddress) {
-      require(_isVoteDelegated(_userAddress));
+      require(_isVoteDelegated(_userAddress) == false);
       _;
     }
     /*verifies if vote is delegated*/
     modifier isValidVoteOption(uint _vote) {
-      require(_isValidVoteOption(_vote));
+      require(_isValidVoteOption(_vote) == true);
       _;
     }
     modifier isValidChainDepthAndNonCircular(address _userAddress) {

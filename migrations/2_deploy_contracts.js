@@ -1,4 +1,4 @@
-var liquidDemocracy = artifacts.require("./liquidDemocracy.sol");
+var liquidDemocracy = artifacts.require("./LiquidDemocracyPoll.sol");
 
 
 module.exports = function(deployer) {

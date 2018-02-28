@@ -50,8 +50,8 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
     // MUST ADJUST TIME TO SUIT TESTS. OTHERWISE TESTS WILL FAIL.
 
-    const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-02-28T10:24:00'));
-    const VOTE_PERIOD = timestamp.fromDate(new Date('2018-02-28T11:24:00'))
+    const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-03-01T10:24:00'));
+    const VOTE_PERIOD = timestamp.fromDate(new Date('2018-03-01T11:24:00'))
 
     const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
     const EIGHT_OPTION_VOTE_ARRAY = '0xff80000000000000000000000000000000000000000000000000000000000000'
@@ -76,7 +76,6 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
     before(deployProposal);
 
     describe("Create Proposal", () => {
-      // these tests are returning weird numbers..... Having real issues with period timing
 
         it("should return correct delegationPeriodEnd", async () => {
 
