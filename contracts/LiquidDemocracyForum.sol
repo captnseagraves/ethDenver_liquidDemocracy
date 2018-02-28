@@ -149,7 +149,7 @@ external
 isRegisteredVoter(_userAddress)
 isValidTopicOption(_topic)
 {
-  willingToBeDelegateToTopicToBool[_userAddress[_topic]] = true;
+  willingToBeDelegateToTopicToBool[_userAddress][_topic] = true;
 
 }
 
@@ -159,7 +159,7 @@ external
 isRegisteredVoter(_userAddress)
 isValidDelegateForTopic(_userAddress, _topic)
 {
-  willingToBeDelegateToTopicToBool[_userAddress[_topic]] = false;
+  willingToBeDelegateToTopicToBool[_userAddress][_topic] = false;
 }
 
 function delegateVote(address _userAddress,uint _topic, address _delegateAddress)
@@ -167,10 +167,10 @@ external
 isRegisteredVoter(_userAddress)
 isValidDelegateForTopic(_delegateAddress, _topic)
 isValidTopicOption(_topic)
-isValidChainDepthAndNonCircular(_userAddress)
+isValidChainDepthAndNonCircular(_userAddress, _topic)
 {
 
-  userToTopicToDelegateAddress[_userAddress[_topic]] = _delegateAddress;
+  userToTopicToDelegateAddress[_userAddress][_topic] = _delegateAddress;
 
   /*userToDelegate[_userAddress] = _delegateAddress;*/
 
@@ -186,7 +186,7 @@ isRegisteredVoter(_userAddress)
 isValidTopicOption(_topic)
 {
 
-  userToTopicToDelegateAddress[_userAddress[_topic]] = 0x0;
+  userToTopicToDelegateAddress[_userAddress][_topic] = 0x0;
 
 }
 
@@ -205,13 +205,13 @@ function _isValidChainDepthAndNonCircular(address _userAddress, uint _topic, uin
     return;
   }
 
-  if (userToTopicToDelegateAddress[_userAddress[_topic]] != 0x0) {
-    if (userToTopicToDelegateAddress[_userAddress[_topic]] == _userAddress) {
+  if (userToTopicToDelegateAddress[_userAddress][_topic] != 0x0) {
+    if (userToTopicToDelegateAddress[_userAddress][_topic] == _userAddress) {
       _valid = false;
       _vCircle = true;
       return;
     }
-    return _isValidChainDepthAndNonCircular(userToTopicToDelegateAddress[_userAddress[_topic]], _topic, _recursionCount + 1);
+    return _isValidChainDepthAndNonCircular(userToTopicToDelegateAddress[_userAddress][_topic], _topic, _recursionCount + 1);
   } else {
     _valid = true;
     return;
@@ -234,7 +234,7 @@ function _isValidChainDepthAndNonCircular(address _userAddress, uint _topic, uin
  view
   public
   returns (bool _delegateStatus){
-   if (willingToBeDelegateToTopicToBool[_userAddress[_topic]] == true) {
+   if (willingToBeDelegateToTopicToBool[_userAddress][_topic] == true) {
      return true;
    } else {
      return false;
