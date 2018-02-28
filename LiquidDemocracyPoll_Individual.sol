@@ -1,10 +1,11 @@
 pragma solidity ^0.4.17;
 
-import "./LDPollInterface.sol";
+/*import "./ldInterface.sol";*/
+import "zeppelin-solidity/contracts/math/SafeMath.sol";
 
 
-
-contract LiquidDemocracyPoll is LDPollInterface {
+contract LiquidDemocracyPoll {
+  using SafeMath for uint;
 
   /*
   Glossary:

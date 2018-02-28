@@ -54,17 +54,17 @@ mapping (address => mapping (uint => bool)) public willingToBeDelegateToTopicToB
 /*would clean and reduce modifiers and helper functions for production*/
 /*verifies voter is registered*/
   modifier isRegisteredVoter(address _userAddress) {
-      require(_isRegisteredVoter(_userAddress));
+      require(_isRegisteredVoter(_userAddress) == true);
     _;
   }
   /*verifies delegate is valid*/
   modifier isValidDelegateForTopic(address _userAddress, uint _topic) {
-    require(_isValidDelegateForTopic(_userAddress, _topic));
+    require(_isValidDelegateForTopic(_userAddress, _topic) == true);
     _;
   }
   /*verifies if vote is delegated*/
   modifier isValidTopicOption(uint _topic) {
-    require(_isValidTopicOption(_topic));
+    require(_isValidTopicOption(_topic) == true);
     _;
   }
   modifier isValidChainDepthAndNonCircular(address _userAddress, uint _topic) {
