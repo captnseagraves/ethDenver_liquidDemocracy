@@ -169,7 +169,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
   function vote(address _userAddress, uint _value)
   external
   isRegisteredVoter(_userAddress)
-  isVoteDelegated(_userAddress)
+  /*isVoteDelegated(_userAddress)*/
   isVoterDelegateAndDelegatePeriodOpen(_userAddress)
   isValidVoteOption(_value)
   votePeriodOpen()
@@ -198,7 +198,11 @@ contract LiquidDemocracyPoll is LDPollInterface {
   returns (uint)
   {
 
-    if(_recursionCount > delegationDepth){
+    if (userVotes[_userAddress] != 0) {
+      return userVotes[_userAddress];
+    }
+
+    if (_recursionCount > delegationDepth){
         return 0;
     }
 
@@ -208,8 +212,6 @@ contract LiquidDemocracyPoll is LDPollInterface {
       return readVote(userToDelegate[_userAddress], _recursionCount + 1);
     } else if (forumDelegate != 0x0) {
       return readVote(forumDelegate, _recursionCount + 1);
-    } else {
-      return userVotes[_userAddress];
     }
   }
 
@@ -219,7 +221,11 @@ contract LiquidDemocracyPoll is LDPollInterface {
   returns (address)
   {
 
-    if(_recursionCount > delegationDepth){
+    if (userVotes[_userAddress] != 0) {
+      return _userAddress;
+    }
+
+    if (_recursionCount > delegationDepth){
      return 0x0;
     }
 
@@ -229,8 +235,6 @@ contract LiquidDemocracyPoll is LDPollInterface {
       return readEndVoter(userToDelegate[_userAddress], _recursionCount + 1);
     } else if (forumDelegate != 0x0) {
       return readEndVoter(forumDelegate, _recursionCount + 1);
-    } else {
-      return _userAddress;
     }
   }
 
@@ -241,7 +245,16 @@ contract LiquidDemocracyPoll is LDPollInterface {
   view
   returns (address _delegateAddress)
   {
-    return userToDelegate[_userAddress];
+    address forumDelegate = LDForumInterface(forumAddress).readDelegate(_userAddress, topic);
+
+    if (userToDelegate[_userAddress] != 0x0) {
+      return userToDelegate[_userAddress];
+    } else if (forumAddress != 0x0) {
+      return forumDelegate;
+    } else {
+      return 0x0;
+    }
+
   }
 
   /*allows user to revoke their delegation if they disagree with delegates vote*/
@@ -250,8 +263,16 @@ contract LiquidDemocracyPoll is LDPollInterface {
   isRegisteredVoter(_userAddress)
   votePeriodOpen()
   {
+    userToDelegate[_userAddress] = 0x0;
+  }
+
+  /*allows user to revoke their delegation if they disagree with delegates vote*/
+  function withdrawDirectVote(address _userAddress)
+  public
+  isRegisteredVoter(_userAddress)
+  votePeriodOpen()
+  {
     userVotes[_userAddress] = 0;
-    userToDelegate[_userAddress] = 0;
   }
 
 
@@ -342,8 +363,10 @@ contract LiquidDemocracyPoll is LDPollInterface {
      return;
    }
 
-   if (userToDelegate[_userAddress] != 0x0) {
-     if (userToDelegate[_userAddress] == _userAddress) {
+      address forumDelegate = LDForumInterface(forumAddress).readDelegate(_userAddress, topic);
+
+   if (userToDelegate[_userAddress] != 0x0 || forumDelegate != 0x0) {
+     if (userToDelegate[_userAddress] == _userAddress || forumDelegate == _userAddress) {
        _valid = false;
        _vCircle = true;
        return;
@@ -361,7 +384,10 @@ contract LiquidDemocracyPoll is LDPollInterface {
   view
    internal
    returns (bool _voteStatus){
-    if (userToDelegate[_userAddress] != 0x0) {
+
+     address forumDelegate = LDForumInterface(forumAddress).readDelegate(_userAddress, topic);
+
+    if (userToDelegate[_userAddress] != 0x0 || forumDelegate != 0x0) {
       return true;
     } else {
       return false;
@@ -378,6 +404,24 @@ contract LiquidDemocracyPoll is LDPollInterface {
       return false;
     }
   }
+
+  /*this way of checking registered voters will cause issues when tallying votes. Need to decide where to tally or cross registered voter data*/
+
+  /*is it valid to think that a user must sign up for each poll? if they are allowed to have their weight counted via a delegate by only registering on the forum level, then no. Otherwise, it's an architecture/UX decision.  */
+
+  /*function _isRegisteredVoter(address _userAddress)
+  view
+   public
+   returns (bool _voterRegistration){
+
+     address forumRegisteredVoter = LDForumInterface(forumAddress)._isRegisteredVoter(_userAddress);
+
+    if (registeredVotersMap[_userAddress] == true || forumRegisteredVoter == true) {
+      return true;
+    } else {
+      return false;
+    }
+  }*/
 
   function _isValidDelegate(address _userAddress)
   view
