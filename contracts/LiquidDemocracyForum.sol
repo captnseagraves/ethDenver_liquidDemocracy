@@ -4,6 +4,7 @@ import "./LiquidDemocracyPoll.sol";
 import "./LDForumInterface.sol";
 
 contract LiquidDemocracyForum is LDForumInterface {
+  /*contract LiquidDemocracyForum {*/
 
 /*
 create topics that hold many polls
@@ -106,10 +107,11 @@ function callChildFunction(bytes32 childId) {
 }
 */
 
+event newPoll(address _newPollAddress);
+
 function createPoll(
   uint _delegatePeriodEnd,
   uint _votePeriodEnd,
-  uint _delegationDepth,
   uint _pctQuorum,
   uint _pctThreshold,
   bytes32 _proposalMetaData,
@@ -118,6 +120,7 @@ function createPoll(
   )
   public
   isValidTopicOption(_topic)
+  returns (address)
 {
 
   LiquidDemocracyPoll current = new LiquidDemocracyPoll(
@@ -136,6 +139,7 @@ function createPoll(
   pollList[pollId] = current;
   pollId++;
 
+newPoll(current);
 }
 
 function registerVoter(address _userAddress)

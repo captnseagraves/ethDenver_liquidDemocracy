@@ -10,12 +10,16 @@ const timestamp = require("unix-timestamp");
 
 
 
-const LiquidDemocracy = artifacts.require("./LiquidDemocracyPoll.sol");
+const LiquidDemocracyPoll = artifacts.require("./LiquidDemocracyPoll.sol");
+const LiquidDemocracyForum = artifacts.require("./LiquidDemocracyForum.sol");
+
 
 const INVALID_OPCODE = "invalid opcode";
 const REVERT_ERROR = "revert";
 
 const EMPTY_BYTES32_HASH = "0x" + web3._extend.utils.padRight("0", 64)
+const ONES_BYTES32_HASH = "0x" + web3._extend.utils.padRight("1", 64)
+
 
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -29,13 +33,15 @@ BigNumber.config({  EXPONENTIAL_AT: 1000  });
 // const LogApproval = require("./utils/logs").LogApproval;
 
 // Import truffle contract instance
-const liquidDemocracyContract = artifacts.require("LiquidDemocracyPoll");
+const liquidDemocracyPollContract = artifacts.require("LiquidDemocracyPoll");
+const liquidDemocracyForumContract = artifacts.require("LiquidDemocracyForum");
+
 
 // Initialize ABI Decoder for deciphering log receipts
-ABIDecoder.addABI(liquidDemocracyContract.abi);
+ABIDecoder.addABI(liquidDemocracyForumContract.abi);
 
-contract("Liquid Democracy Proposal", (ACCOUNTS) => {
-    let liquidProposal;
+contract("Liquid Democracy Forum", (ACCOUNTS) => {
+    let liquidForum;
 
     const PROPOSAL_OWNER = ACCOUNTS[0];
     const VOTER_1 = ACCOUNTS[1];
@@ -55,219 +61,88 @@ contract("Liquid Democracy Proposal", (ACCOUNTS) => {
 
     const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
     const EIGHT_OPTION_VOTE_ARRAY = '0xff80000000000000000000000000000000000000000000000000000000000000'
+    const NINE_OPTION_VOTE_ARRAY = '0xffc0000000000000000000000000000000000000000000000000000000000000'
+
 
     const TX_DEFAULTS = { from: PROPOSAL_OWNER, gas: 4000000 };
 
-    const deployProposal = async () => {
+    const deployForum = async () => {
 
         const instance =
-            await liquidDemocracyContract.new( DELEGATE_PERIOD, VOTE_PERIOD, 5, 75, 51, EMPTY_BYTES32_HASH, EIGHT_OPTION_VOTE_ARRAY, TX_DEFAULTS);
+            await liquidDemocracyForumContract.new( EIGHT_OPTION_VOTE_ARRAY, EMPTY_BYTES32_HASH, 5, TX_DEFAULTS);
 
         const web3ContractInstance =
             web3.eth.contract(instance.abi).at(instance.address);
 
-        liquidProposal = new LiquidDemocracy(
+        liquidForum = new LiquidDemocracyForum(
             web3ContractInstance, TX_DEFAULTS);
 
 
     };
 
 
-    before(deployProposal);
+    before(deployForum);
 
-    describe("Create Proposal", () => {
-
-        it("should return correct delegationPeriodEnd", async () => {
-
-        await expect( liquidProposal.delegatePeriodEnd.call()).to.eventually.bignumber.equal(DELEGATE_PERIOD);
-
-        });
+    describe("Create Forum", () => {
 
 
-        it("should return correct votePeriodEnd", async () => {
+      it("should return correct delegationDepth", async () => {
 
-        await expect( liquidProposal.votePeriodEnd.call()).to.eventually.bignumber.equal(VOTE_PERIOD);
+        await expect( liquidForum.delegationDepth.call()).to.eventually.bignumber.equal(5);
 
-        });
+      });
 
-        it("should return correct delegationDepth", async () => {
+      it("should return correct topicMetaData", async () => {
 
-        await expect( liquidProposal.delegationDepth.call()).to.eventually.bignumber.equal(5);
+        await expect( liquidForum.topicMetaData.call()).to.eventually.equal(EMPTY_BYTES32_HASH);
 
         });
 
-        it("should return correct pctQuorum", async () => {
+      it("should return correct validtopicArray", async () => {
 
-          await expect( liquidProposal.pctQuorum.call()).to.eventually.bignumber.equal(75);
-
-        });
-
-        it("should return correct pctThreshold", async () => {
-
-          await expect( liquidProposal.pctThreshold.call()).to.eventually.bignumber.equal(51);
-
-        });
-
-        it("should return correct proposalMetaData", async () => {
-
-          await expect( liquidProposal.proposalMetaData.call()).to.eventually.equal(EMPTY_BYTES32_HASH);
-
-        });
-
-        it("should return correct validVoteArray", async () => {
-
-          await expect( liquidProposal.validVoteArray.call()).to.eventually.equal(EIGHT_OPTION_VOTE_ARRAY);
+        await expect( liquidForum.validTopicArray.call()).to.eventually.equal(EIGHT_OPTION_VOTE_ARRAY);
 
         });
     });
 
-    describe("#registerVoter()", () => {
-        it("should register new user", async () => {
-
-          await liquidProposal.registerVoter.sendTransaction(VOTER_1, TX_DEFAULTS)
-
-          await expect( liquidProposal._isRegisteredVoter.call(VOTER_1)).to.eventually.equal(true);
-
-          await liquidProposal.registerVoter.sendTransaction(VOTER_2, TX_DEFAULTS)
-          await liquidProposal.registerVoter.sendTransaction(VOTER_4, TX_DEFAULTS)
-          await liquidProposal.registerVoter.sendTransaction(VOTER_5, TX_DEFAULTS)
-          await liquidProposal.registerVoter.sendTransaction(VOTER_6, TX_DEFAULTS)
-          await liquidProposal.registerVoter.sendTransaction(VOTER_7, TX_DEFAULTS)
-          await liquidProposal.registerVoter.sendTransaction(VOTER_8, TX_DEFAULTS)
-          await liquidProposal.registerVoter.sendTransaction(VOTER_9, TX_DEFAULTS)
+    describe("#createNewTopic()", () => {
 
 
-        });
+      it("should return new topic values and metadata", async () => {
 
-        it("should fail when registering a second time", async () => {
+        await liquidForum.createNewTopic.sendTransaction(NINE_OPTION_VOTE_ARRAY, ONES_BYTES32_HASH, TX_DEFAULTS)
 
-          await expect(liquidProposal.registerVoter.sendTransaction(VOTER_1, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+        await expect( liquidForum.validTopicArray.call()).to.eventually.equal(NINE_OPTION_VOTE_ARRAY);
 
-        });
+        await expect( liquidForum.topicMetaData.call()).to.eventually.equal(ONES_BYTES32_HASH);
+
+      });
 
     });
 
-    describe("#becomeDelegate()", () => {
-        it("should allow registered user to be a delegate", async () => {
-
-          await liquidProposal.becomeDelegate.sendTransaction(VOTER_1, TX_DEFAULTS)
-
-          await expect( liquidProposal._isValidDelegate.call(VOTER_1)).to.eventually.equal(true);
-
-          await liquidProposal.becomeDelegate.sendTransaction(VOTER_7, TX_DEFAULTS)
-          await liquidProposal.becomeDelegate.sendTransaction(VOTER_8, TX_DEFAULTS)
-          await liquidProposal.becomeDelegate.sendTransaction(VOTER_9, TX_DEFAULTS)
-
-        });
-
-        it("should fail when unregistered user tries to become delegate", async () => {
-
-          await expect(liquidProposal.becomeDelegate.sendTransaction(VOTER_3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
-
-        });
-    });
-
-    describe("#vote()", () => {
-        it("should allow user to vote", async () => {
-
-          await liquidProposal.vote.sendTransaction(VOTER_1, 1, TX_DEFAULTS)
-
-          await expect( liquidProposal.readVote.call(VOTER_1, 0)).to.eventually.bignumber.equal(1);
-
-          await liquidProposal.vote.sendTransaction(VOTER_2, 2, TX_DEFAULTS)
-          await liquidProposal.vote.sendTransaction(VOTER_4, 4, TX_DEFAULTS)
-          await liquidProposal.vote.sendTransaction(VOTER_5, 5, TX_DEFAULTS)
-          await liquidProposal.vote.sendTransaction(VOTER_6, 6, TX_DEFAULTS)
-          await expect( liquidProposal.readVote.call(VOTER_6, 0)).to.eventually.bignumber.equal(6);
-
-          await liquidProposal.vote.sendTransaction(VOTER_7, 7, TX_DEFAULTS)
-          await liquidProposal.vote.sendTransaction(VOTER_8, 8, TX_DEFAULTS)
-          await liquidProposal.vote.sendTransaction(VOTER_9, 7, TX_DEFAULTS)
-
-        });
-
-        it("should fail when unregistered user tries to vote", async () => {
-
-          await expect(liquidProposal.vote.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
-
-        });
-
-    });
+    describe("#createPoll()", () => {
 
 
+      it("should log new poll", async () => {
 
+      let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, EIGHT_OPTION_VOTE_ARRAY, 3, TX_DEFAULTS)
 
-    describe("#delegateVote()", () => {
-        it("should allow user to delegate their vote", async () => {
+      console.log(txHash);
 
-          await liquidProposal.registerVoter.sendTransaction(VOTER_3, TX_DEFAULTS)
+      //
+      //         const logExpected = LogTicketApproved(mintableNft.address, 0);
+      //
+      //         expect(ticketApprovedLog).to.deep.equal(logExpected);
 
-          await liquidProposal.delegateVote.sendTransaction(VOTER_3, VOTER_7, TX_DEFAULTS)
-          await liquidProposal.delegateVote.sendTransaction(VOTER_5, VOTER_9, TX_DEFAULTS)
-          await liquidProposal.delegateVote.sendTransaction(VOTER_6, VOTER_7, TX_DEFAULTS)
-          await liquidProposal.delegateVote.sendTransaction(VOTER_7, VOTER_9, TX_DEFAULTS)
-          await liquidProposal.delegateVote.sendTransaction(VOTER_9, VOTER_8, TX_DEFAULTS)
+        await web3.eth.getTransactionReceipt(txHash, (err, result) => {
+          const [newPollLog] = ABIDecoder.decodeLogs(result.logs);
 
-          await expect( liquidProposal.readVote.call(VOTER_3, 0)).to.eventually.bignumber.equal(8);
-          await expect( liquidProposal.readVote.call(VOTER_5, 0)).to.eventually.bignumber.equal(8);
-          await expect( liquidProposal.readVote.call(VOTER_6, 0)).to.eventually.bignumber.equal(8);
-          await expect( liquidProposal.readVote.call(VOTER_7, 0)).to.eventually.bignumber.equal(8);
-          await expect( liquidProposal.readVote.call(VOTER_9, 0)).to.eventually.bignumber.equal(8);
+            console.log(newPollLog);
 
-          await expect( liquidProposal.readDelegate.call(VOTER_3)).to.eventually.bignumber.equal(VOTER_7);
-          await expect( liquidProposal.readDelegate.call(VOTER_5)).to.eventually.bignumber.equal(VOTER_9);
-          await expect( liquidProposal.readDelegate.call(VOTER_6)).to.eventually.bignumber.equal(VOTER_7);
-          await expect( liquidProposal.readDelegate.call(VOTER_7)).to.eventually.bignumber.equal(VOTER_9);
-          await expect( liquidProposal.readDelegate.call(VOTER_9)).to.eventually.bignumber.equal(VOTER_8);
+            })
 
-          await expect( liquidProposal.readEndVoter.call(VOTER_3, 0)).to.eventually.bignumber.equal(VOTER_8);
-          await expect( liquidProposal.readEndVoter.call(VOTER_5, 0)).to.eventually.bignumber.equal(VOTER_8);
-          await expect( liquidProposal.readEndVoter.call(VOTER_6, 0)).to.eventually.bignumber.equal(VOTER_8);
-          await expect( liquidProposal.readEndVoter.call(VOTER_7, 0)).to.eventually.bignumber.equal(VOTER_8);
-          await expect( liquidProposal.readEndVoter.call(VOTER_9, 0)).to.eventually.bignumber.equal(VOTER_8);
+      });
 
-        });
-    });
-
-    describe("#revokeDelegation()", () => {
-        it("should allow user to revoke their delegation", async () => {
-
-          await liquidProposal.revokeDelegation.sendTransaction(VOTER_3, TX_DEFAULTS)
-
-          await expect( liquidProposal.readVote.call(VOTER_3, 0)).to.eventually.bignumber.equal(0);
-
-          await expect( liquidProposal.readEndVoter.call(VOTER_3, 0)).to.eventually.bignumber.equal(VOTER_3);
-
-        });
-
-    });
-
-    describe("#tally()", () => {
-        it("should correctly tally votes from poll", async () => {
-
-          let result = await liquidProposal.tally.call()
-
-            await expect(result[0][0].toNumber()).to.equal(1);
-            await expect(result[0][1].toNumber()).to.equal(1);
-            await expect(result[0][2].toNumber()).to.equal(1);
-            await expect(result[0][4].toNumber()).to.equal(1);
-            await expect(result[0][8].toNumber()).to.equal(5);
-
-            await expect(result[1].toNumber()).to.equal(8);
-            await expect(result[2].toNumber()).to.equal(1);
-
-        });
-    });
-
-    describe("#finalDecision()", () => {
-        it("should correctly show final decision of poll", async () => {
-
-          let result = await liquidProposal.finalDecision.call()
-
-            await expect(result[0].toNumber()).to.equal(8);
-            await expect(result[1].toNumber()).to.equal(5);
-
-        });
     });
 
 });

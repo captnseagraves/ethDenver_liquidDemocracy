@@ -5,6 +5,7 @@ import "./LDForumInterface.sol";
 
 
 contract LiquidDemocracyPoll is LDPollInterface {
+  /*contract LiquidDemocracyPoll {*/
 
   /*
   Glossary:
@@ -212,6 +213,8 @@ contract LiquidDemocracyPoll is LDPollInterface {
       return readVote(userToDelegate[_userAddress], _recursionCount + 1);
     } else if (forumDelegate != 0x0) {
       return readVote(forumDelegate, _recursionCount + 1);
+    } else {
+      return userVotes[_userAddress];
     }
   }
 
@@ -221,7 +224,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
   returns (address)
   {
 
-    if (userVotes[_userAddress] != 0) {
+    if (userToDelegate[_userAddress] == 0x0) {
       return _userAddress;
     }
 
@@ -235,6 +238,8 @@ contract LiquidDemocracyPoll is LDPollInterface {
       return readEndVoter(userToDelegate[_userAddress], _recursionCount + 1);
     } else if (forumDelegate != 0x0) {
       return readEndVoter(forumDelegate, _recursionCount + 1);
+    } else {
+      return _userAddress;
     }
   }
 
