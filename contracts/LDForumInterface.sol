@@ -10,5 +10,6 @@ function becomeDelegateForTopic(address _userAddress, uint _topic) external;
 function withdrawAsDelegateForTopic(address _userAddress, uint _topic) external;
 function delegateVote(address _userAddress,uint _topic, address _delegateAddress)external;
 function revokeDelegation(address _userAddress, uint _topic) public;
+function readDelegate(address _userAddress, uint _topic) public view returns (address _delegateAddress);
 
 }

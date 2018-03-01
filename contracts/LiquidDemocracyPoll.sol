@@ -1,7 +1,7 @@
 pragma solidity ^0.4.17;
 
 import "./LDPollInterface.sol";
-
+import "./LDForumInterface.sol";
 
 
 contract LiquidDemocracyPoll is LDPollInterface {
@@ -48,6 +48,10 @@ contract LiquidDemocracyPoll is LDPollInterface {
   bytes32 public proposalMetaData;
   /*256 bit array that holds the validity of each possible vote option. Options are referenced and defined in poll metadata. */
   bytes32 public validVoteArray;
+
+  uint public pollId;
+  address public forumAddress;
+  uint public topic;
 
 
 
@@ -122,7 +126,10 @@ contract LiquidDemocracyPoll is LDPollInterface {
     uint _pctQuorum,
     uint _pctThreshold,
     bytes32 _proposalMetaData,
-    bytes32 _validVoteArray
+    bytes32 _validVoteArray,
+    uint _pollId,
+    address _forumAddress,
+    uint _topic
     ) public {
       delegatePeriodEnd = _delegatePeriodEnd;
       votePeriodEnd = _votePeriodEnd;
@@ -131,6 +138,9 @@ contract LiquidDemocracyPoll is LDPollInterface {
       pctThreshold = _pctThreshold;
       proposalMetaData = _proposalMetaData;
       validVoteArray = _validVoteArray;
+      pollId = _pollId;
+      forumAddress = _forumAddress;
+      topic = _topic;
   }
 
   /*allows voter to register for poll*/
@@ -165,7 +175,6 @@ contract LiquidDemocracyPoll is LDPollInterface {
   votePeriodOpen()
   {
     userVotes[_userAddress] = _value;
-
   }
 
   /*need to verify chain depth and check circular delegation*/
@@ -178,15 +187,14 @@ contract LiquidDemocracyPoll is LDPollInterface {
   isValidChainDepthAndNonCircular(_userAddress)
   delegatePeriodOpen()
   {
-
     userToDelegate[_userAddress] = _delegateAddress;
-
   }
 
   /*allows user to read their vote or their delegate's vote
   returns users vote*/
   function readVote(address _userAddress, uint _recursionCount)
-  public view
+  public
+  view
   returns (uint)
   {
 
@@ -194,21 +202,33 @@ contract LiquidDemocracyPoll is LDPollInterface {
         return 0;
     }
 
+    address forumDelegate = LDForumInterface(forumAddress).readDelegate(_userAddress, topic);
+
     if (userToDelegate[_userAddress] != 0x0) {
       return readVote(userToDelegate[_userAddress], _recursionCount + 1);
+    } else if (forumDelegate != 0x0) {
+      return readVote(forumDelegate, _recursionCount + 1);
     } else {
       return userVotes[_userAddress];
     }
   }
 
-  function readEndVoter(address _userAddress, uint _recursionCount) public view returns (address){
+  function readEndVoter(address _userAddress, uint _recursionCount)
+  public
+  view
+  returns (address)
+  {
 
     if(_recursionCount > delegationDepth){
      return 0x0;
     }
 
+    address forumDelegate = LDForumInterface(forumAddress).readDelegate(_userAddress, topic);
+
     if (userToDelegate[_userAddress] != 0x0) {
       return readEndVoter(userToDelegate[_userAddress], _recursionCount + 1);
+    } else if (forumDelegate != 0x0) {
+      return readEndVoter(forumDelegate, _recursionCount + 1);
     } else {
       return _userAddress;
     }
@@ -230,10 +250,8 @@ contract LiquidDemocracyPoll is LDPollInterface {
   isRegisteredVoter(_userAddress)
   votePeriodOpen()
   {
-
     userVotes[_userAddress] = 0;
     userToDelegate[_userAddress] = 0;
-
   }
 
 
@@ -281,7 +299,8 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
   /*allows user tally votes at */
   function tally()
-  public view
+  public
+  view
   returns (uint[256] _votes, uint _totalVotes, uint _emptyVotes)
   {
 
@@ -305,6 +324,15 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
      return  2**MyPosition == uint8(MyByte & byte(2**MyPosition));
  }
+
+ /**/
+ /**/
+ /*Could there be circular delegation if poll and forum delegations are separate?
+                 Must Check*/
+
+        /*Also may have issues with UX and having to revoke both Poll and Topic delegates in order to place direct vote. Could direct vote be default? Must refactor.*/
+ /**/
+ /**/
 
  function _isValidChainDepthAndNonCircular(address _userAddress, uint _recursionCount) public view returns(bool _valid, bool _vDepth, bool _vCircle){
 

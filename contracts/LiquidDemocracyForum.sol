@@ -113,19 +113,24 @@ function createPoll(
   uint _pctQuorum,
   uint _pctThreshold,
   bytes32 _proposalMetaData,
-  bytes32 _validVoteArray
+  bytes32 _validVoteArray,
+  uint _topic
   )
   public
+  isValidTopicOption(_topic)
 {
 
   LiquidDemocracyPoll current = new LiquidDemocracyPoll(
     _delegatePeriodEnd,
     _votePeriodEnd,
-    _delegationDepth,
+    delegationDepth,
     _pctQuorum,
     _pctThreshold,
     _proposalMetaData,
-    _validVoteArray
+    _validVoteArray,
+    pollId,
+    this,
+    _topic
       );
 
   pollList[pollId] = current;
@@ -173,8 +178,6 @@ isValidChainDepthAndNonCircular(_userAddress, _topic)
 
   userToTopicToDelegateAddress[_userAddress][_topic] = _delegateAddress;
 
-  /*userToDelegate[_userAddress] = _delegateAddress;*/
-
 }
 
 /*function fReviewDelegatedVotes() public {
@@ -189,6 +192,14 @@ isValidTopicOption(_topic)
 
   userToTopicToDelegateAddress[_userAddress][_topic] = 0x0;
 
+}
+
+function readDelegate(address _userAddress, uint _topic)
+public
+view
+returns (address _delegateAddress)
+{
+  return userToTopicToDelegateAddress[_userAddress][_topic];
 }
 
 function _isValidTopicOption(uint _topic) public view returns(bool){
