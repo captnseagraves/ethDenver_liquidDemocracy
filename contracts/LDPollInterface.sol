@@ -3,8 +3,6 @@ pragma solidity ^0.4.17;
 
 contract LDPollInterface {
 
-  /*function LiquidDemocracyPoll(uint _delegatePeriodEnd, uint _votePeriodEnd, uint _delegationDepth, uint _pctQuorum, uint _pctThreshold, bytes32 _proposalMetaData, bytes32 _validVoteArray) public;*/
-
   function registerVoter(address _userAddress) external;
 
   function becomeDelegate(address _userAddress) external;

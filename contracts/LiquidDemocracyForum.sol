@@ -1,8 +1,9 @@
 pragma solidity ^0.4.17;
 
 import "./LiquidDemocracyPoll.sol";
+import "./LDForumInterface.sol";
 
-contract LiquidDemocracyForum {
+contract LiquidDemocracyForum is LDForumInterface {
 
 /*
 create topics that hold many polls

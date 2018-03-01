@@ -1,8 +1,8 @@
-var liquidDemocracy = artifacts.require("./LiquidDemocracyPoll.sol");
-// var LDPollInterface = artifacts.require("./LDPollInterface.sol");
+var LiquidDemocracyPoll = artifacts.require("./LiquidDemocracyPoll.sol");
+var LiquidDemocracyForum = artifacts.require("./LiquidDemocracyForum.sol");
 
 
 module.exports = function(deployer) {
-  deployer.deploy(liquidDemocracy);
-  // deployer.deploy(LDPollInterface);
+  deployer.deploy(LiquidDemocracyPoll);
+  deployer.deploy(LiquidDemocracyForum);
 };
