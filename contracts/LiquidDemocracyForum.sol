@@ -168,6 +168,23 @@ returns (address _delegateAddress)
   return userToTopicToDelegateAddress[_userAddress][_topic];
 }
 
+function readEndDelegateForTopic(address _userAddress, uint _topic, uint _recursionCount)
+public
+view
+returns (address)
+{
+
+  if (_recursionCount > delegationDepth){
+   return 0x0;
+  }
+
+  if (userToTopicToDelegateAddress[_userAddress][_topic] == 0x0) {
+    return _userAddress;
+  } else {
+    return readEndDelegateForTopic(userToTopicToDelegateAddress[_userAddress][_topic], _topic, _recursionCount + 1);
+  }
+}
+
 function _isValidTopicOption(uint _topic) public view returns(bool){
      byte MyByte = validTopicArray[_topic / 8];
      uint MyPosition = 7 - (_topic % 8);
