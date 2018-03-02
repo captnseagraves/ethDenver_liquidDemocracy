@@ -418,23 +418,23 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
     });
   });
 
-  describe("#delegateVote_Forum()", () => {
+  describe("#delegateVoteForTopic()", () => {
     it("should allow user to delegate their vote for a topic", async () => {
 
       await liquidForum.registerVoter_Forum.sendTransaction(VOTER_3, TX_DEFAULTS)
 
-      await liquidForum.delegateVote_Forum.sendTransaction(VOTER_3, 1, VOTER_1, TX_DEFAULTS)
-      await liquidForum.delegateVote_Forum.sendTransaction(VOTER_5, 7, VOTER_7, TX_DEFAULTS)
-      await liquidForum.delegateVote_Forum.sendTransaction(VOTER_6, 7, VOTER_7, TX_DEFAULTS)
-      await liquidForum.delegateVote_Forum.sendTransaction(VOTER_7, 8, VOTER_8, TX_DEFAULTS)
+      await liquidForum.delegateVoteForTopic.sendTransaction(VOTER_3, 1, VOTER_1, TX_DEFAULTS)
+      await liquidForum.delegateVoteForTopic.sendTransaction(VOTER_5, 7, VOTER_7, TX_DEFAULTS)
+      await liquidForum.delegateVoteForTopic.sendTransaction(VOTER_6, 7, VOTER_7, TX_DEFAULTS)
+      await liquidForum.delegateVoteForTopic.sendTransaction(VOTER_7, 8, VOTER_8, TX_DEFAULTS)
       // await liquidForum.withdrawDirectVote.sendTransaction(VOTER_9, TX_DEFAULTS)
-      await liquidForum.delegateVote_Forum.sendTransaction(VOTER_9, 8, VOTER_8, TX_DEFAULTS)
+      await liquidForum.delegateVoteForTopic.sendTransaction(VOTER_9, 8, VOTER_8, TX_DEFAULTS)
 
-      await expect( liquidForum.readDelegate_Forum.call(VOTER_3, 1)).to.eventually.bignumber.equal(VOTER_1);
-      await expect( liquidForum.readDelegate_Forum.call(VOTER_5, 7)).to.eventually.bignumber.equal(VOTER_7);
-      await expect( liquidForum.readDelegate_Forum.call(VOTER_6, 7)).to.eventually.bignumber.equal(VOTER_7);
-      await expect( liquidForum.readDelegate_Forum.call(VOTER_7, 8)).to.eventually.bignumber.equal(VOTER_8);
-      await expect( liquidForum.readDelegate_Forum.call(VOTER_9, 8)).to.eventually.bignumber.equal(VOTER_8);
+      await expect( liquidForum.readDelegateForTopic.call(VOTER_3, 1)).to.eventually.bignumber.equal(VOTER_1);
+      await expect( liquidForum.readDelegateForTopic.call(VOTER_5, 7)).to.eventually.bignumber.equal(VOTER_7);
+      await expect( liquidForum.readDelegateForTopic.call(VOTER_6, 7)).to.eventually.bignumber.equal(VOTER_7);
+      await expect( liquidForum.readDelegateForTopic.call(VOTER_7, 8)).to.eventually.bignumber.equal(VOTER_8);
+      await expect( liquidForum.readDelegateForTopic.call(VOTER_9, 8)).to.eventually.bignumber.equal(VOTER_8);
 
     });
   });

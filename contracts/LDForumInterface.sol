@@ -13,11 +13,11 @@ function becomeDelegateForTopic(address _userAddress, uint _topic) external;
 
 function withdrawAsDelegateForTopic(address _userAddress, uint _topic) external;
 
-function delegateVote_Forum(address _userAddress,uint _topic, address _delegateAddress) external;
+function delegateVoteForTopic(address _userAddress, uint _topic, address _delegateAddress) external;
 
-function revokeDelegation_Forum(address _userAddress, uint _topic) public;
+function revokeDelegationForTopic(address _userAddress, uint _topic) public;
 
-function readDelegate_Forum(address _userAddress, uint _topic) public view returns (address _delegateAddress);
+function readDelegateForTopic(address _userAddress, uint _topic) public view returns (address _delegateAddress);
 
 
 }

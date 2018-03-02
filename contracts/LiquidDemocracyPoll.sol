@@ -181,7 +181,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
         return 0;
     }
 
-    address forumDelegate = LDForumInterface(forumAddress).readDelegate_Forum(_userAddress, topic);
+    address forumDelegate = LDForumInterface(forumAddress).readDelegateForTopic(_userAddress, topic);
 
     if (userToDelegate[_userAddress] != 0x0) {
       return readVote(userToDelegate[_userAddress], _recursionCount + 1);
@@ -206,7 +206,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
      return 0x0;
     }
 
-    address forumDelegate = LDForumInterface(forumAddress).readDelegate_Forum(_userAddress, topic);
+    address forumDelegate = LDForumInterface(forumAddress).readDelegateForTopic(_userAddress, topic);
 
     if (userToDelegate[_userAddress] != 0x0) {
       return readEndVoter(userToDelegate[_userAddress], _recursionCount + 1);
@@ -224,7 +224,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
   view
   returns (address _delegateAddress)
   {
-    address forumDelegate = LDForumInterface(forumAddress).readDelegate_Forum(_userAddress, topic);
+    address forumDelegate = LDForumInterface(forumAddress).readDelegateForTopic(_userAddress, topic);
 
     if (userToDelegate[_userAddress] != 0x0) {
       return userToDelegate[_userAddress];
@@ -351,7 +351,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
      return;
    }
 
-      address forumDelegate = LDForumInterface(forumAddress).readDelegate_Forum(_userAddress, topic);
+      address forumDelegate = LDForumInterface(forumAddress).readDelegateForTopic(_userAddress, topic);
 
    if (userToDelegate[_userAddress] != 0x0 || forumDelegate != 0x0) {
      if (userToDelegate[_userAddress] == _userAddress || forumDelegate == _userAddress) {
@@ -373,7 +373,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
    internal
    returns (bool _voteStatus){
 
-     address forumDelegate = LDForumInterface(forumAddress).readDelegate_Forum(_userAddress, topic);
+     address forumDelegate = LDForumInterface(forumAddress).readDelegateForTopic(_userAddress, topic);
 
     if (userToDelegate[_userAddress] != 0x0 || forumDelegate != 0x0) {
       return true;

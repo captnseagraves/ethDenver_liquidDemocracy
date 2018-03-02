@@ -137,7 +137,7 @@ isValidDelegateForTopic(_userAddress, _topic)
   willingToBeDelegateToTopicToBool[_userAddress][_topic] = false;
 }
 
-function delegateVote_Forum(address _userAddress,uint _topic, address _delegateAddress)
+function delegateVoteForTopic(address _userAddress,uint _topic, address _delegateAddress)
 external
 isRegisteredVoter(_userAddress)
 isValidDelegateForTopic(_delegateAddress, _topic)
@@ -150,7 +150,7 @@ isValidChainDepthAndNonCircular(_userAddress, _topic)
 }
 
 
-function revokeDelegation_Forum(address _userAddress, uint _topic)
+function revokeDelegationForTopic(address _userAddress, uint _topic)
 public
 isRegisteredVoter(_userAddress)
 isValidTopicOption(_topic)
@@ -160,7 +160,7 @@ isValidTopicOption(_topic)
 
 }
 
-function readDelegate_Forum(address _userAddress, uint _topic)
+function readDelegateForTopic(address _userAddress, uint _topic)
 public
 view
 returns (address _delegateAddress)
