@@ -42,6 +42,7 @@ ABIDecoder.addABI(liquidDemocracyForumContract.abi);
 
 contract("Liquid Democracy Forum", (ACCOUNTS) => {
     let liquidForum;
+    let liquidPoll;
 
     const PROPOSAL_OWNER = ACCOUNTS[0];
     const VOTER_1 = ACCOUNTS[1];
@@ -77,7 +78,8 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
         liquidForum = new LiquidDemocracyForum(
             web3ContractInstance, TX_DEFAULTS);
 
-
+            // console.log('instance', instance);
+            // console.log('liquidForum', liquidForum);
     };
 
 
@@ -134,15 +136,73 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       //
       //         expect(ticketApprovedLog).to.deep.equal(logExpected);
 
-        await web3.eth.getTransactionReceipt(txHash, (err, result) => {
+        await web3.eth.getTransactionReceipt(txHash, async (err, result) => {
           const [newPollLog] = ABIDecoder.decodeLogs(result.logs);
 
-            console.log(newPollLog);
+            console.log(await newPollLog.events);
 
-            })
+             liquidPollAddress = await newPollLog.events[0].value
 
+             const contractInstance = await web3.eth.contract(LiquidDemocracyPoll.abi).at(liquidPollAddress);
+
+             liquidPoll = await new LiquidDemocracyPoll(
+                 contractInstance, TX_DEFAULTS);
+
+            console.log(await liquidPoll.pctQuorum.call());
+
+           });
       });
 
+    });
+
+    describe("Create Proposal", () => {
+
+        it("should return correct delegationPeriodEnd", async () => {
+
+
+
+          console.log("liquidPoll", liquidForum.pollList.call(0));
+
+        // await expect( liquidPoll.delegatePeriodEnd.call()).to.eventually.bignumber.equal(DELEGATE_PERIOD);
+
+        });
+
+
+        // it("should return correct votePeriodEnd", async () => {
+        //
+        // await expect( liquidPoll.votePeriodEnd.call()).to.eventually.bignumber.equal(VOTE_PERIOD);
+        //
+        // });
+        //
+        // it("should return correct delegationDepth", async () => {
+        //
+        // await expect( liquidPoll.delegationDepth.call()).to.eventually.bignumber.equal(5);
+        //
+        // });
+        //
+        // it("should return correct pctQuorum", async () => {
+        //
+        //   await expect( liquidPoll.pctQuorum.call()).to.eventually.bignumber.equal(75);
+        //
+        // });
+        //
+        // it("should return correct pctThreshold", async () => {
+        //
+        //   await expect( liquidPoll.pctThreshold.call()).to.eventually.bignumber.equal(51);
+        //
+        // });
+        //
+        // it("should return correct proposalMetaData", async () => {
+        //
+        //   await expect( liquidPoll.proposalMetaData.call()).to.eventually.equal(EMPTY_BYTES32_HASH);
+        //
+        // });
+        //
+        // it("should return correct validVoteArray", async () => {
+        //
+        //   await expect( liquidPoll.validVoteArray.call()).to.eventually.equal(EIGHT_OPTION_VOTE_ARRAY);
+        //
+        // });
     });
 
 });

@@ -20,7 +20,7 @@ bytes32 public topicMetaData;
 uint public delegationDepth;
 uint public pollId;
 
-mapping(uint => LiquidDemocracyPoll) pollList;
+mapping(uint => LiquidDemocracyPoll) public pollList;
 
 mapping (address => bool) internal registeredVotersMap;
 
@@ -107,7 +107,7 @@ function callChildFunction(bytes32 childId) {
 }
 */
 
-event newPoll(address _newPollAddress);
+event newPoll(address _newPollAddress, uint _pollId);
 
 function createPoll(
   uint _delegatePeriodEnd,
@@ -137,9 +137,11 @@ function createPoll(
       );
 
   pollList[pollId] = current;
+
+  newPoll(current, pollId);
+
   pollId++;
 
-newPoll(current);
 }
 
 function registerVoter(address _userAddress)
