@@ -19,6 +19,7 @@ bytes32 public topicMetaData;
 /*limits number of delegates removed from original user*/
 uint public delegationDepth;
 uint public pollId;
+uint public delegationExpiration;
 
 mapping(uint => LiquidDemocracyPoll) public pollList;
 
@@ -26,9 +27,9 @@ mapping (address => bool) internal registeredVotersMap;
 
 address[] internal registeredVotersArray;
 
-mapping (address => mapping (uint => address)) public userToTopicToDelegateAddress;
+mapping (uint => mapping (address => mapping (uint => address))) public expirationToUserToTopicToDelegateAddress;
 
-mapping (address => mapping (uint => bool)) public willingToBeDelegateToTopicToBool;
+mapping (uint => mapping (address => mapping (uint => bool))) public expirationToWillingToBeDelegateToTopicToBool;
 
 
 /*would clean and reduce modifiers and helper functions for production*/
@@ -56,11 +57,17 @@ mapping (address => mapping (uint => bool)) public willingToBeDelegateToTopicToB
 
   event newPoll(address _newPollAddress, uint _pollId);
 
-function LiquidDemocracyForum(bytes32 _validTopicArray, bytes32 _topicMetaData, uint _delegationDepth) public {
+function LiquidDemocracyForum(bytes32 _validTopicArray, bytes32 _topicMetaData, uint _delegationDepth, uint _delegationExpirationInDays) public {
   validTopicArray = _validTopicArray;
   topicMetaData = _topicMetaData;
   delegationDepth = _delegationDepth;
   pollId = 0;
+  delegationExpiration = now + (_delegationExpirationInDays * 1 days);
+}
+
+function resetDelegationExpirationInterval(uint _numberOfDays) public {
+  require(now > delegationExpiration);
+  delegationExpiration = now + (_numberOfDays * 1 days);
 }
 
 function createNewTopic(bytes32 _newValidTopicArray, bytes32 _newTopicMetaData)
@@ -124,7 +131,7 @@ external
 isRegisteredVoter(_userAddress)
 isValidTopicOption(_topic)
 {
-  willingToBeDelegateToTopicToBool[_userAddress][_topic] = true;
+  expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][_userAddress][_topic] = true;
 
 }
 
@@ -134,7 +141,7 @@ external
 isRegisteredVoter(_userAddress)
 isValidDelegateForTopic(_userAddress, _topic)
 {
-  willingToBeDelegateToTopicToBool[_userAddress][_topic] = false;
+  expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][_userAddress][_topic] = false;
 }
 
 function delegateVoteForTopic(address _userAddress,uint _topic, address _delegateAddress)
@@ -145,7 +152,7 @@ isValidTopicOption(_topic)
 isValidChainDepthAndNonCircular(_userAddress, _topic)
 {
 
-  userToTopicToDelegateAddress[_userAddress][_topic] = _delegateAddress;
+  expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] = _delegateAddress;
 
 }
 
@@ -156,7 +163,7 @@ isRegisteredVoter(_userAddress)
 isValidTopicOption(_topic)
 {
 
-  userToTopicToDelegateAddress[_userAddress][_topic] = 0x0;
+  expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] = 0x0;
 
 }
 
@@ -165,23 +172,23 @@ public
 view
 returns (address _delegateAddress)
 {
-  return userToTopicToDelegateAddress[_userAddress][_topic];
+  return expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic];
 }
 
 function readEndDelegateForTopic(address _userAddress, uint _topic, uint _recursionCount)
 public
 view
-returns (address)
+returns (address _endDelegateAddress)
 {
 
   if (_recursionCount > delegationDepth){
    return 0x0;
   }
 
-  if (userToTopicToDelegateAddress[_userAddress][_topic] == 0x0) {
+  if (expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] == 0x0) {
     return _userAddress;
   } else {
-    return readEndDelegateForTopic(userToTopicToDelegateAddress[_userAddress][_topic], _topic, _recursionCount + 1);
+    return readEndDelegateForTopic(expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic], _topic, _recursionCount + 1);
   }
 }
 
@@ -200,13 +207,13 @@ function _isValidChainDepthAndNonCircular(address _userAddress, uint _topic, uin
     return;
   }
 
-  if (userToTopicToDelegateAddress[_userAddress][_topic] != 0x0) {
-    if (userToTopicToDelegateAddress[_userAddress][_topic] == _userAddress) {
+  if (expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] != 0x0) {
+    if (expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] == _userAddress) {
       _valid = false;
       _vCircle = true;
       return;
     }
-    return _isValidChainDepthAndNonCircular(userToTopicToDelegateAddress[_userAddress][_topic], _topic, _recursionCount + 1);
+    return _isValidChainDepthAndNonCircular(expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic], _topic, _recursionCount + 1);
   } else {
     _valid = true;
     return;
@@ -229,7 +236,7 @@ function _isValidChainDepthAndNonCircular(address _userAddress, uint _topic, uin
  view
   public
   returns (bool _delegateStatus){
-   if (willingToBeDelegateToTopicToBool[_userAddress][_topic] == true) {
+   if (expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][_userAddress][_topic] == true) {
      return true;
    } else {
      return false;

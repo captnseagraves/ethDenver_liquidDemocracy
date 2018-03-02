@@ -70,7 +70,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
     const deployForum = async () => {
 
         const instance =
-            await liquidDemocracyForumContract.new( EIGHT_OPTION_VOTE_ARRAY, EMPTY_BYTES32_HASH, 5, TX_DEFAULTS);
+            await liquidDemocracyForumContract.new( EIGHT_OPTION_VOTE_ARRAY, EMPTY_BYTES32_HASH, 5, 30, TX_DEFAULTS);
 
         const web3ContractInstance =
             web3.eth.contract(instance.abi).at(instance.address);
@@ -442,6 +442,20 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect( liquidForum.readDelegateForTopic.call(VOTER_9, 8)).to.eventually.bignumber.equal(VOTER_8);
 
     });
+  });
+
+  describe("#revokeDelegationForTopic()", () => {
+    it("should allow user to revoke their delegation", async () => {
+
+        await liquidForum.revokeDelegationForTopic.sendTransaction(VOTER_5, 7, TX_DEFAULTS)
+        await expect( liquidForum.readDelegateForTopic.call(VOTER_5, 7)).to.eventually.bignumber.equal(0x0);
+      });
+
+    // it("should fail when unregistered user tries to become delegate", async () => {
+    //
+    //   await expect(liquidForum.revokeDelegationForTopic.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+    //
+    // });
   });
 
 });

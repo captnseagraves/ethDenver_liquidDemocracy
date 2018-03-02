@@ -181,7 +181,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
         return 0;
     }
 
-    address forumDelegate = LDForumInterface(forumAddress).readDelegateForTopic(_userAddress, topic);
+    address forumDelegate = LDForumInterface(forumAddress).readEndDelegateForTopic(_userAddress, topic, 0);
 
     if (userToDelegate[_userAddress] != 0x0) {
       return readVote(userToDelegate[_userAddress], _recursionCount + 1);
@@ -206,7 +206,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
      return 0x0;
     }
 
-    address forumDelegate = LDForumInterface(forumAddress).readDelegateForTopic(_userAddress, topic);
+    address forumDelegate = LDForumInterface(forumAddress).readEndDelegateForTopic(_userAddress, topic, 0);
 
     if (userToDelegate[_userAddress] != 0x0) {
       return readEndVoter(userToDelegate[_userAddress], _recursionCount + 1);
@@ -254,7 +254,6 @@ contract LiquidDemocracyPoll is LDPollInterface {
   /**/
   /**/
 
-  /*allows user to revoke their delegation if they disagree with delegates vote*/
   function withdrawDirectVote(address _userAddress)
   public
   isRegisteredVoter(_userAddress)
