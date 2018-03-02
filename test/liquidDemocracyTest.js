@@ -57,8 +57,8 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
     // MUST ADJUST TIME TO SUIT TESTS. OTHERWISE TESTS WILL FAIL.
 
-    const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-03-02T10:24:00'));
-    const VOTE_PERIOD = timestamp.fromDate(new Date('2018-03-02T11:24:00'))
+    const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-03-03T10:24:00'));
+    const VOTE_PERIOD = timestamp.fromDate(new Date('2018-03-03T11:24:00'))
 
     const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
     const EIGHT_OPTION_VOTE_ARRAY = '0xff80000000000000000000000000000000000000000000000000000000000000'
@@ -194,9 +194,9 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect( liquidPoll.validVoteArray.call()).to.eventually.equal(EIGHT_OPTION_VOTE_ARRAY);
 
     });
-    });
+  });
 
-    describe("#registerVoter()", () => {
+  describe("#registerVoter()", () => {
     it("should register new user", async () => {
 
       await liquidPoll.registerVoter.sendTransaction(VOTER_1, TX_DEFAULTS)
@@ -220,9 +220,9 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
     });
 
-    });
+  });
 
-    describe("#becomeDelegate()", () => {
+  describe("#becomeDelegate()", () => {
     it("should allow registered user to be a delegate", async () => {
 
       await liquidPoll.becomeDelegate.sendTransaction(VOTER_1, TX_DEFAULTS)
@@ -240,9 +240,15 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect(liquidPoll.becomeDelegate.sendTransaction(VOTER_3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
 
     });
-    });
+  });
 
-    describe("#vote()", () => {
+  //
+  //
+  // Need to set up test for delegation and voting periods. I know they work properly, but need explicit test.
+  //
+  //
+
+  describe("#vote()", () => {
     it("should allow user to vote", async () => {
 
       await liquidPoll.vote.sendTransaction(VOTER_1, 1, TX_DEFAULTS)
@@ -267,12 +273,12 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
     });
 
-    });
+  });
 
 
 
 
-    describe("#delegateVote()", () => {
+  describe("#delegateVote()", () => {
     it("should allow user to delegate their vote", async () => {
 
       await liquidPoll.registerVoter.sendTransaction(VOTER_3, TX_DEFAULTS)
@@ -306,9 +312,9 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect( liquidPoll.readEndVoter.call(VOTER_9, 0)).to.eventually.bignumber.equal(VOTER_8);
 
     });
-    });
+  });
 
-    describe("#revokeDelegation()", () => {
+  describe("#revokeDelegation()", () => {
     it("should allow user to revoke their delegation", async () => {
 
       await liquidPoll.revokeDelegation.sendTransaction(VOTER_3, TX_DEFAULTS)
@@ -319,9 +325,9 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
     });
 
-    });
+  });
 
-    describe("#tally()", () => {
+  describe("#tally()", () => {
     it("should correctly tally votes from poll", async () => {
 
       let result = await liquidPoll.tally.call()
@@ -336,9 +342,9 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
         await expect(result[2].toNumber()).to.equal(1);
 
     });
-    });
+  });
 
-    describe("#finalDecision()", () => {
+  describe("#finalDecision()", () => {
     it("should correctly show final decision of poll", async () => {
 
       let result = await liquidPoll.finalDecision.call()
@@ -347,7 +353,90 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
         await expect(result[1].toNumber()).to.equal(5);
 
     });
+  });
+
+  describe("#registerVoter_Forum()", () => {
+    it("should register new user in forum", async () => {
+
+      await liquidForum.registerVoter_Forum.sendTransaction(VOTER_1, TX_DEFAULTS)
+
+      await expect( liquidForum._isRegisteredVoter.call(VOTER_1)).to.eventually.equal(true);
+
+      await liquidForum.registerVoter_Forum.sendTransaction(VOTER_2, TX_DEFAULTS)
+      await liquidForum.registerVoter_Forum.sendTransaction(VOTER_4, TX_DEFAULTS)
+      await liquidForum.registerVoter_Forum.sendTransaction(VOTER_5, TX_DEFAULTS)
+      await liquidForum.registerVoter_Forum.sendTransaction(VOTER_6, TX_DEFAULTS)
+      await liquidForum.registerVoter_Forum.sendTransaction(VOTER_7, TX_DEFAULTS)
+      await liquidForum.registerVoter_Forum.sendTransaction(VOTER_8, TX_DEFAULTS)
+      await liquidForum.registerVoter_Forum.sendTransaction(VOTER_9, TX_DEFAULTS)
+
+
     });
 
+    it("should fail when registering a second time", async () => {
+
+      await expect(liquidForum.registerVoter_Forum.sendTransaction(VOTER_1, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+    });
+
+  });
+
+  describe("#becomeDelegateForTopic()", () => {
+    it("should allow registered user to become a delegate for a particular topic", async () => {
+
+        await liquidForum.becomeDelegateForTopic.sendTransaction(VOTER_1, 1, TX_DEFAULTS)
+        await expect( liquidForum._isValidDelegateForTopic.call(VOTER_1, 1)).to.eventually.equal(true);
+
+        await liquidForum.becomeDelegateForTopic.sendTransaction(VOTER_7, 7, TX_DEFAULTS)
+        await expect( liquidForum._isValidDelegateForTopic.call(VOTER_7, 7)).to.eventually.equal(true);
+
+        await liquidForum.becomeDelegateForTopic.sendTransaction(VOTER_8, 8, TX_DEFAULTS)
+        await expect( liquidForum._isValidDelegateForTopic.call(VOTER_8, 8)).to.eventually.equal(true);
+
+        await liquidForum.becomeDelegateForTopic.sendTransaction(VOTER_9, 3, TX_DEFAULTS)
+        await expect( liquidForum._isValidDelegateForTopic.call(VOTER_9, 3)).to.eventually.equal(true);
+      });
+
+    it("should fail when unregistered user tries to become delegate", async () => {
+
+      await expect(liquidForum.becomeDelegateForTopic.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+    });
+  });
+
+  describe("#withdrawAsDelegateForTopic()", () => {
+    it("should allow registered user to become a delegate for a particular topic", async () => {
+
+        await liquidForum.withdrawAsDelegateForTopic.sendTransaction(VOTER_9, 3, TX_DEFAULTS)
+        await expect( liquidForum._isValidDelegateForTopic.call(VOTER_9, 3)).to.eventually.equal(false);
+      });
+
+    it("should fail when unregistered user tries to become delegate", async () => {
+
+      await expect(liquidForum.withdrawAsDelegateForTopic.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+    });
+  });
+
+  describe("#delegateVote_Forum()", () => {
+    it("should allow user to delegate their vote for a topic", async () => {
+
+      await liquidForum.registerVoter_Forum.sendTransaction(VOTER_3, TX_DEFAULTS)
+
+      await liquidForum.delegateVote_Forum.sendTransaction(VOTER_3, 1, VOTER_1, TX_DEFAULTS)
+      await liquidForum.delegateVote_Forum.sendTransaction(VOTER_5, 7, VOTER_7, TX_DEFAULTS)
+      await liquidForum.delegateVote_Forum.sendTransaction(VOTER_6, 7, VOTER_7, TX_DEFAULTS)
+      await liquidForum.delegateVote_Forum.sendTransaction(VOTER_7, 8, VOTER_8, TX_DEFAULTS)
+      // await liquidForum.withdrawDirectVote.sendTransaction(VOTER_9, TX_DEFAULTS)
+      await liquidForum.delegateVote_Forum.sendTransaction(VOTER_9, 8, VOTER_8, TX_DEFAULTS)
+
+      await expect( liquidForum.readDelegate_Forum.call(VOTER_3, 1)).to.eventually.bignumber.equal(VOTER_1);
+      await expect( liquidForum.readDelegate_Forum.call(VOTER_5, 7)).to.eventually.bignumber.equal(VOTER_7);
+      await expect( liquidForum.readDelegate_Forum.call(VOTER_6, 7)).to.eventually.bignumber.equal(VOTER_7);
+      await expect( liquidForum.readDelegate_Forum.call(VOTER_7, 8)).to.eventually.bignumber.equal(VOTER_8);
+      await expect( liquidForum.readDelegate_Forum.call(VOTER_9, 8)).to.eventually.bignumber.equal(VOTER_8);
+
+    });
+  });
 
 });

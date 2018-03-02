@@ -26,32 +26,10 @@ mapping (address => bool) internal registeredVotersMap;
 
 address[] internal registeredVotersArray;
 
-/*mapping (address => topicToDelegate) public userToTopicDelegation;*/
-
 mapping (address => mapping (uint => address)) public userToTopicToDelegateAddress;
-
-
-/*mapping (uint => userDelegation) public topicToDelegate;*/
-
-/*mapping (address => userDelegation) public userToDelegate;*/
 
 mapping (address => mapping (uint => bool)) public willingToBeDelegateToTopicToBool;
 
-/*struct pollInfo {
-  address pollAddress;
-  uint topic;
-}*/
-
-/*struct userDelegation {
-  address delegateAddress;
-  uint delegationExpiration;
-}*/
-
-/*struct userDelegation {
-  address delegateAddress;
-  uint delegationExpiration;
-  uint[] topicsDelegated;
-}*/
 
 /*would clean and reduce modifiers and helper functions for production*/
 /*verifies voter is registered*/
@@ -76,6 +54,7 @@ mapping (address => mapping (uint => bool)) public willingToBeDelegateToTopicToB
     _;
   }
 
+  event newPoll(address _newPollAddress, uint _pollId);
 
 function LiquidDemocracyForum(bytes32 _validTopicArray, bytes32 _topicMetaData, uint _delegationDepth) public {
   validTopicArray = _validTopicArray;
@@ -92,22 +71,6 @@ public
   topicMetaData = _newTopicMetaData;
 
 }
-
-/*import './Child.sol';
-
-mapping(bytes32 => Child) childList;
-
-function spawnChild(bytes32 childId) {
-    Child current = new Child();
-    childList[childId] = current;
-}
-
-function callChildFunction(bytes32 childId) {
-    childList[childId].theChildfunction();
-}
-*/
-
-event newPoll(address _newPollAddress, uint _pollId);
 
 function createPoll(
   uint _delegatePeriodEnd,
@@ -144,7 +107,7 @@ function createPoll(
 
 }
 
-function registerVoter(address _userAddress)
+function registerVoter_Forum(address _userAddress)
 external
 {
 
@@ -174,7 +137,7 @@ isValidDelegateForTopic(_userAddress, _topic)
   willingToBeDelegateToTopicToBool[_userAddress][_topic] = false;
 }
 
-function delegateVote(address _userAddress,uint _topic, address _delegateAddress)
+function delegateVote_Forum(address _userAddress,uint _topic, address _delegateAddress)
 external
 isRegisteredVoter(_userAddress)
 isValidDelegateForTopic(_delegateAddress, _topic)
@@ -186,11 +149,8 @@ isValidChainDepthAndNonCircular(_userAddress, _topic)
 
 }
 
-/*function fReviewDelegatedVotes() public {
 
-}*/
-
-function revokeDelegation(address _userAddress, uint _topic)
+function revokeDelegation_Forum(address _userAddress, uint _topic)
 public
 isRegisteredVoter(_userAddress)
 isValidTopicOption(_topic)
@@ -200,7 +160,7 @@ isValidTopicOption(_topic)
 
 }
 
-function readDelegate(address _userAddress, uint _topic)
+function readDelegate_Forum(address _userAddress, uint _topic)
 public
 view
 returns (address _delegateAddress)

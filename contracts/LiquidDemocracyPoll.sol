@@ -7,32 +7,6 @@ import "./LDForumInterface.sol";
 contract LiquidDemocracyPoll is LDPollInterface {
   /*contract LiquidDemocracyPoll {*/
 
-  /*
-  Glossary:
-
-  Common Vote Option Values Are:
-  *** All options assume 0 index is used for a null vote ***
-  *** See pattern below to extrapolate correct hex value for n options ***
-  Zero Options = 0x8000000000000000000000000000000000000000000000000000000000000000 (Null Vote)
-  One option = 0xc000000000000000000000000000000000000000000000000000000000000000
-  Two options = 0xe000000000000000000000000000000000000000000000000000000000000000 (Binary Vote)
-  Three options = 0xf000000000000000000000000000000000000000000000000000000000000000
-  Four options = 0xf800000000000000000000000000000000000000000000000000000000000000
-  Five options = 0xfc00000000000000000000000000000000000000000000000000000000000000
-  Six options = 0xfe00000000000000000000000000000000000000000000000000000000000000
-  Seven options = 0xff00000000000000000000000000000000000000000000000000000000000000
-  Eight options = 0xff80000000000000000000000000000000000000000000000000000000000000
-  Sixteen options = 0xffff000000000000000000000000000000000000000000000000000000000000
-  81 options = 0xffffffffffffffffffffc0000000000000000000000000000000000000000000
-  255 options = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-
-  pctQuorum: Percentage of registered voters who have responded in order to consider the poll valid.
-
-  threshold: Percentage of votes needed toward a particular option to make that option successful.
-
-  Absolute Thresahold (potential feature): ex. 51% of 100 voters, or 100% of 51 voters
-
-  */
 
   /* times written as seconds since unix epoch*/
   /*end of delegate period*/
@@ -207,7 +181,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
         return 0;
     }
 
-    address forumDelegate = LDForumInterface(forumAddress).readDelegate(_userAddress, topic);
+    address forumDelegate = LDForumInterface(forumAddress).readDelegate_Forum(_userAddress, topic);
 
     if (userToDelegate[_userAddress] != 0x0) {
       return readVote(userToDelegate[_userAddress], _recursionCount + 1);
@@ -232,7 +206,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
      return 0x0;
     }
 
-    address forumDelegate = LDForumInterface(forumAddress).readDelegate(_userAddress, topic);
+    address forumDelegate = LDForumInterface(forumAddress).readDelegate_Forum(_userAddress, topic);
 
     if (userToDelegate[_userAddress] != 0x0) {
       return readEndVoter(userToDelegate[_userAddress], _recursionCount + 1);
@@ -250,7 +224,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
   view
   returns (address _delegateAddress)
   {
-    address forumDelegate = LDForumInterface(forumAddress).readDelegate(_userAddress, topic);
+    address forumDelegate = LDForumInterface(forumAddress).readDelegate_Forum(_userAddress, topic);
 
     if (userToDelegate[_userAddress] != 0x0) {
       return userToDelegate[_userAddress];
@@ -377,7 +351,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
      return;
    }
 
-      address forumDelegate = LDForumInterface(forumAddress).readDelegate(_userAddress, topic);
+      address forumDelegate = LDForumInterface(forumAddress).readDelegate_Forum(_userAddress, topic);
 
    if (userToDelegate[_userAddress] != 0x0 || forumDelegate != 0x0) {
      if (userToDelegate[_userAddress] == _userAddress || forumDelegate == _userAddress) {
@@ -399,7 +373,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
    internal
    returns (bool _voteStatus){
 
-     address forumDelegate = LDForumInterface(forumAddress).readDelegate(_userAddress, topic);
+     address forumDelegate = LDForumInterface(forumAddress).readDelegate_Forum(_userAddress, topic);
 
     if (userToDelegate[_userAddress] != 0x0 || forumDelegate != 0x0) {
       return true;
@@ -418,24 +392,6 @@ contract LiquidDemocracyPoll is LDPollInterface {
       return false;
     }
   }
-
-  /*this way of checking registered voters will cause issues when tallying votes. Need to decide where to tally or cross registered voter data*/
-
-  /*is it valid to think that a user must sign up for each poll? if they are allowed to have their weight counted via a delegate by only registering on the forum level, then no. Otherwise, it's an architecture/UX decision.  */
-
-  /*function _isRegisteredVoter(address _userAddress)
-  view
-   public
-   returns (bool _voterRegistration){
-
-     address forumRegisteredVoter = LDForumInterface(forumAddress)._isRegisteredVoter(_userAddress);
-
-    if (registeredVotersMap[_userAddress] == true || forumRegisteredVoter == true) {
-      return true;
-    } else {
-      return false;
-    }
-  }*/
 
   function _isValidDelegate(address _userAddress)
   view
