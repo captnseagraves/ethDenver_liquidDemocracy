@@ -31,6 +31,10 @@ mapping (uint => mapping (address => mapping (uint => address))) public expirati
 
 mapping (uint => mapping (address => mapping (uint => bool))) public expirationToWillingToBeDelegateToTopicToBool;
 
+modifier isDelegationExpirationIntervalOpen() {
+  require(block.timestamp < delegationExpiration);
+  _;
+}
 
 /*would clean and reduce modifiers and helper functions for production*/
 /*verifies voter is registered*/
@@ -62,12 +66,13 @@ function LiquidDemocracyForum(bytes32 _validTopicArray, bytes32 _topicMetaData, 
   topicMetaData = _topicMetaData;
   delegationDepth = _delegationDepth;
   pollId = 0;
-  delegationExpiration = now + (_delegationExpirationInDays * 1 days);
+  delegationExpiration = block.timestamp + (_delegationExpirationInDays * 1 days);
 }
 
-function resetDelegationExpirationInterval(uint _numberOfDays) public {
-  require(now > delegationExpiration);
-  delegationExpiration = now + (_numberOfDays * 1 days);
+function resetDelegationExpirationInterval(uint _numberOfDays)
+ public {
+  require(block.timestamp > delegationExpiration);
+  delegationExpiration = block.timestamp + (_numberOfDays * 1 days);
 }
 
 function createNewTopic(bytes32 _newValidTopicArray, bytes32 _newTopicMetaData)
@@ -130,19 +135,22 @@ function becomeDelegateForTopic(address _userAddress, uint _topic)
 external
 isRegisteredVoter(_userAddress)
 isValidTopicOption(_topic)
+isDelegationExpirationIntervalOpen()
 {
   expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][_userAddress][_topic] = true;
-
 }
 
 /*Allows user to withdraw as a delegate in all future polls. All polls where they are currently a delegate they will remain a delegate until the poll closes*/
-function withdrawAsDelegateForTopic(address _userAddress, uint _topic)
+
+/*withdraw becomes deprecated with delegationExpirationInterval*/
+
+/*function withdrawAsDelegateForTopic(address _userAddress, uint _topic)
 external
 isRegisteredVoter(_userAddress)
 isValidDelegateForTopic(_userAddress, _topic)
 {
   expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][_userAddress][_topic] = false;
-}
+}*/
 
 function delegateVoteForTopic(address _userAddress,uint _topic, address _delegateAddress)
 external
@@ -150,6 +158,7 @@ isRegisteredVoter(_userAddress)
 isValidDelegateForTopic(_delegateAddress, _topic)
 isValidTopicOption(_topic)
 isValidChainDepthAndNonCircular(_userAddress, _topic)
+isDelegationExpirationIntervalOpen()
 {
 
   expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] = _delegateAddress;
@@ -161,6 +170,7 @@ function revokeDelegationForTopic(address _userAddress, uint _topic)
 public
 isRegisteredVoter(_userAddress)
 isValidTopicOption(_topic)
+isDelegationExpirationIntervalOpen()
 {
 
   expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] = 0x0;
@@ -170,6 +180,7 @@ isValidTopicOption(_topic)
 function readDelegateForTopic(address _userAddress, uint _topic)
 public
 view
+isDelegationExpirationIntervalOpen()
 returns (address _delegateAddress)
 {
   return expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic];
@@ -178,6 +189,7 @@ returns (address _delegateAddress)
 function readEndDelegateForTopic(address _userAddress, uint _topic, uint _recursionCount)
 public
 view
+isDelegationExpirationIntervalOpen()
 returns (address _endDelegateAddress)
 {
 
@@ -199,7 +211,11 @@ function _isValidTopicOption(uint _topic) public view returns(bool){
     return  2**MyPosition == uint8(MyByte & byte(2**MyPosition));
 }
 
-function _isValidChainDepthAndNonCircular(address _userAddress, uint _topic, uint _recursionCount) public view returns(bool _valid, bool _vDepth, bool _vCircle){
+function _isValidChainDepthAndNonCircular(address _userAddress, uint _topic, uint _recursionCount)
+public
+view
+isDelegationExpirationIntervalOpen()
+returns(bool _valid, bool _vDepth, bool _vCircle){
 
   if(_recursionCount > delegationDepth){
     _vDepth = true;
@@ -235,6 +251,7 @@ function _isValidChainDepthAndNonCircular(address _userAddress, uint _topic, uin
  function _isValidDelegateForTopic(address _userAddress, uint _topic)
  view
   public
+  isDelegationExpirationIntervalOpen()
   returns (bool _delegateStatus){
    if (expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][_userAddress][_topic] == true) {
      return true;

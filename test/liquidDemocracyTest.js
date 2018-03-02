@@ -406,19 +406,19 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
     });
   });
 
-  describe("#withdrawAsDelegateForTopic()", () => {
-    it("should allow registered user to become a delegate for a particular topic", async () => {
-
-        await liquidForum.withdrawAsDelegateForTopic.sendTransaction(VOTER_9, 3, TX_DEFAULTS)
-        await expect( liquidForum._isValidDelegateForTopic.call(VOTER_9, 3)).to.eventually.equal(false);
-      });
-
-    it("should fail when unregistered user tries to become delegate", async () => {
-
-      await expect(liquidForum.withdrawAsDelegateForTopic.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
-
-    });
-  });
+  // describe("#withdrawAsDelegateForTopic()", () => {
+  //   it("should allow registered user to become a delegate for a particular topic", async () => {
+  //
+  //       await liquidForum.withdrawAsDelegateForTopic.sendTransaction(VOTER_9, 3, TX_DEFAULTS)
+  //       await expect( liquidForum._isValidDelegateForTopic.call(VOTER_9, 3)).to.eventually.equal(false);
+  //     });
+  //
+  //   it("should fail when unregistered user tries to become delegate", async () => {
+  //
+  //     await expect(liquidForum.withdrawAsDelegateForTopic.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+  //
+  //   });
+  // });
 
   describe("#delegateVoteForTopic()", () => {
     it("should allow user to delegate their vote for a topic", async () => {

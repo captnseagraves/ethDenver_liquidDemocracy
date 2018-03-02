@@ -8,7 +8,7 @@ interface LDForumInterface {
   function createPoll( uint _delegatePeriodEnd, uint _votePeriodEnd, uint _pctQuorum, uint _pctThreshold, bytes32 _proposalMetaData, bytes32 _validVoteArray, uint _topic) public returns (address);
   function registerVoter_Forum(address _userAddress) external;
   function becomeDelegateForTopic(address _userAddress, uint _topic) external;
-  function withdrawAsDelegateForTopic(address _userAddress, uint _topic) external;
+  /*function withdrawAsDelegateForTopic(address _userAddress, uint _topic) external;*/
   function delegateVoteForTopic(address _userAddress, uint _topic, address _delegateAddress) external;
   function revokeDelegationForTopic(address _userAddress, uint _topic) public;
   function readDelegateForTopic(address _userAddress, uint _topic) public view returns (address _delegateAddress);
