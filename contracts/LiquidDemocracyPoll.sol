@@ -271,6 +271,15 @@ contract LiquidDemocracyPoll is LDPollInterface {
     userToDelegate[_userAddress] = 0x0;
   }
 
+  /**/
+  /**/
+  /*Need to implement onlyVoter function!!!!!!!!!!
+
+    must implement controls so that only the msg.sender can can their own data, no other actor should be able to change data.
+  /
+  /**/
+  /**/
+
   /*allows user to revoke their delegation if they disagree with delegates vote*/
   function withdrawDirectVote(address _userAddress)
   public

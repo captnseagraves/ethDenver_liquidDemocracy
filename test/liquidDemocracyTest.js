@@ -30,7 +30,7 @@ chai.should();
 BigNumber.config({  EXPONENTIAL_AT: 1000  });
 
 
-// const LogApproval = require("./utils/logs").LogApproval;
+const LogNewPoll = require("./utils/logs").LogNewPoll;
 
 // Import truffle contract instance
 const liquidDemocracyPollContract = artifacts.require("LiquidDemocracyPoll");
@@ -57,8 +57,8 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
     // MUST ADJUST TIME TO SUIT TESTS. OTHERWISE TESTS WILL FAIL.
 
-    const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-03-01T10:24:00'));
-    const VOTE_PERIOD = timestamp.fromDate(new Date('2018-03-01T11:24:00'))
+    const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-03-02T10:24:00'));
+    const VOTE_PERIOD = timestamp.fromDate(new Date('2018-03-02T11:24:00'))
 
     const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
     const EIGHT_OPTION_VOTE_ARRAY = '0xff80000000000000000000000000000000000000000000000000000000000000'
@@ -129,80 +129,225 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, EIGHT_OPTION_VOTE_ARRAY, 3, TX_DEFAULTS)
 
-      console.log(txHash);
-
-      //
-      //         const logExpected = LogTicketApproved(mintableNft.address, 0);
-      //
-      //         expect(ticketApprovedLog).to.deep.equal(logExpected);
-
         await web3.eth.getTransactionReceipt(txHash, async (err, result) => {
           const [newPollLog] = ABIDecoder.decodeLogs(result.logs);
 
-            console.log(await newPollLog.events);
+          let newPollAddress = await liquidForum.pollList.call(0);
 
-             liquidPollAddress = await newPollLog.events[0].value
+          const logExpected =
+                      LogNewPoll(newPollAddress, liquidForum.address, 0, 'newPoll');
 
-             const contractInstance = await web3.eth.contract(LiquidDemocracyPoll.abi).at(liquidPollAddress);
-
-             liquidPoll = await new LiquidDemocracyPoll(
-                 contractInstance, TX_DEFAULTS);
-
-            console.log(await liquidPoll.pctQuorum.call());
-
+                  expect(newPollLog).to.deep.equal(logExpected);
            });
+
+      let liquidPollAddress = await liquidForum.pollList.call(0);
+
+      const contractInstance = await web3.eth.contract(LiquidDemocracyPoll.abi).at(liquidPollAddress);
+
+      liquidPoll = await new LiquidDemocracyPoll(
+               contractInstance, TX_DEFAULTS);
       });
 
+  });
+
+  describe("LiquidDemocracyPoll Tests", () => {
+
+    it("should return correct delegationPeriodEnd", async () => {
+
+    await expect( liquidPoll.delegatePeriodEnd.call()).to.eventually.bignumber.equal(DELEGATE_PERIOD);
+
     });
 
-    describe("Create Proposal", () => {
 
-        it("should return correct delegationPeriodEnd", async () => {
+    it("should return correct votePeriodEnd", async () => {
 
+    await expect( liquidPoll.votePeriodEnd.call()).to.eventually.bignumber.equal(VOTE_PERIOD);
 
-
-          console.log("liquidPoll", liquidForum.pollList.call(0));
-
-        // await expect( liquidPoll.delegatePeriodEnd.call()).to.eventually.bignumber.equal(DELEGATE_PERIOD);
-
-        });
-
-
-        // it("should return correct votePeriodEnd", async () => {
-        //
-        // await expect( liquidPoll.votePeriodEnd.call()).to.eventually.bignumber.equal(VOTE_PERIOD);
-        //
-        // });
-        //
-        // it("should return correct delegationDepth", async () => {
-        //
-        // await expect( liquidPoll.delegationDepth.call()).to.eventually.bignumber.equal(5);
-        //
-        // });
-        //
-        // it("should return correct pctQuorum", async () => {
-        //
-        //   await expect( liquidPoll.pctQuorum.call()).to.eventually.bignumber.equal(75);
-        //
-        // });
-        //
-        // it("should return correct pctThreshold", async () => {
-        //
-        //   await expect( liquidPoll.pctThreshold.call()).to.eventually.bignumber.equal(51);
-        //
-        // });
-        //
-        // it("should return correct proposalMetaData", async () => {
-        //
-        //   await expect( liquidPoll.proposalMetaData.call()).to.eventually.equal(EMPTY_BYTES32_HASH);
-        //
-        // });
-        //
-        // it("should return correct validVoteArray", async () => {
-        //
-        //   await expect( liquidPoll.validVoteArray.call()).to.eventually.equal(EIGHT_OPTION_VOTE_ARRAY);
-        //
-        // });
     });
+
+    it("should return correct delegationDepth", async () => {
+
+    await expect( liquidPoll.delegationDepth.call()).to.eventually.bignumber.equal(5);
+
+    });
+
+    it("should return correct pctQuorum", async () => {
+
+      await expect( liquidPoll.pctQuorum.call()).to.eventually.bignumber.equal(75);
+
+    });
+
+    it("should return correct pctThreshold", async () => {
+
+      await expect( liquidPoll.pctThreshold.call()).to.eventually.bignumber.equal(51);
+
+    });
+
+    it("should return correct proposalMetaData", async () => {
+
+      await expect( liquidPoll.proposalMetaData.call()).to.eventually.equal(EMPTY_BYTES32_HASH);
+
+    });
+
+    it("should return correct validVoteArray", async () => {
+
+      await expect( liquidPoll.validVoteArray.call()).to.eventually.equal(EIGHT_OPTION_VOTE_ARRAY);
+
+    });
+    });
+
+    describe("#registerVoter()", () => {
+    it("should register new user", async () => {
+
+      await liquidPoll.registerVoter.sendTransaction(VOTER_1, TX_DEFAULTS)
+
+      await expect( liquidPoll._isRegisteredVoter.call(VOTER_1)).to.eventually.equal(true);
+
+      await liquidPoll.registerVoter.sendTransaction(VOTER_2, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_4, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_5, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_6, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_7, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_8, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_9, TX_DEFAULTS)
+
+
+    });
+
+    it("should fail when registering a second time", async () => {
+
+      await expect(liquidPoll.registerVoter.sendTransaction(VOTER_1, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+    });
+
+    });
+
+    describe("#becomeDelegate()", () => {
+    it("should allow registered user to be a delegate", async () => {
+
+      await liquidPoll.becomeDelegate.sendTransaction(VOTER_1, TX_DEFAULTS)
+
+      await expect( liquidPoll._isValidDelegate.call(VOTER_1)).to.eventually.equal(true);
+
+      await liquidPoll.becomeDelegate.sendTransaction(VOTER_7, TX_DEFAULTS)
+      await liquidPoll.becomeDelegate.sendTransaction(VOTER_8, TX_DEFAULTS)
+      await liquidPoll.becomeDelegate.sendTransaction(VOTER_9, TX_DEFAULTS)
+
+    });
+
+    it("should fail when unregistered user tries to become delegate", async () => {
+
+      await expect(liquidPoll.becomeDelegate.sendTransaction(VOTER_3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+    });
+    });
+
+    describe("#vote()", () => {
+    it("should allow user to vote", async () => {
+
+      await liquidPoll.vote.sendTransaction(VOTER_1, 1, TX_DEFAULTS)
+
+      await expect( liquidPoll.readVote.call(VOTER_1, 0)).to.eventually.bignumber.equal(1);
+
+      await liquidPoll.vote.sendTransaction(VOTER_2, 2, TX_DEFAULTS)
+      await liquidPoll.vote.sendTransaction(VOTER_4, 4, TX_DEFAULTS)
+      await liquidPoll.vote.sendTransaction(VOTER_5, 5, TX_DEFAULTS)
+      await liquidPoll.vote.sendTransaction(VOTER_6, 6, TX_DEFAULTS)
+      await expect( liquidPoll.readVote.call(VOTER_6, 0)).to.eventually.bignumber.equal(6);
+
+      await liquidPoll.vote.sendTransaction(VOTER_7, 7, TX_DEFAULTS)
+      await liquidPoll.vote.sendTransaction(VOTER_8, 8, TX_DEFAULTS)
+      await liquidPoll.vote.sendTransaction(VOTER_9, 3, TX_DEFAULTS)
+
+    });
+
+    it("should fail when unregistered user tries to vote", async () => {
+
+      await expect(liquidPoll.vote.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+    });
+
+    });
+
+
+
+
+    describe("#delegateVote()", () => {
+    it("should allow user to delegate their vote", async () => {
+
+      await liquidPoll.registerVoter.sendTransaction(VOTER_3, TX_DEFAULTS)
+
+      await liquidPoll.delegateVote.sendTransaction(VOTER_3, VOTER_7, TX_DEFAULTS)
+      await liquidPoll.withdrawDirectVote.sendTransaction(VOTER_5, TX_DEFAULTS)
+      await liquidPoll.delegateVote.sendTransaction(VOTER_5, VOTER_9, TX_DEFAULTS)
+      await liquidPoll.withdrawDirectVote.sendTransaction(VOTER_6, TX_DEFAULTS)
+      await liquidPoll.delegateVote.sendTransaction(VOTER_6, VOTER_7, TX_DEFAULTS)
+      await liquidPoll.withdrawDirectVote.sendTransaction(VOTER_7, TX_DEFAULTS)
+      await liquidPoll.delegateVote.sendTransaction(VOTER_7, VOTER_9, TX_DEFAULTS)
+      await liquidPoll.withdrawDirectVote.sendTransaction(VOTER_9, TX_DEFAULTS)
+      await liquidPoll.delegateVote.sendTransaction(VOTER_9, VOTER_8, TX_DEFAULTS)
+
+      await expect( liquidPoll.readVote.call(VOTER_3, 0)).to.eventually.bignumber.equal(8);
+      await expect( liquidPoll.readVote.call(VOTER_5, 0)).to.eventually.bignumber.equal(8);
+      await expect( liquidPoll.readVote.call(VOTER_6, 0)).to.eventually.bignumber.equal(8);
+      await expect( liquidPoll.readVote.call(VOTER_7, 0)).to.eventually.bignumber.equal(8);
+      await expect( liquidPoll.readVote.call(VOTER_9, 0)).to.eventually.bignumber.equal(8);
+
+      await expect( liquidPoll.readDelegate.call(VOTER_3)).to.eventually.bignumber.equal(VOTER_7);
+      await expect( liquidPoll.readDelegate.call(VOTER_5)).to.eventually.bignumber.equal(VOTER_9);
+      await expect( liquidPoll.readDelegate.call(VOTER_6)).to.eventually.bignumber.equal(VOTER_7);
+      await expect( liquidPoll.readDelegate.call(VOTER_7)).to.eventually.bignumber.equal(VOTER_9);
+      await expect( liquidPoll.readDelegate.call(VOTER_9)).to.eventually.bignumber.equal(VOTER_8);
+
+      await expect( liquidPoll.readEndVoter.call(VOTER_3, 0)).to.eventually.bignumber.equal(VOTER_8);
+      await expect( liquidPoll.readEndVoter.call(VOTER_5, 0)).to.eventually.bignumber.equal(VOTER_8);
+      await expect( liquidPoll.readEndVoter.call(VOTER_6, 0)).to.eventually.bignumber.equal(VOTER_8);
+      await expect( liquidPoll.readEndVoter.call(VOTER_7, 0)).to.eventually.bignumber.equal(VOTER_8);
+      await expect( liquidPoll.readEndVoter.call(VOTER_9, 0)).to.eventually.bignumber.equal(VOTER_8);
+
+    });
+    });
+
+    describe("#revokeDelegation()", () => {
+    it("should allow user to revoke their delegation", async () => {
+
+      await liquidPoll.revokeDelegation.sendTransaction(VOTER_3, TX_DEFAULTS)
+
+      await expect( liquidPoll.readVote.call(VOTER_3, 0)).to.eventually.bignumber.equal(0);
+
+      await expect( liquidPoll.readEndVoter.call(VOTER_3, 0)).to.eventually.bignumber.equal(VOTER_3);
+
+    });
+
+    });
+
+    describe("#tally()", () => {
+    it("should correctly tally votes from poll", async () => {
+
+      let result = await liquidPoll.tally.call()
+
+        await expect(result[0][0].toNumber()).to.equal(1);
+        await expect(result[0][1].toNumber()).to.equal(1);
+        await expect(result[0][2].toNumber()).to.equal(1);
+        await expect(result[0][4].toNumber()).to.equal(1);
+        await expect(result[0][8].toNumber()).to.equal(5);
+
+        await expect(result[1].toNumber()).to.equal(8);
+        await expect(result[2].toNumber()).to.equal(1);
+
+    });
+    });
+
+    describe("#finalDecision()", () => {
+    it("should correctly show final decision of poll", async () => {
+
+      let result = await liquidPoll.finalDecision.call()
+
+        await expect(result[0].toNumber()).to.equal(8);
+        await expect(result[1].toNumber()).to.equal(5);
+
+    });
+    });
+
 
 });

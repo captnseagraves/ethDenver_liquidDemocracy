@@ -4,28 +4,24 @@ const ABIDecoder = require("abi-decoder");
 const BigNumber = require("bignumber.js");
 const Web3 = require("web3");
 
-// function LogTransfer(
-//     contract,
-//     from,
-//     to,
-//     tokenId,
-// ){
-//     return {
-//         name: "Transfer",
-//         events: [
-//             { name: "_from",
-//               type: 'address',
-//               value: from },
-//             { name: "_to",
-//               type: 'address',
-//               value: to },
-//             { name: "_tokenId",
-//               type: 'uint256',
-//               value: String(tokenId) },
-//         ],
-//         address: contract
-//     };
-// }
+
+
+
+function LogNewPoll(
+    pollAddress,
+    forumAddress,
+    pollId,
+    name
+){
+    return { name: name,
+      events:
+       [ { name: '_newPollAddress',
+           type: 'address',
+           value: pollAddress },
+         { name: '_pollId', type: 'uint256', value: String(pollId) } ],
+      address: forumAddress }
+}
+
 //
 // function LogApproval(
 //     contract,
@@ -148,6 +144,7 @@ const Web3 = require("web3");
 
 
 module.exports = {
+  LogNewPoll
   // LogTransfer,
   // LogApproval,
   // LogTicketMinted,
