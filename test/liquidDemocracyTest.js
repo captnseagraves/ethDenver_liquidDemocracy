@@ -66,11 +66,13 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
         timekeeper.freeze(time);
 
+        // console.log('time1', Date.now());
 
-    const DELEGATE_PERIOD = time + 60;
+
+    const DELEGATE_PERIOD = timestamp.add(time, "1d");
 
     // const VOTE_PERIOD = timestamp.fromDate(new Date('2018-03-03T11:24:00'))
-    const VOTE_PERIOD = time + 120;
+    const VOTE_PERIOD = timestamp.add(time, "2d");
 
     const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
     const EIGHT_OPTION_VOTE_ARRAY = '0xff80000000000000000000000000000000000000000000000000000000000000'
@@ -82,7 +84,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
     const deployForum = async () => {
 
         const instance =
-            await liquidDemocracyForumContract.new( EIGHT_OPTION_VOTE_ARRAY, EMPTY_BYTES32_HASH, 5, 30, TX_DEFAULTS);
+            await liquidDemocracyForumContract.new( EIGHT_OPTION_VOTE_ARRAY, EMPTY_BYTES32_HASH, 5, -1, TX_DEFAULTS);
 
         const web3ContractInstance =
             web3.eth.contract(instance.abi).at(instance.address);
@@ -124,41 +126,43 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
         // Because Returned DEI is coming from EVM test sometimes fails due to misalignment of clocks
 
         dei = await liquidForum.delegationExpiration.call();
-        let expectedDEI = timestamp.add(time, "+30d")
-        console.log(expectedDEI);
-        console.log(expectedDEI+1);
-        console.log(expectedDEI-1);
+        let expectedDEI = timestamp.add(time, "-1d")
 
-
-
-        console.log("ExpectedDEI", expectedDEI)
-        console.log("Returned DEI", dei.toNumber());
+        // console.log("ExpectedDEI", expectedDEI)
+        // console.log("Returned DEI", dei.toNumber());
 
         expect(dei.toNumber()).to.be.within(expectedDEI - 2, expectedDEI + 2)
       });
     });
 
-    // this test does not work, not sure if function is faulty or if race problem.
+    describe("#resetDelegationExpirationInterval()", () => {
 
-    // describe("#resetDelegationExpirationInterval()", () => {
-    //
-    //
-    //   it("should return delegationExpirationInterval greater than previous DEI", async () => {
-    //
-    //     console.log('dei', dei);
-    //
-    //     await liquidForum.resetDelegationExpirationInterval.sendTransaction(30, TX_DEFAULTS)
-    //
-    //     let newDei = await liquidForum.delegationExpiration.call();
-    //
-    //     console.log('newDei', await newDei);
-    //
-    //
-    //     await expect(newDei.toNumber()).to.eventually.be.above(dei.toNumber());
-    //
-    //   });
-    //
-    // });
+      it("should return delegationExpirationInterval greater than previous DEI", async () => {
+
+        let newTime = timestamp.add(time, "+30d")
+
+        timekeeper.freeze(newTime);
+
+        // console.log('time2', Date.now());
+
+
+        await liquidForum.resetDelegationExpirationInterval.sendTransaction(30, TX_DEFAULTS)
+
+        let newDei = await liquidForum.delegationExpiration.call();
+
+
+        // console.log("newTime", newTime);
+        // console.log('newDei', newDei.toNumber());
+
+
+        expect(newDei.toNumber()).to.be.within(newTime - 2, newTime + 2);
+
+        timekeeper.freeze(time);
+        // console.log('time3', Date.now());
+
+      });
+
+    });
 
     describe("#createNewTopic()", () => {
 
