@@ -65,8 +65,8 @@ function LiquidDemocracyForum(bytes32 _validTopicArray, bytes32 _topicMetaData, 
   validTopicArray = _validTopicArray;
   topicMetaData = _topicMetaData;
   delegationDepth = _delegationDepth;
-  pollId = 0;
   delegationExpiration = block.timestamp + (_delegationExpirationInDays * 1 days);
+  pollId = 0;
 }
 
 function resetDelegationExpirationInterval(uint _numberOfDays)
@@ -77,6 +77,7 @@ function resetDelegationExpirationInterval(uint _numberOfDays)
 
 function createNewTopic(bytes32 _newValidTopicArray, bytes32 _newTopicMetaData)
 public
+/*need to implement only steward modifier*/
 {
 
   validTopicArray = _newValidTopicArray;
@@ -95,6 +96,7 @@ function createPoll(
   )
   public
   isValidTopicOption(_topic)
+  /*need to implement only steward/registered voter modifier*/
   returns (address)
 {
 
