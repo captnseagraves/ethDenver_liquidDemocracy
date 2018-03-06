@@ -92,8 +92,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
         liquidForum = new LiquidDemocracyForum(
             web3ContractInstance, TX_DEFAULTS);
 
-            // console.log('instance', instance);
-            // console.log('liquidForum', liquidForum);
     };
 
 
@@ -123,8 +121,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       it("should return correct delegationExpiration", async () => {
 
-        // Because Returned DEI is coming from EVM test sometimes fails due to misalignment of clocks
-
         dei = await liquidForum.delegationExpiration.call();
         let expectedDEI = timestamp.add(time, "-1d")
 
@@ -142,18 +138,14 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
         let newTime = timestamp.add(time, "+30d")
 
         timekeeper.freeze(newTime);
-
         // console.log('time2', Date.now());
-
 
         await liquidForum.resetDelegationExpirationInterval.sendTransaction(30, TX_DEFAULTS)
 
         let newDei = await liquidForum.delegationExpiration.call();
 
-
         // console.log("newTime", newTime);
         // console.log('newDei', newDei.toNumber());
-
 
         expect(newDei.toNumber()).to.be.within(newTime - 2, newTime + 2);
 
@@ -277,6 +269,8 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
     });
 
+  // test for registering after voting period has ended
+
   });
 
   describe("#becomeDelegate()", () => {
@@ -297,13 +291,10 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect(liquidPoll.becomeDelegate.sendTransaction(VOTER_3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
 
     });
-  });
 
-  //
-  //
-  // Need to set up test for delegation and voting periods. I know they work properly, but need explicit test.
-  //
-  //
+    // test for becoming delegate after delegate period has ended
+
+  });
 
   describe("#vote()", () => {
     it("should allow user to vote", async () => {
@@ -329,6 +320,9 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect(liquidPoll.vote.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
 
     });
+
+    // test for voting after voting period has ended
+
 
   });
 
@@ -369,6 +363,9 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect( liquidPoll.readEndVoter.call(VOTER_9, 0)).to.eventually.bignumber.equal(VOTER_8);
 
     });
+
+    // test for delegating vote after voting period has ended
+
   });
 
   describe("#revokeDelegation()", () => {
@@ -381,6 +378,9 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect( liquidPoll.readEndVoter.call(VOTER_3, 0)).to.eventually.bignumber.equal(VOTER_3);
 
     });
+
+    // test for revoking delegation after voting period has ended
+
 
   });
 
@@ -461,21 +461,10 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect(liquidForum.becomeDelegateForTopic.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
 
     });
-  });
 
-  // describe("#withdrawAsDelegateForTopic()", () => {
-  //   it("should allow registered user to become a delegate for a particular topic", async () => {
-  //
-  //       await liquidForum.withdrawAsDelegateForTopic.sendTransaction(VOTER_9, 3, TX_DEFAULTS)
-  //       await expect( liquidForum._isValidDelegateForTopic.call(VOTER_9, 3)).to.eventually.equal(false);
-  //     });
-  //
-  //   it("should fail when unregistered user tries to become delegate", async () => {
-  //
-  //     await expect(liquidForum.withdrawAsDelegateForTopic.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
-  //
-  //   });
-  // });
+    // test delegation read correctly from different delegationExpiratoinIntervals
+
+  });
 
   describe("#delegateVoteForTopic()", () => {
     it("should allow user to delegate their vote for a topic", async () => {
@@ -508,11 +497,82 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
         await expect( liquidForum.readDelegateForTopic.call(VOTER_5, 7)).to.eventually.bignumber.equal(0x0);
       });
 
+
+      // test delegation read correctly from different delegationExpiratoinIntervals
+
+
+    //
     // it("should fail when unregistered user tries to become delegate", async () => {
     //
     //   await expect(liquidForum.revokeDelegationForTopic.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
     //
     // });
+  });
+
+  // test for registering after voting period has ended
+  // test for becoming delegate after delegate period has ended
+  // test for voting after voting period has ended
+  // test for delegating vote after voting period has ended
+  // test for revoking delegation after voting period has ended
+  // test delegation read correctly from different delegationExpiratoinIntervals
+  // test tally works correctly reading from topic delegation, poll delegation, and direct voting.
+
+  describe("#createPoll() 2nd Instance", () => {
+
+    it("should log new poll", async () => {
+
+      const DELEGATE_PERIOD = timestamp.add(time, "-1h");
+      const VOTE_PERIOD = timestamp.add(time, "+1h");
+
+    let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, EIGHT_OPTION_VOTE_ARRAY, 4, TX_DEFAULTS)
+
+      await web3.eth.getTransactionReceipt(txHash, async (err, result) => {
+        const [newPollLog] = ABIDecoder.decodeLogs(result.logs);
+
+        let newPollAddress = await liquidForum.pollList.call(1);
+
+        const logExpected =
+                    LogNewPoll(newPollAddress, liquidForum.address, 1, 'newPoll');
+
+                expect(newPollLog).to.deep.equal(logExpected);
+         });
+
+    let liquidPollAddress = await liquidForum.pollList.call(1);
+
+    const contractInstance = await web3.eth.contract(LiquidDemocracyPoll.abi).at(liquidPollAddress);
+
+    liquidPoll = await new LiquidDemocracyPoll(
+             contractInstance, TX_DEFAULTS);
+    });
+
+  });
+
+  describe("#registerVoter()", () => {
+    it("should register new user when delegation period has passed, but vote period open", async () => {
+
+      await liquidPoll.registerVoter.sendTransaction(VOTER_1, TX_DEFAULTS)
+
+      await expect( liquidPoll._isRegisteredVoter.call(VOTER_1)).to.eventually.equal(true);
+
+      await liquidPoll.registerVoter.sendTransaction(VOTER_2, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_4, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_5, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_6, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_7, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_8, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_9, TX_DEFAULTS)
+
+
+    });
+  });
+
+  describe("#becomeDelegate()", () => {
+
+    it("should fail when registered user tries to become delegate after delegation period has closed", async () => {
+
+      await expect(liquidPoll.becomeDelegate.sendTransaction(VOTER_1, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+    });
   });
 
 });

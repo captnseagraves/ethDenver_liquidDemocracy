@@ -121,6 +121,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
   /*allows voter to register for poll*/
   function registerVoter(address _userAddress)
   external
+  votePeriodOpen()
   {
 
     require(registeredVotersMap[_userAddress] == false);
@@ -134,6 +135,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
   function becomeDelegate(address _userAddress)
   external
   isRegisteredVoter(_userAddress)
+  delegatePeriodOpen()
   {
     willingToBeDelegate[_userAddress] = true;
   }
