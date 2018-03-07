@@ -501,12 +501,13 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       // test delegation read correctly from different delegationExpiratoinIntervals
 
 
-    //
+
     // it("should fail when unregistered user tries to become delegate", async () => {
     //
     //   await expect(liquidForum.revokeDelegationForTopic.sendTransaction(VOTER_3, 3, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
     //
     // });
+
   });
 
   // test for registering after voting period has ended
@@ -516,6 +517,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
   // test for revoking delegation after voting period has ended
   // test delegation read correctly from different delegationExpiratoinIntervals
   // test tally works correctly reading from topic delegation, poll delegation, and direct voting.
+  // test for unregistered user revoking delegation
 
   describe("#createPoll() 2nd Instance", () => {
 
@@ -548,7 +550,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
   });
 
   describe("#registerVoter()", () => {
-    it("should register new user when delegation period has passed, but vote period open", async () => {
+    it("should register new user when delegation period has closed, but vote period open", async () => {
 
       await liquidPoll.registerVoter.sendTransaction(VOTER_1, TX_DEFAULTS)
 
@@ -574,5 +576,26 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
     });
   });
+
+  describe("#vote()", () => {
+    it("should allow user to vote when delegation period has closed, but vote period open", async () => {
+
+      await liquidPoll.vote.sendTransaction(VOTER_1, 1, TX_DEFAULTS)
+
+    });
+
+
+  });
+
+  describe("#delegateVote()", () => {
+    it("should fail to allow user to delegate their vote after delegation has closed", async () => {
+
+      await expect(liquidPoll.delegateVote.sendTransaction(VOTER_5, VOTER_9, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+    });
+  });
+
+
+  // refactor to have each function call be from wallet owner instead of proposal owner, and test security. 
 
 });

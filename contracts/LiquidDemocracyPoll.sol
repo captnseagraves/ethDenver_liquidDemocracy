@@ -29,6 +29,8 @@ contract LiquidDemocracyPoll is LDPollInterface {
   uint public topic;
 
 
+/*want to think about not having users stand up as delegates, but allow anyone to delegate to anyone*/
+
 
   /*redundant voter registers solve for different major issues when each is used individually*/
 
@@ -167,6 +169,14 @@ contract LiquidDemocracyPoll is LDPollInterface {
     userToDelegate[_userAddress] = _delegateAddress;
   }
 
+  /*can refactor these functions to be one
+  or just refactor to have each do something different, not DRY currently
+
+
+
+  create function to change address of forum contract, allows upgrades
+  */
+
   /*allows user to read their vote or their delegate's vote
   returns users vote*/
   function readVote(address _userAddress, uint _recursionCount)
@@ -190,7 +200,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
     } else if (forumDelegate != 0x0) {
       return readVote(forumDelegate, _recursionCount + 1);
     } else {
-      return userVotes[_userAddress];
+      return 0;
     }
   }
 
@@ -265,6 +275,11 @@ contract LiquidDemocracyPoll is LDPollInterface {
   }
 
 
+/*figure out how to handle ties
+  return array of winners, if array is length 1, easy solution.
+  if tied, auto-generate run-off poll
+*/
+
   //todo: how to handle final decision and runoff conditions
   /*if we can make this a view function, that would be ideal*/
   function finalDecision()
@@ -275,6 +290,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
     uint totalVotes;
     uint emptyVotes;
+    /*rename to rsults or similar vs. votes*/
     uint[256] memory _votes;
 
     (_votes, totalVotes, emptyVotes) = tally();
@@ -307,12 +323,19 @@ contract LiquidDemocracyPoll is LDPollInterface {
     }
   }
 
+/* recording votes/delegatoins as they happen vs. tallyin at the end, may be more expensive  upfront, but allows outcome to be actionable on chain, because end tally function doesnt run out of gas. */
+
+/*could have gas conscious tally function that run multiple times.*/
+
+
   /*allows user tally votes at */
   function tally()
   public
   view
   returns (uint[256] _votes, uint _totalVotes, uint _emptyVotes)
   {
+
+    /*could point to registered voters in forum, instead of poll*/
 
     //todo: how to handle vote validation and initialization
     for (uint i = 0; i < registeredVotersArray.length; i++){
@@ -327,6 +350,9 @@ contract LiquidDemocracyPoll is LDPollInterface {
     }
     return (_votes, _totalVotes, _emptyVotes);
   }
+
+
+/*Could refactor to just use uints. why the complicated bit math?*/
 
  function _isValidVoteOption(uint _vote) public view returns(bool){
       byte MyByte = validVoteArray[_vote / 8];

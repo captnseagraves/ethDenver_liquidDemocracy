@@ -14,6 +14,11 @@ allow different delegations to different topics
 implement delegation expiration period
 */
 
+
+/*modularity could be very cool and allow many different kinds of voting and many different features.*/
+
+
+
 bytes32 public validTopicArray;
 bytes32 public topicMetaData;
 /*limits number of delegates removed from original user*/
@@ -26,6 +31,13 @@ mapping(uint => LiquidDemocracyPoll) public pollList;
 mapping (address => bool) internal registeredVotersMap;
 
 address[] internal registeredVotersArray;
+
+/*
+  expiration contract possible to simplfy mappings
+  delegates could be own contract as well
+  OOP approach with contracts as objects
+  - could also name something less gnarly and have comment explaining structure
+*/
 
 mapping (uint => mapping (address => mapping (uint => address))) public expirationToUserToTopicToDelegateAddress;
 
@@ -132,6 +144,8 @@ external
 
 }
 
+/*delegate stand up could be simple flag which allows any user to delegate for any topic/poll*/
+
   /*allows user to offer themselves as a delegate*/
 function becomeDelegateForTopic(address _userAddress, uint _topic)
 external
@@ -163,6 +177,7 @@ isValidChainDepthAndNonCircular(_userAddress, _topic)
 isDelegationExpirationIntervalOpen()
 {
 
+/*possible mapping name, delegatesForUser, have comment explaing structure*/
   expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] = _delegateAddress;
 
 }
