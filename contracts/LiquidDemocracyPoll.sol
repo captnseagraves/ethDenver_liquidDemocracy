@@ -96,6 +96,10 @@ contract LiquidDemocracyPoll is LDPollInterface {
       _;
     }
 
+/**********/
+    /*NEED TO ADD EVENTS*/
+/***********/
+
   function LiquidDemocracyPoll(
     uint _delegatePeriodEnd,
     uint _votePeriodEnd,
@@ -290,10 +294,9 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
     uint totalVotes;
     uint emptyVotes;
-    /*rename to rsults or similar vs. votes*/
-    uint[256] memory _votes;
+    uint[256] memory _tallyResults;
 
-    (_votes, totalVotes, emptyVotes) = tally();
+    (_tallyResults, totalVotes, emptyVotes) = tally();
 
 
     if (registeredVotersArray.length == 0 || (totalVotes * 100) / (registeredVotersArray.length) < pctQuorum) {
@@ -305,9 +308,9 @@ contract LiquidDemocracyPoll is LDPollInterface {
       uint highestVoteHold = 0;
       uint highestVoteValueHold = 0;
 
-        for (uint i = 0; i < _votes.length; i++) {
-          if (_votes[i] > highestVoteValueHold) {
-            highestVoteValueHold = _votes[i];
+        for (uint i = 0; i < _tallyResults.length; i++) {
+          if (_tallyResults[i] > highestVoteValueHold) {
+            highestVoteValueHold = _tallyResults[i];
             highestVoteHold = i;
           }
         }

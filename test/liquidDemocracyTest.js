@@ -45,7 +45,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
     let liquidPoll;
     let dei;
 
-    const PROPOSAL_OWNER = ACCOUNTS[0];
+    const OWNER = ACCOUNTS[0];
     const VOTER_1 = ACCOUNTS[1];
     const VOTER_2 = ACCOUNTS[2];
     const VOTER_3 = ACCOUNTS[3];
@@ -79,18 +79,18 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
     const NINE_OPTION_VOTE_ARRAY = '0xffc0000000000000000000000000000000000000000000000000000000000000'
 
 
-    const TX_DEFAULTS = { from: PROPOSAL_OWNER, gas: 4000000 };
+    const TX_DEFAULTS = { from: OWNER, gas: 4000000 };
 
     const deployForum = async () => {
 
         const instance =
-            await liquidDemocracyForumContract.new( EIGHT_OPTION_VOTE_ARRAY, EMPTY_BYTES32_HASH, 5, -1, TX_DEFAULTS);
+            await liquidDemocracyForumContract.new( EIGHT_OPTION_VOTE_ARRAY, EMPTY_BYTES32_HASH, 5, -1, { from: OWNER, gas: 4000000 });
 
         const web3ContractInstance =
             web3.eth.contract(instance.abi).at(instance.address);
 
         liquidForum = new LiquidDemocracyForum(
-            web3ContractInstance, TX_DEFAULTS);
+            web3ContractInstance, { from: OWNER, gas: 4000000 });
 
     };
 
@@ -140,7 +140,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
         timekeeper.freeze(newTime);
         // console.log('time2', Date.now());
 
-        await liquidForum.resetDelegationExpirationInterval.sendTransaction(30, TX_DEFAULTS)
+        await liquidForum.resetDelegationExpirationInterval.sendTransaction(30, { from: OWNER, gas: 4000000 })
 
         let newDei = await liquidForum.delegationExpiration.call();
 
@@ -161,7 +161,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       it("should return new topic values and metadata", async () => {
 
-        await liquidForum.createNewTopic.sendTransaction(NINE_OPTION_VOTE_ARRAY, ONES_BYTES32_HASH, TX_DEFAULTS)
+        await liquidForum.createNewTopic.sendTransaction(NINE_OPTION_VOTE_ARRAY, ONES_BYTES32_HASH, { from: OWNER, gas: 4000000 })
 
         await expect( liquidForum.validTopicArray.call()).to.eventually.equal(NINE_OPTION_VOTE_ARRAY);
 
@@ -176,7 +176,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       it("should log new poll", async () => {
 
-      let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, EIGHT_OPTION_VOTE_ARRAY, 3, TX_DEFAULTS)
+      let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, EIGHT_OPTION_VOTE_ARRAY, 3, { from: OWNER, gas: 4000000 })
 
         await web3.eth.getTransactionReceipt(txHash, async (err, result) => {
           const [newPollLog] = ABIDecoder.decodeLogs(result.logs);
@@ -194,7 +194,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       const contractInstance = await web3.eth.contract(LiquidDemocracyPoll.abi).at(liquidPollAddress);
 
       liquidPoll = await new LiquidDemocracyPoll(
-               contractInstance, TX_DEFAULTS);
+               contractInstance, { from: OWNER, gas: 4000000 });
       });
 
   });
@@ -248,14 +248,14 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
   describe("#registerVoter()", () => {
     it("should register new user", async () => {
 
-      await liquidPoll.registerVoter.sendTransaction(VOTER_1, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_1, { from: VOTER_1, gas: 4000000 })
 
       await expect( liquidPoll._isRegisteredVoter.call(VOTER_1)).to.eventually.equal(true);
 
-      await liquidPoll.registerVoter.sendTransaction(VOTER_2, TX_DEFAULTS)
-      await liquidPoll.registerVoter.sendTransaction(VOTER_4, TX_DEFAULTS)
-      await liquidPoll.registerVoter.sendTransaction(VOTER_5, TX_DEFAULTS)
-      await liquidPoll.registerVoter.sendTransaction(VOTER_6, TX_DEFAULTS)
+      await liquidPoll.registerVoter.sendTransaction(VOTER_2, { from: VOTER_2, gas: 4000000 })
+      await liquidPoll.registerVoter.sendTransaction(VOTER_4, { from: VOTER_4, gas: 4000000 })
+      await liquidPoll.registerVoter.sendTransaction(VOTER_5, { from: VOTER_5, gas: 4000000 })
+      await liquidPoll.registerVoter.sendTransaction(VOTER_6, { from: VOTER_6, gas: 4000000 })
       await liquidPoll.registerVoter.sendTransaction(VOTER_7, TX_DEFAULTS)
       await liquidPoll.registerVoter.sendTransaction(VOTER_8, TX_DEFAULTS)
       await liquidPoll.registerVoter.sendTransaction(VOTER_9, TX_DEFAULTS)

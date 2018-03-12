@@ -2,8 +2,10 @@ pragma solidity ^0.4.17;
 
 import "./LiquidDemocracyPoll.sol";
 import "./LDForumInterface.sol";
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
-contract LiquidDemocracyForum is LDForumInterface {
+
+contract LiquidDemocracyForum is LDForumInterface, Ownable {
   /*contract LiquidDemocracyForum {*/
 
 /*
@@ -79,17 +81,22 @@ function LiquidDemocracyForum(bytes32 _validTopicArray, bytes32 _topicMetaData, 
   delegationDepth = _delegationDepth;
   delegationExpiration = block.timestamp + (_delegationExpirationInDays * 1 days);
   pollId = 0;
+/*Ideally will have multiple stewards for a forum*/
+  owner = msg.sender;
 }
 
 function resetDelegationExpirationInterval(uint _numberOfDays)
- public {
+/*anyone can call this function, time lock is sufficient and desireable*/
+ public
+{
   require(block.timestamp > delegationExpiration);
   delegationExpiration = block.timestamp + (_numberOfDays * 1 days);
 }
 
 function createNewTopic(bytes32 _newValidTopicArray, bytes32 _newTopicMetaData)
 public
-/*need to implement only steward modifier*/
+/*Ideally will have multiple stewards for a forum to allow many users to create topics/polls*/
+onlyOwner()
 {
 
   validTopicArray = _newValidTopicArray;
@@ -108,7 +115,8 @@ function createPoll(
   )
   public
   isValidTopicOption(_topic)
-  /*need to implement only steward/registered voter modifier*/
+  /*Ideally will have multiple stewards for a forum to allow many users to create topics/polls*/
+  onlyOwner()
   returns (address)
 {
 
