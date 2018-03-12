@@ -295,10 +295,16 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
     (_votes, totalVotes, emptyVotes) = tally();
 
-
-    if ((totalVotes * 100) / (registeredVotersArray.length) < pctQuorum) {
+    if (registeredVotersArray.length == 0) {
       _finalDecision = 0;
       _finalDecisionTally = 0;
+      return;
+
+    } else if ((totalVotes * 100) / (registeredVotersArray.length) < pctQuorum) {
+      _finalDecision = 0;
+      _finalDecisionTally = 0;
+      return;
+      
     } else {
 
       uint highestVoteHold = 0;

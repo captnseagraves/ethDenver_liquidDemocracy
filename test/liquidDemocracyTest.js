@@ -629,10 +629,13 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
         await liquidPoll.revokeDelegationForPoll.sendTransaction(VOTER_2, TX_DEFAULTS)
 
+      });
+
+      it("should still return vote and endVoter of forum Delegate", async () => {
+
         await expect( liquidPoll.readVote.call(VOTER_2, 0)).to.eventually.bignumber.equal(4);
 
         await expect( liquidPoll.readEndVoter.call(VOTER_2, 0)).to.eventually.bignumber.equal(VOTER_4);
-
 
       });
     });
@@ -672,4 +675,121 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
   // refactor to have each function call be from wallet owner instead of proposal owner, and test security.
 
+
+  describe("#createPoll() 3rd Instance", () => {
+
+    it("should log new poll", async () => {
+
+      const DELEGATE_PERIOD = timestamp.add(time, "-2h");
+      const VOTE_PERIOD = timestamp.add(time, "-1h");
+
+    let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, EIGHT_OPTION_VOTE_ARRAY, 1, TX_DEFAULTS)
+
+      await web3.eth.getTransactionReceipt(txHash, async (err, result) => {
+        const [newPollLog] = ABIDecoder.decodeLogs(result.logs);
+
+        let newPollAddress = await liquidForum.pollList.call(2);
+
+        const logExpected =
+                    LogNewPoll(newPollAddress, liquidForum.address, 2, 'newPoll');
+
+                expect(newPollLog).to.deep.equal(logExpected);
+         });
+
+    let liquidPollAddress = await liquidForum.pollList.call(2);
+
+    const contractInstance = await web3.eth.contract(LiquidDemocracyPoll.abi).at(liquidPollAddress);
+
+    liquidPoll = await new LiquidDemocracyPoll(
+             contractInstance, TX_DEFAULTS);
+    });
+
+  });
+
+  describe("#registerVoter()", () => {
+    it("should fail to register voter after vote period has closed", async () => {
+
+      await expect(liquidPoll.registerVoter.sendTransaction(VOTER_1, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+    });
+  });
+
+  describe("#becomeDelegate()", () => {
+
+    it("should fail when user tries to become delegate after vote period has closed", async () => {
+
+      await expect(liquidPoll.becomeDelegate.sendTransaction(VOTER_1, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+    });
+  });
+
+  describe("#vote()", () => {
+    it("should fail to allow user to vote when vote period has closed", async () => {
+
+      await expect(liquidPoll.vote.sendTransaction(VOTER_1, 1, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+    });
+
+
+  });
+
+  describe("#delegateVote()", () => {
+    it("should fail to allow user to delegate their vote after vote period has closed", async () => {
+
+      await expect(liquidPoll.delegateVote.sendTransaction(VOTER_5, VOTER_9, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+    });
+  });
+
+
+    describe("#revokeDelegation() in poll", () => {
+      it("should allow user to revoke their delegation after delegation period has passed, but vote period open", async () => {
+
+          await expect(liquidPoll.revokeDelegationForPoll.sendTransaction(VOTER_2, TX_DEFAULTS)).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+      });
+
+      it("should still return vote and endVoter of forum Delegate", async () => {
+
+        await expect( liquidPoll.readVote.call(VOTER_2, 0)).to.eventually.bignumber.equal(0);
+
+        await expect( liquidPoll.readEndVoter.call(VOTER_2, 0)).to.eventually.bignumber.equal(VOTER_4);
+
+      });
+    });
+
+      // test for revoking delegation after voting period has ended
+
+      describe("#tally()", () => {
+        it("should correctly tally votes from poll", async () => {
+
+          let result = await liquidPoll.tally.call()
+
+          console.log(result);
+
+            await expect(result[0][0].toNumber()).to.equal(0);
+            await expect(result[0][1].toNumber()).to.equal(0);
+            await expect(result[0][4].toNumber()).to.equal(0);
+            await expect(result[0][7].toNumber()).to.equal(0);
+
+            await expect(result[1].toNumber()).to.equal(0);
+            await expect(result[2].toNumber()).to.equal(0);
+
+        });
+      });
+
+      describe("#finalDecision()", () => {
+        it("should correctly show final decision of poll", async () => {
+
+          let result = await liquidPoll.finalDecision.call()
+
+          console.log('final decision', result);
+
+            await expect(result[0].toNumber()).to.equal(0);
+            await expect(result[1].toNumber()).to.equal(0);
+
+        });
+      });
+
+  // refactor to have each function call be from wallet owner instead of proposal owner, and test security.
 });
