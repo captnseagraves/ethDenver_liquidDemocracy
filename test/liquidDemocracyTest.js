@@ -84,7 +84,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
     const deployForum = async () => {
 
         const instance =
-            await liquidDemocracyForumContract.new( EIGHT_OPTION_VOTE_ARRAY, EMPTY_BYTES32_HASH, 5, -1, { from: OWNER, gas: 4000000 });
+            await liquidDemocracyForumContract.new( 8, EMPTY_BYTES32_HASH, 5, -1, { from: OWNER, gas: 4000000 });
 
         const web3ContractInstance =
             web3.eth.contract(instance.abi).at(instance.address);
@@ -114,7 +114,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       it("should return correct validtopicArray", async () => {
 
-        await expect( liquidForum.validTopicArray.call()).to.eventually.equal(EIGHT_OPTION_VOTE_ARRAY);
+        await expect( liquidForum.validTopicOptions.call()).to.eventually.bignumber.equal(8);
 
       });
 
@@ -161,9 +161,9 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       it("should return new topic values and metadata", async () => {
 
-        await liquidForum.createNewTopic.sendTransaction(NINE_OPTION_VOTE_ARRAY, ONES_BYTES32_HASH, { from: OWNER, gas: 4000000 })
+        await liquidForum.createNewTopic.sendTransaction(9, ONES_BYTES32_HASH, { from: OWNER, gas: 4000000 })
 
-        await expect( liquidForum.validTopicArray.call()).to.eventually.equal(NINE_OPTION_VOTE_ARRAY);
+        await expect( liquidForum.validTopicOptions.call()).to.eventually.bignumber.equal(9);
 
         await expect( liquidForum.topicMetaData.call()).to.eventually.equal(ONES_BYTES32_HASH);
 
@@ -176,7 +176,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       it("should log new poll", async () => {
 
-      let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, EIGHT_OPTION_VOTE_ARRAY, 3, { from: OWNER, gas: 4000000 })
+      let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, 8, 3, { from: OWNER, gas: 4000000 })
 
         await web3.eth.getTransactionReceipt(txHash, async (err, result) => {
           const [newPollLog] = ABIDecoder.decodeLogs(result.logs);
@@ -238,9 +238,9 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
     });
 
-    it("should return correct validVoteArray", async () => {
+    it("should return correct validVoteOptions", async () => {
 
-      await expect( liquidPoll.validVoteArray.call()).to.eventually.equal(EIGHT_OPTION_VOTE_ARRAY);
+      await expect( liquidPoll.validVoteOptions.call()).to.eventually.bignumber.equal(8);
 
     });
   });
@@ -783,4 +783,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       });
 
   // refactor to have each function call be from wallet owner instead of proposal owner, and test security.
+
+  /*Could there be circular delegation if poll and forum delegations are separate?
+                  Must test*/
 });

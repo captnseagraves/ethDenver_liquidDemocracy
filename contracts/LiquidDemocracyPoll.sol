@@ -22,7 +22,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
   /*possible IPFS hash of proposal metadata*/
   bytes32 public proposalMetaData;
   /*256 bit array that holds the validity of each possible vote option. Options are referenced and defined in poll metadata. */
-  bytes32 public validVoteArray;
+  uint public validVoteOptions;
 
   uint public pollId;
   address public forumAddress;
@@ -80,7 +80,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
     }
     /*verifies if vote is delegated*/
     modifier isValidVoteOption(uint _vote) {
-      require(_isValidVoteOption(_vote) == true);
+      require(_vote <= validVoteOptions);
       _;
     }
     modifier isValidChainDepthAndNonCircular() {
@@ -107,7 +107,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
     uint _pctQuorum,
     uint _pctThreshold,
     bytes32 _proposalMetaData,
-    bytes32 _validVoteArray,
+    uint _validVoteOptions,
     uint _pollId,
     address _forumAddress,
     uint _topic
@@ -118,7 +118,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
       pctQuorum = _pctQuorum;
       pctThreshold = _pctThreshold;
       proposalMetaData = _proposalMetaData;
-      validVoteArray = _validVoteArray;
+      validVoteOptions = _validVoteOptions;
       pollId = _pollId;
       forumAddress = _forumAddress;
       topic = _topic;
@@ -358,19 +358,17 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
 /*Could refactor to just use uints. why the complicated bit math?*/
 
- function _isValidVoteOption(uint _vote) public view returns(bool){
+ /*function _isValidVoteOption(uint _vote) public view returns(bool){
       byte MyByte = validVoteArray[_vote / 8];
       uint MyPosition = 7 - (_vote % 8);
 
      return  2**MyPosition == uint8(MyByte & byte(2**MyPosition));
- }
+ }*/
 
  /**/
  /**/
  /*Could there be circular delegation if poll and forum delegations are separate?
                  Must Check*/
-
-        /*Also may have issues with UX and having to revoke both Poll and Topic delegates in order to place direct vote. Could direct vote be default? Must refactor.*/
  /**/
  /**/
 

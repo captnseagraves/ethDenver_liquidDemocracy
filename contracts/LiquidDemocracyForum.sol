@@ -21,7 +21,7 @@ implement delegation expiration period
 
 
 
-bytes32 public validTopicArray;
+uint public validTopicOptions;
 bytes32 public topicMetaData;
 /*limits number of delegates removed from original user*/
 uint public delegationDepth;
@@ -63,7 +63,7 @@ modifier isDelegationExpirationIntervalOpen() {
   }
   /*verifies if vote is delegated*/
   modifier isValidTopicOption(uint _topic) {
-    require(_isValidTopicOption(_topic) == true);
+    require(_topic <= validTopicOptions);
     _;
   }
   modifier isValidChainDepthAndNonCircular(uint _topic) {
@@ -75,8 +75,8 @@ modifier isDelegationExpirationIntervalOpen() {
 
   event newPoll(address _newPollAddress, uint _pollId);
 
-function LiquidDemocracyForum(bytes32 _validTopicArray, bytes32 _topicMetaData, uint _delegationDepth, uint _delegationExpirationInDays) public {
-  validTopicArray = _validTopicArray;
+function LiquidDemocracyForum(uint _validTopicOptions, bytes32 _topicMetaData, uint _delegationDepth, uint _delegationExpirationInDays) public {
+  validTopicOptions = _validTopicOptions;
   topicMetaData = _topicMetaData;
   delegationDepth = _delegationDepth;
   delegationExpiration = block.timestamp + (_delegationExpirationInDays * 1 days);
@@ -93,13 +93,13 @@ function resetDelegationExpirationInterval(uint _numberOfDays)
   delegationExpiration = block.timestamp + (_numberOfDays * 1 days);
 }
 
-function createNewTopic(bytes32 _newValidTopicArray, bytes32 _newTopicMetaData)
+function createNewTopic(uint _numberOfValidTopicOptions, bytes32 _newTopicMetaData)
 public
 /*Ideally will have multiple stewards for a forum to allow many users to create topics/polls*/
 onlyOwner
 {
 
-  validTopicArray = _newValidTopicArray;
+  validTopicOptions = _numberOfValidTopicOptions;
   topicMetaData = _newTopicMetaData;
 
 }
@@ -110,7 +110,7 @@ function createPoll(
   uint _pctQuorum,
   uint _pctThreshold,
   bytes32 _proposalMetaData,
-  bytes32 _validVoteArray,
+  uint _validVoteOptions,
   uint _topic
   )
   public
@@ -127,7 +127,7 @@ function createPoll(
     _pctQuorum,
     _pctThreshold,
     _proposalMetaData,
-    _validVoteArray,
+    _validVoteOptions,
     pollId,
     this,
     _topic
@@ -229,12 +229,12 @@ returns (address _endDelegateAddress)
   }
 }
 
-function _isValidTopicOption(uint _topic) public view returns(bool){
+/*function _isValidTopicOption(uint _topic) public view returns(bool){
      byte MyByte = validTopicArray[_topic / 8];
      uint MyPosition = 7 - (_topic % 8);
 
     return  2**MyPosition == uint8(MyByte & byte(2**MyPosition));
-}
+}*/
 
 function _isValidChainDepthAndNonCircular(address _userAddress, uint _topic, uint _recursionCount)
 public
