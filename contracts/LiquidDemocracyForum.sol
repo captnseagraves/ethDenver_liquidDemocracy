@@ -52,13 +52,13 @@ modifier isDelegationExpirationIntervalOpen() {
 
 /*would clean and reduce modifiers and helper functions for production*/
 /*verifies voter is registered*/
-  modifier isRegisteredVoter(address _userAddress) {
-      require(_isRegisteredVoter(_userAddress) == true);
+  modifier isRegisteredVoter() {
+      require(_isRegisteredVoter(msg.sender) == true);
     _;
   }
   /*verifies delegate is valid*/
-  modifier isValidDelegateForTopic(address _userAddress, uint _topic) {
-    require(_isValidDelegateForTopic(_userAddress, _topic) == true);
+  modifier isValidDelegateForTopic(address _delegateAddress, uint _topic) {
+    require(_isValidDelegateForTopic(_delegateAddress, _topic) == true);
     _;
   }
   /*verifies if vote is delegated*/
@@ -66,9 +66,9 @@ modifier isDelegationExpirationIntervalOpen() {
     require(_isValidTopicOption(_topic) == true);
     _;
   }
-  modifier isValidChainDepthAndNonCircular(address _userAddress, uint _topic) {
+  modifier isValidChainDepthAndNonCircular(uint _topic) {
     bool bValid;
-    (bValid,,) =_isValidChainDepthAndNonCircular(_userAddress, _topic, 0);
+    (bValid,,) =_isValidChainDepthAndNonCircular(msg.sender, _topic, 0);
     require(bValid);
     _;
   }
@@ -96,7 +96,7 @@ function resetDelegationExpirationInterval(uint _numberOfDays)
 function createNewTopic(bytes32 _newValidTopicArray, bytes32 _newTopicMetaData)
 public
 /*Ideally will have multiple stewards for a forum to allow many users to create topics/polls*/
-onlyOwner()
+onlyOwner
 {
 
   validTopicArray = _newValidTopicArray;
@@ -116,7 +116,7 @@ function createPoll(
   public
   isValidTopicOption(_topic)
   /*Ideally will have multiple stewards for a forum to allow many users to create topics/polls*/
-  onlyOwner()
+  onlyOwner
   returns (address)
 {
 
@@ -141,27 +141,27 @@ function createPoll(
 
 }
 
-function registerVoter_Forum(address _userAddress)
+function registerVoter_Forum()
 external
 {
 
-  require(registeredVotersMap[_userAddress] == false);
+  require(registeredVotersMap[msg.sender] == false);
 
-  registeredVotersArray.push(_userAddress);
-  registeredVotersMap[_userAddress] = true;
+  registeredVotersArray.push(msg.sender);
+  registeredVotersMap[msg.sender] = true;
 
 }
 
 /*delegate stand up could be simple flag which allows any user to delegate for any topic/poll*/
 
   /*allows user to offer themselves as a delegate*/
-function becomeDelegateForTopic(address _userAddress, uint _topic)
+function becomeDelegateForTopic(uint _topic)
 external
-isRegisteredVoter(_userAddress)
+isRegisteredVoter
 isValidTopicOption(_topic)
-isDelegationExpirationIntervalOpen()
+isDelegationExpirationIntervalOpen
 {
-  expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][_userAddress][_topic] = true;
+  expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][msg.sender][_topic] = true;
 }
 
 /*Allows user to withdraw as a delegate in all future polls. All polls where they are currently a delegate they will remain a delegate until the poll closes*/
@@ -176,36 +176,36 @@ isValidDelegateForTopic(_userAddress, _topic)
   expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][_userAddress][_topic] = false;
 }*/
 
-function delegateVoteForTopic(address _userAddress,uint _topic, address _delegateAddress)
+function delegateVoteForTopic(uint _topic, address _delegateAddress)
 external
-isRegisteredVoter(_userAddress)
+isRegisteredVoter
 isValidDelegateForTopic(_delegateAddress, _topic)
 isValidTopicOption(_topic)
-isValidChainDepthAndNonCircular(_userAddress, _topic)
-isDelegationExpirationIntervalOpen()
+isValidChainDepthAndNonCircular(_topic)
+isDelegationExpirationIntervalOpen
 {
 
 /*possible mapping name, delegatesForUser, have comment explaing structure*/
-  expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] = _delegateAddress;
+  expirationToUserToTopicToDelegateAddress[delegationExpiration][msg.sender][_topic] = _delegateAddress;
 
 }
 
 
-function revokeDelegationForTopic(address _userAddress, uint _topic)
+function revokeDelegationForTopic(uint _topic)
 public
-isRegisteredVoter(_userAddress)
+isRegisteredVoter
 isValidTopicOption(_topic)
-isDelegationExpirationIntervalOpen()
+isDelegationExpirationIntervalOpen
 {
 
-  expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] = 0x0;
+  expirationToUserToTopicToDelegateAddress[delegationExpiration][msg.sender][_topic] = 0x0;
 
 }
 
 function readDelegateForTopic(address _userAddress, uint _topic)
 public
 view
-isDelegationExpirationIntervalOpen()
+isDelegationExpirationIntervalOpen
 returns (address _delegateAddress)
 {
   return expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic];
@@ -214,7 +214,7 @@ returns (address _delegateAddress)
 function readEndDelegateForTopic(address _userAddress, uint _topic, uint _recursionCount)
 public
 view
-isDelegationExpirationIntervalOpen()
+isDelegationExpirationIntervalOpen
 returns (address _endDelegateAddress)
 {
 
@@ -239,7 +239,7 @@ function _isValidTopicOption(uint _topic) public view returns(bool){
 function _isValidChainDepthAndNonCircular(address _userAddress, uint _topic, uint _recursionCount)
 public
 view
-isDelegationExpirationIntervalOpen()
+isDelegationExpirationIntervalOpen
 returns(bool _valid, bool _vDepth, bool _vCircle){
 
   if(_recursionCount > delegationDepth){
@@ -276,7 +276,7 @@ returns(bool _valid, bool _vDepth, bool _vCircle){
  function _isValidDelegateForTopic(address _userAddress, uint _topic)
  view
   public
-  isDelegationExpirationIntervalOpen()
+  isDelegationExpirationIntervalOpen
   returns (bool _delegateStatus){
    if (expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][_userAddress][_topic] == true) {
      return true;

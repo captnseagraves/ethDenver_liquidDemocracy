@@ -64,18 +64,18 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
   /*would clean and reduce modifiers and helper functions for production*/
   /*verifies voter is registered*/
-    modifier isRegisteredVoter(address _userAddress) {
-        require(_isRegisteredVoter(_userAddress) == true);
+    modifier isRegisteredVoter() {
+        require(_isRegisteredVoter(msg.sender) == true);
       _;
     }
     /*verifies delegate is valid*/
-    modifier isValidDelegate(address _userAddress) {
-      require(_isValidDelegate(_userAddress) == true);
+    modifier isValidDelegate(address _delegateAddress) {
+      require(_isValidDelegate(_delegateAddress) == true);
       _;
     }
     /*verifies if vote is delegated*/
-    modifier isVoteDelegated(address _userAddress) {
-      require(_isVoteDelegated(_userAddress) == false);
+    modifier isVoteDelegated() {
+      require(_isVoteDelegated(msg.sender) == false);
       _;
     }
     /*verifies if vote is delegated*/
@@ -83,14 +83,14 @@ contract LiquidDemocracyPoll is LDPollInterface {
       require(_isValidVoteOption(_vote) == true);
       _;
     }
-    modifier isValidChainDepthAndNonCircular(address _userAddress) {
+    modifier isValidChainDepthAndNonCircular() {
       bool bValid;
-      (bValid,,) =_isValidChainDepthAndNonCircular(_userAddress, 0);
+      (bValid,,) =_isValidChainDepthAndNonCircular(msg.sender, 0);
       require(bValid);
       _;
     }
-    modifier isVoterDelegateAndDelegatePeriodOpen(address _userAddress) {
-      if (willingToBeDelegate[_userAddress] == true) {
+    modifier isVoterDelegateAndDelegatePeriodOpen() {
+      if (willingToBeDelegate[msg.sender] == true) {
         require(block.timestamp < delegatePeriodEnd);
       }
       _;
@@ -125,52 +125,52 @@ contract LiquidDemocracyPoll is LDPollInterface {
   }
 
   /*allows voter to register for poll*/
-  function registerVoter(address _userAddress)
+  function registerVoter()
   external
-  votePeriodOpen()
+  votePeriodOpen
   {
 
-    require(registeredVotersMap[_userAddress] == false);
+    require(registeredVotersMap[msg.sender] == false);
 
-    registeredVotersArray.push(_userAddress);
-    registeredVotersMap[_userAddress] = true;
+    registeredVotersArray.push(msg.sender);
+    registeredVotersMap[msg.sender] = true;
 
   }
 
   /*allows user to offer themselves as a delegate*/
-  function becomeDelegate(address _userAddress)
+  function becomeDelegate()
   external
-  isRegisteredVoter(_userAddress)
-  delegatePeriodOpen()
+  isRegisteredVoter
+  delegatePeriodOpen
   {
-    willingToBeDelegate[_userAddress] = true;
+    willingToBeDelegate[msg.sender] = true;
   }
 
   /*Instead of using bytes32 as 256 bit array, could potentially use enums... not sure pros/cons of each*/
   /*allows user to vote a value
   todo: rewrite tests for voting*/
-  function vote(address _userAddress, uint _value)
+  function vote(uint _value)
   external
-  isRegisteredVoter(_userAddress)
+  isRegisteredVoter
   /*isVoteDelegated(_userAddress)*/
-  isVoterDelegateAndDelegatePeriodOpen(_userAddress)
+  isVoterDelegateAndDelegatePeriodOpen
   isValidVoteOption(_value)
-  votePeriodOpen()
+  votePeriodOpen
   {
-    userVotes[_userAddress] = _value;
+    userVotes[msg.sender] = _value;
   }
 
   /*need to verify chain depth and check circular delegation*/
 
   /* allows user to delegate their vote to another user who is a valid delegeate*/
-  function delegateVote(address _userAddress, address _delegateAddress)
+  function delegateVote(address _delegateAddress)
   external
-  isRegisteredVoter(_userAddress)
+  isRegisteredVoter
   isValidDelegate(_delegateAddress)
-  isValidChainDepthAndNonCircular(_userAddress)
-  delegatePeriodOpen()
+  isValidChainDepthAndNonCircular
+  delegatePeriodOpen
   {
-    userToDelegate[_userAddress] = _delegateAddress;
+    userToDelegate[msg.sender] = _delegateAddress;
   }
 
   /*can refactor these functions to be one
@@ -253,12 +253,12 @@ contract LiquidDemocracyPoll is LDPollInterface {
   }
 
   /*allows user to revoke their delegation if they disagree with delegates vote*/
-  function revokeDelegationForPoll(address _userAddress)
+  function revokeDelegationForPoll()
   public
-  isRegisteredVoter(_userAddress)
-  votePeriodOpen()
+  isRegisteredVoter
+  votePeriodOpen
   {
-    userToDelegate[_userAddress] = 0x0;
+    userToDelegate[msg.sender] = 0x0;
   }
 
   /**/
@@ -270,12 +270,12 @@ contract LiquidDemocracyPoll is LDPollInterface {
   /**/
   /**/
 
-  function withdrawDirectVote(address _userAddress)
+  function withdrawDirectVote()
   public
-  isRegisteredVoter(_userAddress)
-  votePeriodOpen()
+  isRegisteredVoter
+  votePeriodOpen
   {
-    userVotes[_userAddress] = 0;
+    userVotes[msg.sender] = 0;
   }
 
 
@@ -374,7 +374,11 @@ contract LiquidDemocracyPoll is LDPollInterface {
  /**/
  /**/
 
- function _isValidChainDepthAndNonCircular(address _userAddress, uint _recursionCount) public view returns(bool _valid, bool _vDepth, bool _vCircle){
+ function _isValidChainDepthAndNonCircular(address _userAddress, uint _recursionCount)
+  public
+  view
+  returns(bool _valid, bool _vDepth, bool _vCircle)
+ {
 
    if(_recursionCount > delegationDepth){
      _vDepth = true;
@@ -400,9 +404,10 @@ contract LiquidDemocracyPoll is LDPollInterface {
   /*these addtional functions allow me to test contract. would remove bottom two for production and implement in modifier*/
 
   function _isVoteDelegated(address _userAddress)
-  view
+   view
    internal
-   returns (bool _voteStatus){
+   returns (bool _voteStatus)
+  {
 
      address forumDelegate = LDForumInterface(forumAddress).readDelegateForTopic(_userAddress, topic);
 
@@ -414,9 +419,10 @@ contract LiquidDemocracyPoll is LDPollInterface {
   }
 
   function _isRegisteredVoter(address _userAddress)
-  view
+   view
    public
-   returns (bool _voterRegistration){
+   returns (bool _voterRegistration)
+  {
     if (registeredVotersMap[_userAddress] == true) {
       return true;
     } else {
