@@ -301,13 +301,21 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       await liquidPoll.vote.sendTransaction(1, { from: VOTER_1, gas: 4000000 })
 
-      await expect( liquidPoll.readVote.call(VOTER_1, 0)).to.eventually.bignumber.equal(1);
+      let voter_1_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_1, 0)
+
+      await expect(voter_1_vote[0].toNumber()).to.equal(1);
+      await expect(voter_1_vote[1]).to.equal(VOTER_1);
+
 
       await liquidPoll.vote.sendTransaction(2, { from: VOTER_2, gas: 4000000 })
       await liquidPoll.vote.sendTransaction(4, { from: VOTER_4, gas: 4000000 })
       await liquidPoll.vote.sendTransaction(5, { from: VOTER_5, gas: 4000000 })
       await liquidPoll.vote.sendTransaction(6, { from: VOTER_6, gas: 4000000 })
-      await expect( liquidPoll.readVote.call(VOTER_6, 0)).to.eventually.bignumber.equal(6);
+
+      let voter_6_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_6, 0)
+
+      await expect(voter_6_vote[0].toNumber()).to.equal(6);
+      await expect(voter_6_vote[1]).to.equal(VOTER_6);
 
       await liquidPoll.vote.sendTransaction(7, { from: VOTER_7, gas: 4000000 })
       await liquidPoll.vote.sendTransaction(8, { from: VOTER_8, gas: 4000000 })
@@ -341,23 +349,35 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await liquidPoll.withdrawDirectVote.sendTransaction({ from: VOTER_9, gas: 4000000 })
       await liquidPoll.delegateVote.sendTransaction(VOTER_8, { from: VOTER_9, gas: 4000000 })
 
-      await expect( liquidPoll.readVote.call(VOTER_3, 0)).to.eventually.bignumber.equal(8);
-      await expect( liquidPoll.readVote.call(VOTER_5, 0)).to.eventually.bignumber.equal(8);
-      await expect( liquidPoll.readVote.call(VOTER_6, 0)).to.eventually.bignumber.equal(8);
-      await expect( liquidPoll.readVote.call(VOTER_7, 0)).to.eventually.bignumber.equal(8);
-      await expect( liquidPoll.readVote.call(VOTER_9, 0)).to.eventually.bignumber.equal(8);
+      let voter_3_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_3, 0)
+
+      await expect(voter_3_vote[0].toNumber()).to.equal(8);
+      await expect(voter_3_vote[1]).to.equal(VOTER_8);
+
+      let voter_5_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_5, 0)
+
+      await expect(voter_5_vote[0].toNumber()).to.equal(8);
+      await expect(voter_5_vote[1]).to.equal(VOTER_8);
+      let voter_6_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_6, 0)
+
+      await expect(voter_6_vote[0].toNumber()).to.equal(8);
+      await expect(voter_6_vote[1]).to.equal(VOTER_8);
+
+      let voter_7_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_7, 0)
+
+      await expect(voter_7_vote[0].toNumber()).to.equal(8);
+      await expect(voter_7_vote[1]).to.equal(VOTER_8);
+
+      let voter_9_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_9, 0)
+
+      await expect(voter_9_vote[0].toNumber()).to.equal(8);
+      await expect(voter_9_vote[1]).to.equal(VOTER_8);
 
       await expect( liquidPoll.readDelegate.call(VOTER_3)).to.eventually.bignumber.equal(VOTER_7);
       await expect( liquidPoll.readDelegate.call(VOTER_5)).to.eventually.bignumber.equal(VOTER_9);
       await expect( liquidPoll.readDelegate.call(VOTER_6)).to.eventually.bignumber.equal(VOTER_7);
       await expect( liquidPoll.readDelegate.call(VOTER_7)).to.eventually.bignumber.equal(VOTER_9);
       await expect( liquidPoll.readDelegate.call(VOTER_9)).to.eventually.bignumber.equal(VOTER_8);
-
-      await expect( liquidPoll.readEndVoter.call(VOTER_3, 0)).to.eventually.bignumber.equal(VOTER_8);
-      await expect( liquidPoll.readEndVoter.call(VOTER_5, 0)).to.eventually.bignumber.equal(VOTER_8);
-      await expect( liquidPoll.readEndVoter.call(VOTER_6, 0)).to.eventually.bignumber.equal(VOTER_8);
-      await expect( liquidPoll.readEndVoter.call(VOTER_7, 0)).to.eventually.bignumber.equal(VOTER_8);
-      await expect( liquidPoll.readEndVoter.call(VOTER_9, 0)).to.eventually.bignumber.equal(VOTER_8);
 
     });
 
@@ -370,9 +390,10 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       await liquidPoll.revokeDelegationForPoll.sendTransaction({ from: VOTER_3, gas: 4000000 })
 
-      await expect( liquidPoll.readVote.call(VOTER_3, 0)).to.eventually.bignumber.equal(0);
+      let voter_3_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_3, 0)
 
-      await expect( liquidPoll.readEndVoter.call(VOTER_3, 0)).to.eventually.bignumber.equal(VOTER_3);
+      await expect(voter_3_vote[0].toNumber()).to.equal(0);
+      await expect(voter_3_vote[1]).to.equal(VOTER_3);
 
     });
 
@@ -632,9 +653,10 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       it("should still return vote and endVoter of forum Delegate", async () => {
 
-        await expect( liquidPoll.readVote.call(VOTER_2, 0)).to.eventually.bignumber.equal(4);
+        let voter_3_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_2, 0)
 
-        await expect( liquidPoll.readEndVoter.call(VOTER_2, 0)).to.eventually.bignumber.equal(VOTER_4);
+        await expect(voter_3_vote[0].toNumber()).to.equal(4);
+        await expect(voter_3_vote[1]).to.equal(VOTER_4);
 
       });
     });
@@ -746,9 +768,10 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       it("should still return vote and endVoter of forum Delegate", async () => {
 
-        await expect( liquidPoll.readVote.call(VOTER_2, 0)).to.eventually.bignumber.equal(0);
+        let voter_3_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_2, 0)
 
-        await expect( liquidPoll.readEndVoter.call(VOTER_2, 0)).to.eventually.bignumber.equal(VOTER_4);
+        await expect(voter_3_vote[0].toNumber()).to.equal(0);
+        await expect(voter_3_vote[1]).to.equal(VOTER_4);
 
       });
     });

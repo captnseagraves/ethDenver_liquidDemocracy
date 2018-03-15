@@ -146,21 +146,16 @@ contract LiquidDemocracyPoll is LDPollInterface {
     willingToBeDelegate[msg.sender] = true;
   }
 
-  /*Instead of using bytes32 as 256 bit array, could potentially use enums... not sure pros/cons of each*/
-  /*allows user to vote a value
-  todo: rewrite tests for voting*/
+  /*allows user to vote a value*/
   function vote(uint _value)
   external
   isRegisteredVoter
-  /*isVoteDelegated(_userAddress)*/
   isVoterDelegateAndDelegatePeriodOpen
   isValidVoteOption(_value)
   votePeriodOpen
   {
     userVotes[msg.sender] = _value;
   }
-
-  /*need to verify chain depth and check circular delegation*/
 
   /* allows user to delegate their vote to another user who is a valid delegeate*/
   function delegateVote(address _delegateAddress)
@@ -175,40 +170,42 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
   /*can refactor these functions to be one
   or just refactor to have each do something different, not DRY currently
-
-
-
-  create function to change address of forum contract, allows upgrades
   */
 
   /*allows user to read their vote or their delegate's vote
   returns users vote*/
-  function readVote(address _userAddress, uint _recursionCount)
+  function readVoteAndEndVoter(address _userAddress, uint _recursionCount)
   public
   view
-  returns (uint)
+  returns (uint _voteValue, address _endVoterAddress)
   {
 
     if (userVotes[_userAddress] != 0) {
-      return userVotes[_userAddress];
+      _voteValue = userVotes[_userAddress];
+      _endVoterAddress = _userAddress;
+      return;
     }
 
     if (_recursionCount > delegationDepth){
-        return 0;
+      _voteValue = 0;
+      _endVoterAddress = _userAddress;
+      return;
     }
 
     address forumDelegate = LDForumInterface(forumAddress).readEndDelegateForTopic(_userAddress, topic, 0);
 
     if (userToDelegate[_userAddress] != 0x0) {
-      return readVote(userToDelegate[_userAddress], _recursionCount + 1);
+      return readVoteAndEndVoter(userToDelegate[_userAddress], _recursionCount + 1);
     } else if (forumDelegate != 0x0) {
-      return readVote(forumDelegate, _recursionCount + 1);
+      return readVoteAndEndVoter(forumDelegate, _recursionCount + 1);
     } else {
-      return 0;
+      _voteValue = 0;
+      _endVoterAddress = _userAddress;
+      return;
     }
   }
 
-  function readEndVoter(address _userAddress, uint _recursionCount)
+  /*function readEndVoter(address _userAddress, uint _recursionCount)
   public
   view
   returns (address)
@@ -231,7 +228,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
     } else {
       return _userAddress;
     }
-  }
+  }*/
 
 
   /*allows user to read user they delegated their vote to*/
@@ -343,7 +340,8 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
     //todo: how to handle vote validation and initialization
     for (uint i = 0; i < registeredVotersArray.length; i++){
-      uint vote = readVote(registeredVotersArray[i], 0);
+      uint vote;
+    (vote,)  = readVoteAndEndVoter(registeredVotersArray[i], 0);
       _votes[vote]++;
 
       if(vote > 0){
@@ -355,6 +353,14 @@ contract LiquidDemocracyPoll is LDPollInterface {
     return (_votes, _totalVotes, _emptyVotes);
   }
 
+
+function changeForumAddress(address _newForumAddress)
+  public
+
+{
+  forumAddress = _newForumAddress;
+  /*event*/
+}
 
 /*Could refactor to just use uints. why the complicated bit math?*/
 
