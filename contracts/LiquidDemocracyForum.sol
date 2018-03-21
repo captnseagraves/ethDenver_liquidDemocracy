@@ -38,12 +38,15 @@ address[] internal registeredVotersArray;
   expiration contract possible to simplfy mappings
   delegates could be own contract as well
   OOP approach with contracts as objects
-  - could also name something less gnarly and have comment explaining structure
 */
 
-mapping (uint => mapping (address => mapping (uint => address))) public expirationToUserToTopicToDelegateAddress;
+/* This mapping contains a user's topic delegation per epiration interval
+ expirationInterval -> userAddress -> topic -> delegateAddress */
+mapping (uint => mapping (address => mapping (uint => address))) public delegatesForUser;
 
-mapping (uint => mapping (address => mapping (uint => bool))) public expirationToWillingToBeDelegateToTopicToBool;
+/* This mapping contains a user's willingness to be a delegate per epiration interval
+expirationInterval -> userAddress -> topic -> bool */
+mapping (uint => mapping (address => mapping (uint => bool))) public willingtoBeTopicDelegate;
 
 modifier isDelegationExpirationIntervalOpen() {
   require(block.timestamp < delegationExpiration);
@@ -86,7 +89,8 @@ function LiquidDemocracyForum(uint _validTopicOptions, bytes32 _topicMetaData, u
 }
 
 function resetDelegationExpirationInterval(uint _numberOfDays)
-/*anyone can call this function, time lock is sufficient and desireable*/
+/*anyone can call this function, time lock is sufficient and desireable
+Ideally would be called automatically*/
  public
 {
   require(block.timestamp > delegationExpiration);
@@ -152,7 +156,9 @@ external
 
 }
 
-/*delegate stand up could be simple flag which allows any user to delegate for any topic/poll*/
+/*delegate stand up could be simple flag which allows any user to delegate for any topic/poll
+  - might require heavy refator and cause problems with restracting delegations
+*/
 
   /*allows user to offer themselves as a delegate*/
 function becomeDelegateForTopic(uint _topic)
@@ -161,7 +167,7 @@ isRegisteredVoter
 isValidTopicOption(_topic)
 isDelegationExpirationIntervalOpen
 {
-  expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][msg.sender][_topic] = true;
+  willingtoBeTopicDelegate[delegationExpiration][msg.sender][_topic] = true;
 }
 
 /*Allows user to withdraw as a delegate in all future polls. All polls where they are currently a delegate they will remain a delegate until the poll closes*/
@@ -173,7 +179,7 @@ external
 isRegisteredVoter(_userAddress)
 isValidDelegateForTopic(_userAddress, _topic)
 {
-  expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][_userAddress][_topic] = false;
+  willingtoBeTopicDelegate[delegationExpiration][_userAddress][_topic] = false;
 }*/
 
 function delegateVoteForTopic(uint _topic, address _delegateAddress)
@@ -185,8 +191,7 @@ isValidChainDepthAndNonCircular(_topic)
 isDelegationExpirationIntervalOpen
 {
 
-/*possible mapping name, delegatesForUser, have comment explaing structure*/
-  expirationToUserToTopicToDelegateAddress[delegationExpiration][msg.sender][_topic] = _delegateAddress;
+  delegatesForUser[delegationExpiration][msg.sender][_topic] = _delegateAddress;
 
 }
 
@@ -198,7 +203,7 @@ isValidTopicOption(_topic)
 isDelegationExpirationIntervalOpen
 {
 
-  expirationToUserToTopicToDelegateAddress[delegationExpiration][msg.sender][_topic] = 0x0;
+  delegatesForUser[delegationExpiration][msg.sender][_topic] = 0x0;
 
 }
 
@@ -208,7 +213,7 @@ view
 isDelegationExpirationIntervalOpen
 returns (address _delegateAddress)
 {
-  return expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic];
+  return delegatesForUser[delegationExpiration][_userAddress][_topic];
 }
 
 function readEndDelegateForTopic(address _userAddress, uint _topic, uint _recursionCount)
@@ -222,10 +227,10 @@ returns (address _endDelegateAddress)
    return 0x0;
   }
 
-  if (expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] == 0x0) {
+  if (delegatesForUser[delegationExpiration][_userAddress][_topic] == 0x0) {
     return _userAddress;
   } else {
-    return readEndDelegateForTopic(expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic], _topic, _recursionCount + 1);
+    return readEndDelegateForTopic(delegatesForUser[delegationExpiration][_userAddress][_topic], _topic, _recursionCount + 1);
   }
 }
 
@@ -248,13 +253,13 @@ returns(bool _valid, bool _vDepth, bool _vCircle){
     return;
   }
 
-  if (expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] != 0x0) {
-    if (expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic] == _userAddress) {
+  if (delegatesForUser[delegationExpiration][_userAddress][_topic] != 0x0) {
+    if (delegatesForUser[delegationExpiration][_userAddress][_topic] == _userAddress) {
       _valid = false;
       _vCircle = true;
       return;
     }
-    return _isValidChainDepthAndNonCircular(expirationToUserToTopicToDelegateAddress[delegationExpiration][_userAddress][_topic], _topic, _recursionCount + 1);
+    return _isValidChainDepthAndNonCircular(delegatesForUser[delegationExpiration][_userAddress][_topic], _topic, _recursionCount + 1);
   } else {
     _valid = true;
     return;
@@ -278,7 +283,7 @@ returns(bool _valid, bool _vDepth, bool _vCircle){
   public
   isDelegationExpirationIntervalOpen
   returns (bool _delegateStatus){
-   if (expirationToWillingToBeDelegateToTopicToBool[delegationExpiration][_userAddress][_topic] == true) {
+   if (willingtoBeTopicDelegate[delegationExpiration][_userAddress][_topic] == true) {
      return true;
    } else {
      return false;

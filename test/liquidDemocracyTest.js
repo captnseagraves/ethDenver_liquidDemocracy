@@ -56,10 +56,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
     const VOTER_8 = ACCOUNTS[8];
     const VOTER_9 = ACCOUNTS[9];
 
-    // MUST ADJUST TIME TO SUIT TESTS. OTHERWISE TESTS WILL FAIL.
-
-    // const DELEGATE_PERIOD = timestamp.fromDate(new Date('2018-03-03T10:24:00'));
-
     timestamp.round = true;
 
     let time = timestamp.now()
@@ -68,10 +64,8 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
         // console.log('time1', Date.now());
 
-
     const DELEGATE_PERIOD = timestamp.add(time, "1d");
 
-    // const VOTE_PERIOD = timestamp.fromDate(new Date('2018-03-03T11:24:00'))
     const VOTE_PERIOD = timestamp.add(time, "2d");
 
     const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -84,7 +78,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
     const deployForum = async () => {
 
         const instance =
-            await liquidDemocracyForumContract.new( 8, EMPTY_BYTES32_HASH, 5, -1, { from: OWNER, gas: 4000000 });
+            await liquidDemocracyForumContract.new( 8, EMPTY_BYTES32_HASH, 2, -1, { from: OWNER, gas: 4000000 });
 
         const web3ContractInstance =
             web3.eth.contract(instance.abi).at(instance.address);
@@ -102,7 +96,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       it("should return correct delegationDepth", async () => {
 
-        await expect( liquidForum.delegationDepth.call()).to.eventually.bignumber.equal(5);
+        await expect( liquidForum.delegationDepth.call()).to.eventually.bignumber.equal(2);
 
       });
 
@@ -216,7 +210,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
     it("should return correct delegationDepth", async () => {
 
-    await expect( liquidPoll.delegationDepth.call()).to.eventually.bignumber.equal(5);
+    await expect( liquidPoll.delegationDepth.call()).to.eventually.bignumber.equal(2);
 
     });
 
@@ -268,9 +262,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect(liquidPoll.registerVoter.sendTransaction({ from: VOTER_1, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
 
     });
-
-  // test for registering after voting period has ended
-
   });
 
   describe("#becomeDelegate()", () => {
@@ -291,9 +282,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect(liquidPoll.becomeDelegate.sendTransaction({ from: VOTER_3, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
 
     });
-
-    // test for becoming delegate after delegate period has ended
-
   });
 
   describe("#vote()", () => {
@@ -328,10 +316,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect(liquidPoll.vote.sendTransaction(3, { from: VOTER_3, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
 
     });
-
-    // test for voting after voting period has ended
-
-
   });
 
   describe("#delegateVote()", () => {
@@ -380,9 +364,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect( liquidPoll.readDelegate.call(VOTER_9)).to.eventually.bignumber.equal(VOTER_8);
 
     });
-
-    // test for delegating vote after voting period has ended
-
   });
 
   describe("#revokeDelegationForPoll()", () => {
@@ -396,10 +377,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect(voter_3_vote[1]).to.equal(VOTER_3);
 
     });
-
-    // test for revoking delegation after voting period has ended
-
-
   });
 
   describe("#tally()", () => {
@@ -453,7 +430,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect(liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_1, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
 
     });
-
   });
 
   describe("#becomeDelegateForTopic()", () => {
@@ -478,7 +454,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
         await liquidForum.becomeDelegateForTopic.sendTransaction(2, { from: VOTER_2, gas: 4000000 })
         await liquidForum.becomeDelegateForTopic.sendTransaction(2, { from: VOTER_6, gas: 4000000 })
 
-
       });
 
     it("should fail when unregistered user tries to become delegate", async () => {
@@ -486,9 +461,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect(liquidForum.becomeDelegateForTopic.sendTransaction(3, { from: VOTER_3, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
 
     });
-
-    // test delegation read correctly from different delegationExpiratoinIntervals
-
   });
 
   describe("#delegateVoteForTopic()", () => {
@@ -536,33 +508,14 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
   });
 
   describe("#revokeDelegationForTopic()", () => {
+
     it("should allow user to revoke their delegation", async () => {
 
         await liquidForum.revokeDelegationForTopic.sendTransaction(7, { from: VOTER_5, gas: 4000000 })
         await expect( liquidForum.readDelegateForTopic.call(VOTER_5, 7)).to.eventually.bignumber.equal(0x0);
       });
-
-
-      // test delegation read correctly from different delegationExpiratoinIntervals
-
-
-
-    // it("should fail when unregistered user tries to become delegate", async () => {
-    //
-    //   await expect(liquidForum.revokeDelegationForTopic.sendTransaction(VOTER_3, 3, { from: VOTER_, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
-    //
-    // });
-
   });
 
-  // test for registering after voting period has ended
-  // test for becoming delegate after delegate period has ended
-  // test for voting after voting period has ended
-  // test for delegating vote after voting period has ended
-  // test for revoking delegation after voting period has ended
-  // test delegation read correctly from different delegationExpiratoinIntervals
-  // test tally works correctly reading from topic delegation, poll delegation, and direct voting.
-  // test for unregistered user revoking delegation
 
   describe("#createPoll() 2nd Instance", () => {
 
@@ -661,8 +614,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       });
     });
 
-      // test for revoking delegation after voting period has ended
-
       describe("#tally()", () => {
         it("should correctly tally votes from poll", async () => {
 
@@ -689,9 +640,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
         });
       });
-
-  // refactor to have each function call be from wallet owner instead of proposal owner, and test security.
-
 
   describe("#createPoll() 3rd Instance", () => {
 
@@ -760,7 +708,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
 
     describe("#revokeDelegation() in poll", () => {
-      it("should allow user to revoke their delegation after delegation period has passed, but vote period open", async () => {
+      it("should fail to allow user to revoke their delegation after delegation period hashas closed", async () => {
 
           await expect(liquidPoll.revokeDelegationForPoll.sendTransaction({ from: VOTER_2, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
 
@@ -775,8 +723,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       });
     });
-
-      // test for revoking delegation after voting period has ended
 
       describe("#tally()", () => {
         it("should correctly tally votes from poll", async () => {
@@ -805,7 +751,9 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
         });
       });
 
-  // refactor to have each function call be from wallet owner instead of proposal owner, and test security.
+  // refactor to have each function call be from wallet owner instead of proposal owner,
+
+  //  and test security.
 
   /*Could there be circular delegation if poll and forum delegations are separate?
                   Must test*/

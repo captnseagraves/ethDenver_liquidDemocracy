@@ -168,9 +168,6 @@ contract LiquidDemocracyPoll is LDPollInterface {
     userToDelegate[msg.sender] = _delegateAddress;
   }
 
-  /*can refactor these functions to be one
-  or just refactor to have each do something different, not DRY currently
-  */
 
   /*allows user to read their vote or their delegate's vote
   returns users vote*/
@@ -258,14 +255,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
     userToDelegate[msg.sender] = 0x0;
   }
 
-  /**/
-  /**/
-  /*Need to implement onlyVoter function!!!!!!!!!!
 
-    must implement controls so that only the msg.sender can can their own data, no other actor should be able to change data.
-  /
-  /**/
-  /**/
 
   function withdrawDirectVote()
   public
@@ -327,6 +317,8 @@ contract LiquidDemocracyPoll is LDPollInterface {
 /* recording votes/delegatoins as they happen vs. tallyin at the end, may be more expensive  upfront, but allows outcome to be actionable on chain, because end tally function doesnt run out of gas. */
 
 /*could have gas conscious tally function that run multiple times.*/
+
+/*could also use trubit style computation and perform actions based on those results*/
 
 
   /*allows user tally votes at */
