@@ -71,8 +71,7 @@ function LiquidDemocracyForum(uint _validTopicOptions, bytes32 _topicMetaData, u
 }
 
 function resetDelegationExpirationInterval(uint _numberOfDays)
-/*anyone can call this function, time lock is sufficient and desireable
-Ideally would be called automatically*/
+/*anyone can call this function, time lock is sufficient and desireable*/
  public
 {
   require(block.timestamp > delegationExpiration);
@@ -138,10 +137,6 @@ external
 
 }
 
-/*delegate stand up could be simple flag which allows any user to delegate for any topic/poll
-  - might require heavy refator and cause problems with restracting delegations
-*/
-
   /*allows user to offer themselves as a delegate*/
 function becomeDelegateForTopic(uint _topic)
 external
@@ -151,18 +146,6 @@ isDelegationExpirationIntervalOpen
 {
   willingtoBeTopicDelegate[delegationExpiration][msg.sender][_topic] = true;
 }
-
-/*Allows user to withdraw as a delegate in all future polls. All polls where they are currently a delegate they will remain a delegate until the poll closes*/
-
-/*withdraw becomes deprecated with delegationExpirationInterval*/
-
-/*function withdrawAsDelegateForTopic(address _userAddress, uint _topic)
-external
-isRegisteredVoter(_userAddress)
-isValidDelegateForTopic(_userAddress, _topic)
-{
-  willingtoBeTopicDelegate[delegationExpiration][_userAddress][_topic] = false;
-}*/
 
 function delegateVoteForTopic(uint _topic, address _delegateAddress)
 external
@@ -216,12 +199,6 @@ returns (address _endDelegateAddress)
   }
 }
 
-/*function _isValidTopicOption(uint _topic) public view returns(bool){
-     byte MyByte = validTopicArray[_topic / 8];
-     uint MyPosition = 7 - (_topic % 8);
-
-    return  2**MyPosition == uint8(MyByte & byte(2**MyPosition));
-}*/
 
 function _isValidChainDepthAndNonCircular(address _userAddress, uint _topic, uint _recursionCount)
 public
