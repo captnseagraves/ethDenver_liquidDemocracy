@@ -6,20 +6,6 @@ import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
 contract LiquidDemocracyForum is LDForumInterface, Ownable {
-  /*contract LiquidDemocracyForum {*/
-
-/*
-create topics that hold many polls
-generate polls with designated topic
-allow delegation at the topic level
-allow different delegations to different topics
-implement delegation expiration period
-*/
-
-
-/*modularity could be very cool and allow many different kinds of voting and many different features.*/
-
-
 
 uint public validTopicOptions;
 bytes32 public topicMetaData;
@@ -34,11 +20,7 @@ mapping (address => bool) internal registeredVotersMap;
 
 address[] internal registeredVotersArray;
 
-/*
-  expiration contract possible to simplfy mappings
-  delegates could be own contract as well
-  OOP approach with contracts as objects
-*/
+
 
 /* This mapping contains a user's topic delegation per epiration interval
  expirationInterval -> userAddress -> topic -> delegateAddress */

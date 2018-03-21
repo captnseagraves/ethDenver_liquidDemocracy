@@ -29,9 +29,6 @@ contract LiquidDemocracyPoll is LDPollInterface {
   uint public topic;
 
 
-/*want to think about not having users stand up as delegates, but allow anyone to delegate to anyone*/
-
-
   /*redundant voter registers solve for different major issues when each is used individually*/
 
   /*tracks user registration and single signup*/
@@ -95,10 +92,6 @@ contract LiquidDemocracyPoll is LDPollInterface {
       }
       _;
     }
-
-/**********/
-    /*NEED TO ADD EVENTS*/
-/***********/
 
   function LiquidDemocracyPoll(
     uint _delegatePeriodEnd,
@@ -202,31 +195,6 @@ contract LiquidDemocracyPoll is LDPollInterface {
     }
   }
 
-  /*function readEndVoter(address _userAddress, uint _recursionCount)
-  public
-  view
-  returns (address)
-  {
-
-    address forumDelegate = LDForumInterface(forumAddress).readEndDelegateForTopic(_userAddress, topic, 0);
-
-    if (userToDelegate[_userAddress] == 0x0 && forumDelegate == _userAddress) {
-      return _userAddress;
-    }
-
-    if (_recursionCount > delegationDepth){
-     return 0x0;
-    }
-
-    if (userToDelegate[_userAddress] != 0x0) {
-      return readEndVoter(userToDelegate[_userAddress], _recursionCount + 1);
-    } else if (forumDelegate != 0x0) {
-      return readEndVoter(forumDelegate, _recursionCount + 1);
-    } else {
-      return _userAddress;
-    }
-  }*/
-
 
   /*allows user to read user they delegated their vote to*/
   function readDelegate(address _userAddress)
@@ -266,12 +234,6 @@ contract LiquidDemocracyPoll is LDPollInterface {
   }
 
 
-/*figure out how to handle ties
-  return array of winners, if array is length 1, easy solution.
-  if tied, auto-generate run-off poll
-*/
-
-  //todo: how to handle final decision and runoff conditions
   /*if we can make this a view function, that would be ideal*/
   function finalDecision()
   public
@@ -314,21 +276,12 @@ contract LiquidDemocracyPoll is LDPollInterface {
     }
   }
 
-/* recording votes/delegatoins as they happen vs. tallyin at the end, may be more expensive  upfront, but allows outcome to be actionable on chain, because end tally function doesnt run out of gas. */
-
-/*could have gas conscious tally function that run multiple times.*/
-
-/*could also use trubit style computation and perform actions based on those results*/
-
-
   /*allows user tally votes at */
   function tally()
   public
   view
   returns (uint[256] _votes, uint _totalVotes, uint _emptyVotes)
   {
-
-    /*could point to registered voters in forum, instead of poll*/
 
     //todo: how to handle vote validation and initialization
     for (uint i = 0; i < registeredVotersArray.length; i++){
@@ -353,22 +306,6 @@ function changeForumAddress(address _newForumAddress)
   forumAddress = _newForumAddress;
   /*event*/
 }
-
-/*Could refactor to just use uints. why the complicated bit math?*/
-
- /*function _isValidVoteOption(uint _vote) public view returns(bool){
-      byte MyByte = validVoteArray[_vote / 8];
-      uint MyPosition = 7 - (_vote % 8);
-
-     return  2**MyPosition == uint8(MyByte & byte(2**MyPosition));
- }*/
-
- /**/
- /**/
- /*Could there be circular delegation if poll and forum delegations are separate?
-                 Must Check*/
- /**/
- /**/
 
  function _isValidChainDepthAndNonCircular(address _userAddress, uint _recursionCount)
   public
