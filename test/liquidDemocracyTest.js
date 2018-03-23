@@ -150,6 +150,31 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
     });
 
+    describe("#registerVoter_Forum()", () => {
+      it("should register new user in forum", async () => {
+
+        await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_1, gas: 4000000 })
+
+        await expect( liquidForum.verifyVoter.call(VOTER_1)).to.eventually.equal(true);
+
+        await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_2, gas: 4000000 })
+        await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_4, gas: 4000000 })
+        await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_5, gas: 4000000 })
+        await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_6, gas: 4000000 })
+        await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_7, gas: 4000000 })
+        await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_8, gas: 4000000 })
+        await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_9, gas: 4000000 })
+
+
+      });
+
+      it("should fail when registering a second time", async () => {
+
+        await expect(liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_1, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
+
+      });
+    });
+
     describe("#createNewTopic()", () => {
 
 
@@ -238,31 +263,31 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
     });
   });
-
-  describe("#registerVoter()", () => {
-    it("should register new user", async () => {
-
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_1, gas: 4000000 })
-
-      await expect( liquidPoll._isRegisteredVoter.call(VOTER_1)).to.eventually.equal(true);
-
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_2, gas: 4000000 })
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_4, gas: 4000000 })
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_5, gas: 4000000 })
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_6, gas: 4000000 })
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_7, gas: 4000000 })
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_8, gas: 4000000 })
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_9, gas: 4000000 })
-
-
-    });
-
-    it("should fail when registering a second time", async () => {
-
-      await expect(liquidPoll.registerVoter.sendTransaction({ from: VOTER_1, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
-
-    });
-  });
+  //
+  // describe("#registerVoter()", () => {
+  //   it("should register new user", async () => {
+  //
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_1, gas: 4000000 })
+  //
+  //     await expect( liquidPoll._isRegisteredVoter.call(VOTER_1)).to.eventually.equal(true);
+  //
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_2, gas: 4000000 })
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_4, gas: 4000000 })
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_5, gas: 4000000 })
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_6, gas: 4000000 })
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_7, gas: 4000000 })
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_8, gas: 4000000 })
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_9, gas: 4000000 })
+  //
+  //
+  //   });
+  //
+  //   it("should fail when registering a second time", async () => {
+  //
+  //     await expect(liquidPoll.registerVoter.sendTransaction({ from: VOTER_1, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
+  //
+  //   });
+  // });
 
   describe("#becomeDelegate()", () => {
     it("should allow registered user to be a delegate", async () => {
@@ -321,9 +346,9 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
   describe("#delegateVote()", () => {
     it("should allow user to delegate their vote", async () => {
 
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_3, gas: 4000000 })
+      // await liquidPoll.registerVoter.sendTransaction({ from: VOTER_3, gas: 4000000 })
 
-      await liquidPoll.delegateVote.sendTransaction(VOTER_7, { from: VOTER_3, gas: 4000000 })
+      // await liquidPoll.delegateVote.sendTransaction(VOTER_7, { from: VOTER_3, gas: 4000000 })
       await liquidPoll.withdrawDirectVote.sendTransaction({ from: VOTER_5, gas: 4000000 })
       await liquidPoll.delegateVote.sendTransaction(VOTER_9, { from: VOTER_5, gas: 4000000 })
       await liquidPoll.withdrawDirectVote.sendTransaction({ from: VOTER_6, gas: 4000000 })
@@ -333,10 +358,13 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await liquidPoll.withdrawDirectVote.sendTransaction({ from: VOTER_9, gas: 4000000 })
       await liquidPoll.delegateVote.sendTransaction(VOTER_8, { from: VOTER_9, gas: 4000000 })
 
-      let voter_3_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_3, 0)
+      await liquidPoll.withdrawDirectVote.sendTransaction({ from: VOTER_2, gas: 4000000 })
+      await liquidPoll.delegateVote.sendTransaction(VOTER_1, { from: VOTER_2, gas: 4000000 })
 
-      await expect(voter_3_vote[0].toNumber()).to.equal(8);
-      await expect(voter_3_vote[1]).to.equal(VOTER_8);
+      // let voter_3_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_3, 0)
+
+      // await expect(voter_3_vote[0].toNumber()).to.equal(8);
+      // await expect(voter_3_vote[1]).to.equal(VOTER_8);
 
       let voter_5_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_5, 0)
 
@@ -357,7 +385,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       await expect(voter_9_vote[0].toNumber()).to.equal(8);
       await expect(voter_9_vote[1]).to.equal(VOTER_8);
 
-      await expect( liquidPoll.readDelegate.call(VOTER_3)).to.eventually.bignumber.equal(VOTER_7);
+      // await expect( liquidPoll.readDelegate.call(VOTER_3)).to.eventually.bignumber.equal(VOTER_7);
       await expect( liquidPoll.readDelegate.call(VOTER_5)).to.eventually.bignumber.equal(VOTER_9);
       await expect( liquidPoll.readDelegate.call(VOTER_6)).to.eventually.bignumber.equal(VOTER_7);
       await expect( liquidPoll.readDelegate.call(VOTER_7)).to.eventually.bignumber.equal(VOTER_9);
@@ -369,12 +397,12 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
   describe("#revokeDelegationForPoll()", () => {
     it("should allow user to revoke their delegation", async () => {
 
-      await liquidPoll.revokeDelegationForPoll.sendTransaction({ from: VOTER_3, gas: 4000000 })
+      await liquidPoll.revokeDelegationForPoll.sendTransaction({ from: VOTER_2, gas: 4000000 })
 
-      let voter_3_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_3, 0)
+      let voter_3_vote = await liquidPoll.readVoteAndEndVoter.call(VOTER_2, 0)
 
       await expect(voter_3_vote[0].toNumber()).to.equal(0);
-      await expect(voter_3_vote[1]).to.equal(VOTER_3);
+      await expect(voter_3_vote[1]).to.equal(VOTER_2);
 
     });
   });
@@ -407,30 +435,6 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
     });
   });
 
-  describe("#registerVoter_Forum()", () => {
-    it("should register new user in forum", async () => {
-
-      await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_1, gas: 4000000 })
-
-      await expect( liquidForum._isRegisteredVoter.call(VOTER_1)).to.eventually.equal(true);
-
-      await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_2, gas: 4000000 })
-      await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_4, gas: 4000000 })
-      await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_5, gas: 4000000 })
-      await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_6, gas: 4000000 })
-      await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_7, gas: 4000000 })
-      await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_8, gas: 4000000 })
-      await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_9, gas: 4000000 })
-
-
-    });
-
-    it("should fail when registering a second time", async () => {
-
-      await expect(liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_1, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
-
-    });
-  });
 
   describe("#becomeDelegateForTopic()", () => {
     it("should allow registered user to become a delegate for a particular topic", async () => {
@@ -466,7 +470,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
   describe("#delegateVoteForTopic()", () => {
     it("should allow user to delegate their vote for a topic", async () => {
 
-      await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_3, gas: 4000000 })
+      // await liquidForum.registerVoter_Forum.sendTransaction({ from: VOTER_3, gas: 4000000 })
 
       await liquidForum.delegateVoteForTopic.sendTransaction(1, VOTER_1, { from: VOTER_3, gas: 4000000 })
       await liquidForum.delegateVoteForTopic.sendTransaction(7, VOTER_7, { from: VOTER_5, gas: 4000000 })
@@ -547,24 +551,24 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
   });
 
-  describe("#registerVoter()", () => {
-    it("should register new user when delegation period has closed, but vote period open", async () => {
-
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_1, gas: 4000000 })
-
-      await expect( liquidPoll._isRegisteredVoter.call(VOTER_1)).to.eventually.equal(true);
-
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_2, gas: 4000000 })
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_4, gas: 4000000 })
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_5, gas: 4000000 })
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_6, gas: 4000000 })
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_7, gas: 4000000 })
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_8, gas: 4000000 })
-      await liquidPoll.registerVoter.sendTransaction({ from: VOTER_9, gas: 4000000 })
-
-
-    });
-  });
+  // describe("#registerVoter()", () => {
+  //   it("should register new user when delegation period has closed, but vote period open", async () => {
+  //
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_1, gas: 4000000 })
+  //
+  //     await expect( liquidPoll._isRegisteredVoter.call(VOTER_1)).to.eventually.equal(true);
+  //
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_2, gas: 4000000 })
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_4, gas: 4000000 })
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_5, gas: 4000000 })
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_6, gas: 4000000 })
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_7, gas: 4000000 })
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_8, gas: 4000000 })
+  //     await liquidPoll.registerVoter.sendTransaction({ from: VOTER_9, gas: 4000000 })
+  //
+  //
+  //   });
+  // });
 
   describe("#becomeDelegate()", () => {
 
@@ -617,7 +621,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       describe("#tally()", () => {
         it("should correctly tally votes from poll", async () => {
 
-          let result = await liquidPoll.tally.call()
+          let result = await liquidForum.tally.call(liquidPollAddress)
 
             await expect(result[0][0].toNumber()).to.equal(0);
             await expect(result[0][1].toNumber()).to.equal(1);
@@ -633,7 +637,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       describe("#finalDecision()", () => {
         it("should correctly show final decision of poll", async () => {
 
-          let result = await liquidPoll.finalDecision.call()
+          let result = await liquidForum.finalDecision.call(liquidPollAddress)
 
             await expect(result[0].toNumber()).to.equal(0);
             await expect(result[1].toNumber()).to.equal(0);
@@ -671,13 +675,13 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
   });
 
-  describe("#registerVoter()", () => {
-    it("should fail to register voter after vote period has closed", async () => {
-
-      await expect(liquidPoll.registerVoter.sendTransaction({ from: VOTER_1, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
-
-    });
-  });
+  // describe("#registerVoter()", () => {
+  //   it("should fail to register voter after vote period has closed", async () => {
+  //
+  //     await expect(liquidPoll.registerVoter.sendTransaction({ from: VOTER_1, gas: 4000000 })).to.eventually.be.rejectedWith(REVERT_ERROR);
+  //
+  //   });
+  // });
 
   describe("#becomeDelegate()", () => {
 
@@ -727,7 +731,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       describe("#tally()", () => {
         it("should correctly tally votes from poll", async () => {
 
-          let result = await liquidPoll.tally.call()
+          let result = await liquidForum.tally.call(liquidPollAddress)
 
             await expect(result[0][0].toNumber()).to.equal(0);
             await expect(result[0][1].toNumber()).to.equal(0);
@@ -743,7 +747,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       describe("#finalDecision()", () => {
         it("should correctly show final decision of poll", async () => {
 
-          let result = await liquidPoll.finalDecision.call()
+          let result = await liquidForum.finalDecision.call(liquidPollAddress)
 
             await expect(result[0].toNumber()).to.equal(0);
             await expect(result[1].toNumber()).to.equal(0);

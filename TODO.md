@@ -1,5 +1,7 @@
 
 ToDo List:
+-------------------------------------------------------------------------------------------
+Testing:
 
 - test vote and non-vote functions with delegation expiration
   -- test delegation read correctly from different delegationExpirationIntervals
@@ -19,21 +21,22 @@ ToDo List:
 
 - test delegation depth for poll and forum
 
+-------------------------------------------------------------------------------------------
+Refactor/Additions:
+
 - ensure user cant revoke delegation after vote has passed, or find way to write outcome
    of poll to ensure correct outcome documented
 
 - figure out how to handle ties
   -- return array of winners, if array is length 1, easy solution.
+    -- cant return variable length array
   -- if tied, auto-generate run-off poll
 
-- figure out how to take action based on outcome of poll
-  -- likely some sort of trueBit off chain computation while keeping tally()/finalDecision() view function
-  -- or make tally()/finalDecision() gas conscious and stop/start until computation
-     finished and result executed.
-
-- figure out how to call resetDelegationExpirationInterval() automatically
-
 - refactor to use registered voters in forum / examine pros and cons of doing so
+  -- cant return variable length array to poll for use in tallying
+  -- could tally/finalDecision from forum
+
+- implement safeMath
 
 - add events
 
@@ -44,6 +47,11 @@ ToDo List:
   -- delegate stand up could be simple flag which allows any user to delegate for any topic/poll
   -- might require heavy refactor and cause problems with revoking delegations
 
+- Comment all tests and functionality
+
+-------------------------------------------------------------------------------------------
+  Harder stuff:
+
 - Modularize contracts
   -- expiration contract possible to simplify mappings
     delegates could be own contract as well
@@ -51,8 +59,13 @@ ToDo List:
 
 - Add token weighted functionality
 
+- figure out how to take action based on outcome of poll
+  -- likely some sort of trueBit off chain computation while keeping tally()/finalDecision() view function
+  -- or make tally()/finalDecision() gas conscious and stop/start until computation
+     finished and result executed.
+
 - implement ACL
   -- Ideally will have multiple stewards for a forum to allow many users to create    
      topics/polls
 
-- Comment all tests and functionality
+- figure out how to call resetDelegationExpirationInterval() automatically

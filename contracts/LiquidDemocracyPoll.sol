@@ -31,11 +31,6 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
   /*redundant voter registers solve for different major issues when each is used individually*/
 
-  /*tracks user registration and single signup*/
-  mapping (address => bool) internal registeredVotersMap;
-
-  /*allows contract to iterate over voters to tally votes and follow delegation chains*/
-  address[] internal registeredVotersArray;
 
   /*0 equals no vote, other values will equate to those set in vote initialization*/
   mapping (address => uint) public userVotes;
@@ -118,17 +113,17 @@ contract LiquidDemocracyPoll is LDPollInterface {
   }
 
   /*allows voter to register for poll*/
-  function registerVoter()
+  /* function registerVoter()
   external
   votePeriodOpen
   {
 
     require(registeredVotersMap[msg.sender] == false);
 
-    registeredVotersArray.push(msg.sender);
     registeredVotersMap[msg.sender] = true;
+    registeredVotersArray.push(msg.sender);
 
-  }
+  } */
 
   /*allows user to offer themselves as a delegate*/
   function becomeDelegate()
@@ -234,69 +229,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
   }
 
 
-  /*if we can make this a view function, that would be ideal*/
-  function finalDecision()
-  public
-  view
-  returns (uint _finalDecision, uint _finalDecisionTally)
-  {
 
-    uint totalVotes;
-    uint emptyVotes;
-    uint[256] memory _tallyResults;
-
-    (_tallyResults, totalVotes, emptyVotes) = tally();
-
-
-    if (registeredVotersArray.length == 0 || (totalVotes * 100) / (registeredVotersArray.length) < pctQuorum) {
-      _finalDecision = 0;
-      _finalDecisionTally = 0;
-      return;
-    } else {
-
-      uint highestVoteHold = 0;
-      uint highestVoteValueHold = 0;
-
-        for (uint i = 0; i < _tallyResults.length; i++) {
-          if (_tallyResults[i] > highestVoteValueHold) {
-            highestVoteValueHold = _tallyResults[i];
-            highestVoteHold = i;
-          }
-        }
-
-        if (((highestVoteValueHold * 100) / totalVotes) > pctThreshold) {
-          _finalDecision = highestVoteHold;
-          _finalDecisionTally = highestVoteValueHold;
-          return;
-        } else {
-          _finalDecision = 0;
-          _finalDecisionTally = 0;
-          return;
-        }
-    }
-  }
-
-  /*allows user tally votes at */
-  function tally()
-  public
-  view
-  returns (uint[256] _votes, uint _totalVotes, uint _emptyVotes)
-  {
-
-    //todo: how to handle vote validation and initialization
-    for (uint i = 0; i < registeredVotersArray.length; i++){
-      uint vote;
-    (vote,)  = readVoteAndEndVoter(registeredVotersArray[i], 0);
-      _votes[vote]++;
-
-      if(vote > 0){
-          _totalVotes++;
-      } else {
-          _emptyVotes++;
-      }
-    }
-    return (_votes, _totalVotes, _emptyVotes);
-  }
 
 
 function changeForumAddress(address _newForumAddress)
@@ -356,7 +289,7 @@ function changeForumAddress(address _newForumAddress)
    public
    returns (bool _voterRegistration)
   {
-    if (registeredVotersMap[_userAddress] == true) {
+    if (LDForumInterface(forumAddress).verifyVoter(_userAddress) == true) {
       return true;
     } else {
       return false;

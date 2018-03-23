@@ -38,7 +38,7 @@ modifier isDelegationExpirationIntervalOpen() {
 /*would clean and reduce modifiers and helper functions for production*/
 /*verifies voter is registered*/
   modifier isRegisteredVoter() {
-      require(_isRegisteredVoter(msg.sender) == true);
+      require(verifyVoter(msg.sender) == true);
     _;
   }
   /*verifies delegate is valid*/
@@ -199,6 +199,73 @@ returns (address _endDelegateAddress)
   }
 }
 
+/*if we can make this a view function, that would be ideal*/
+/* function finalDecision()
+public
+view
+returns (uint _finalDecision, uint _finalDecisionTally)
+{
+
+  uint totalVotes;
+  uint emptyVotes;
+  uint[256] memory _tallyResults;
+
+  (_tallyResults, totalVotes, emptyVotes) = tally();
+
+
+  if (registeredVotersArray.length == 0 || (totalVotes * 100) / (registeredVotersArray.length) < pctQuorum) {
+    _finalDecision = 0;
+    _finalDecisionTally = 0;
+    return;
+  } else {
+
+    uint highestVoteHold = 0;
+    uint highestVoteValueHold = 0;
+
+      for (uint i = 0; i < _tallyResults.length; i++) {
+        if (_tallyResults[i] > highestVoteValueHold) {
+          highestVoteValueHold = _tallyResults[i];
+          highestVoteHold = i;
+        }
+      }
+
+      if (((highestVoteValueHold * 100) / totalVotes) > pctThreshold) {
+        _finalDecision = highestVoteHold;
+        _finalDecisionTally = highestVoteValueHold;
+        return;
+      } else {
+        _finalDecision = 0;
+        _finalDecisionTally = 0;
+        return;
+      }
+  }
+} */
+
+/*allows user tally votes at */
+function tally(address _pollAddress)
+public
+view
+returns (uint[256] _votes, uint _totalVotes, uint _emptyVotes)
+{
+
+  /* address forumDelegate = LDForumInterface(forumAddress).readEndDelegateForTopic(_userAddress, topic, 0); */
+
+
+  //todo: how to handle vote validation and initialization
+  for (uint i = 0; i < registeredVotersArray.length; i++){
+    uint vote;
+  (vote,)  = LDPollInterface(_pollAddress).readVoteAndEndVoter(registeredVotersArray[i], 0);
+    _votes[vote]++;
+
+    if(vote > 0){
+        _totalVotes++;
+    } else {
+        _emptyVotes++;
+    }
+  }
+  return (_votes, _totalVotes, _emptyVotes);
+}
+
 
 function _isValidChainDepthAndNonCircular(address _userAddress, uint _topic, uint _recursionCount)
 public
@@ -226,7 +293,7 @@ returns(bool _valid, bool _vDepth, bool _vCircle){
 }
 
 
- function _isRegisteredVoter(address _userAddress)
+ function verifyVoter(address _userAddress)
  view
   public
   returns (bool _voterRegistration){
