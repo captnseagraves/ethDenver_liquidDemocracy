@@ -228,9 +228,21 @@ contract LiquidDemocracyPoll is LDPollInterface {
     userVotes[msg.sender] = 0;
   }
 
+function readPctQuorum()
+  public
+  view
+  returns (uint)
+{
+  return pctQuorum;
+}
 
-
-
+function readPctThreshold()
+  public
+  view
+  returns (uint)
+{
+  return pctThreshold;
+}
 
 function changeForumAddress(address _newForumAddress)
   public

@@ -13,7 +13,7 @@ interface LDForumInterface {
   function revokeDelegationForTopic(uint _topic) public;
   function readDelegateForTopic(address _userAddress, uint _topic) public view returns (address _delegateAddress);
   function readEndDelegateForTopic(address _userAddress, uint _topic, uint _recursionCount) public view returns (address _endDelegateAddress);
-  /* function finalDecision() public view returns (uint _finalDecision, uint _finalDecisionTally); */
+  function finalDecision(address _pollAddress) public view returns (uint _finalDecision, uint _finalDecisionTally);
   function tally(address _pollAddress) public view returns (uint[256] _votes, uint _totalVotes, uint _emptyVotes);
   function verifyVoter(address _userAddress) view public returns (bool _voterRegistration);
 }

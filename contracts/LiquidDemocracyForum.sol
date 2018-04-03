@@ -199,8 +199,8 @@ returns (address _endDelegateAddress)
   }
 }
 
-/*if we can make this a view function, that would be ideal*/
-/* function finalDecision()
+/* if we can make this a view function, that would be ideal*/
+function finalDecision(address _pollAddress)
 public
 view
 returns (uint _finalDecision, uint _finalDecisionTally)
@@ -210,10 +210,12 @@ returns (uint _finalDecision, uint _finalDecisionTally)
   uint emptyVotes;
   uint[256] memory _tallyResults;
 
-  (_tallyResults, totalVotes, emptyVotes) = tally();
+  (_tallyResults, totalVotes, emptyVotes) = tally(_pollAddress);
 
+uint _pctQuorum = LDPollInterface(_pollAddress).readPctQuorum();
+uint _pctThreshold = LDPollInterface(_pollAddress).readPctThreshold();
 
-  if (registeredVotersArray.length == 0 || (totalVotes * 100) / (registeredVotersArray.length) < pctQuorum) {
+  if (registeredVotersArray.length == 0 || (totalVotes * 100) / (registeredVotersArray.length) < _pctQuorum) {
     _finalDecision = 0;
     _finalDecisionTally = 0;
     return;
@@ -229,7 +231,7 @@ returns (uint _finalDecision, uint _finalDecisionTally)
         }
       }
 
-      if (((highestVoteValueHold * 100) / totalVotes) > pctThreshold) {
+      if (((highestVoteValueHold * 100) / totalVotes) > _pctThreshold) {
         _finalDecision = highestVoteHold;
         _finalDecisionTally = highestVoteValueHold;
         return;
@@ -239,7 +241,7 @@ returns (uint _finalDecision, uint _finalDecisionTally)
         return;
       }
   }
-} */
+}
 
 /*allows user tally votes at */
 function tally(address _pollAddress)
