@@ -13,6 +13,7 @@ Testing:
 
 - test delegation read correctly from different delegationExpirationIntervals
   -- may not be possible because of protocol time
+    -- look into OpenZeppelin test helpers
 
 - test no user can manipulate another voter's vote, delegations, or privileged  
    functionality
@@ -21,26 +22,25 @@ Testing:
 
 - test delegation depth for poll and forum
 
+- test for events beyond new poll
 -------------------------------------------------------------------------------------------
 Refactor/Additions:
+
+- implement require error statements a la solidity 0.4.23
 
 - ensure user cant revoke delegation after vote has passed, or find way to write outcome
    of poll to ensure correct outcome documented
 
 - figure out how to handle ties
   -- return array of winners, if array is length 1, easy solution.
-    -- cant return variable length array
+    -- cant return variable length array (may be doable with solidity 0.4.23)
   -- if tied, auto-generate run-off poll
-
-- refactor to use registered voters in forum / examine pros and cons of doing so
-  -- cant return variable length array to poll for use in tallying
-  -- could tally/finalDecision from forum
+    -- Could do once contracts can call functions/pay gas. Ethical question for DAOs to execute automatically. Don't want AI's to take over.
+    -- Could run result via Trubit and have human execute outcome.
 
 - implement safeMath
 
 - add events
-
-- add error handling a la midnight
 
 - Want to think about not having users stand up as delegates, but allow anyone to delegate
   to anyone
@@ -55,7 +55,6 @@ Refactor/Additions:
 - Modularize contracts
   -- expiration contract possible to simplify mappings
     delegates could be own contract as well
-    OOP approach with contracts as objects
 
 - Add token weighted functionality
 

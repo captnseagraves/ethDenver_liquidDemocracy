@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.23;
 
 import "./LDPollInterface.sol";
 import "./LDForumInterface.sol";
@@ -77,7 +77,8 @@ contract LiquidDemocracyPoll is LDPollInterface {
     }
     modifier isValidChainDepthAndNonCircular() {
       bool bValid;
-      (bValid,,) =_isValidChainDepthAndNonCircular(msg.sender, 0);
+
+      (bValid,,) = _isValidChainDepthAndNonCircular(msg.sender, 0);
       require(bValid);
       _;
     }
@@ -88,7 +89,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
       _;
     }
 
-  function LiquidDemocracyPoll(
+  constructor (
     uint _delegatePeriodEnd,
     uint _votePeriodEnd,
     uint _delegationDepth,
@@ -112,18 +113,6 @@ contract LiquidDemocracyPoll is LDPollInterface {
       topic = _topic;
   }
 
-  /*allows voter to register for poll*/
-  /* function registerVoter()
-  external
-  votePeriodOpen
-  {
-
-    require(registeredVotersMap[msg.sender] == false);
-
-    registeredVotersMap[msg.sender] = true;
-    registeredVotersArray.push(msg.sender);
-
-  } */
 
   /*allows user to offer themselves as a delegate*/
   function becomeDelegate()
@@ -211,7 +200,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
   /*allows user to revoke their delegation if they disagree with delegates vote*/
   function revokeDelegationForPoll()
-  public
+  external
   isRegisteredVoter
   votePeriodOpen
   {
@@ -221,7 +210,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
 
   function withdrawDirectVote()
-  public
+  external
   isRegisteredVoter
   votePeriodOpen
   {
@@ -229,7 +218,7 @@ contract LiquidDemocracyPoll is LDPollInterface {
   }
 
 function readPctQuorum()
-  public
+  external
   view
   returns (uint)
 {
@@ -237,15 +226,16 @@ function readPctQuorum()
 }
 
 function readPctThreshold()
-  public
+  external
   view
   returns (uint)
 {
   return pctThreshold;
 }
 
+/* this needs access controls */
 function changeForumAddress(address _newForumAddress)
-  public
+  external
 
 {
   forumAddress = _newForumAddress;

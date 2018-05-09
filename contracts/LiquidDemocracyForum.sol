@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.23;
 
 import "./LiquidDemocracyPoll.sol";
 import "./LDForumInterface.sol";
@@ -59,8 +59,12 @@ modifier isDelegationExpirationIntervalOpen() {
   }
 
   event newPoll(address _newPollAddress, uint _pollId);
+  event delegationExpirationIntervalReset(uint _delegationExpiration);
+  event newTopicCreated(uint _numberOfValidTopicOptions, bytes32 _newTopicMetaData);
 
-function LiquidDemocracyForum(uint _validTopicOptions, bytes32 _topicMetaData, uint _delegationDepth, uint _delegationExpirationInDays) public {
+
+
+constructor (uint _validTopicOptions, bytes32 _topicMetaData, uint _delegationDepth, uint _delegationExpirationInDays) public {
   validTopicOptions = _validTopicOptions;
   topicMetaData = _topicMetaData;
   delegationDepth = _delegationDepth;
@@ -72,14 +76,16 @@ function LiquidDemocracyForum(uint _validTopicOptions, bytes32 _topicMetaData, u
 
 function resetDelegationExpirationInterval(uint _numberOfDays)
 /*anyone can call this function, time lock is sufficient and desireable*/
- public
+ external
 {
   require(block.timestamp > delegationExpiration);
   delegationExpiration = block.timestamp + (_numberOfDays * 1 days);
+
+  emit delegationExpirationIntervalReset(delegationExpiration);
 }
 
 function createNewTopic(uint _numberOfValidTopicOptions, bytes32 _newTopicMetaData)
-public
+external
 /*Ideally will have multiple stewards for a forum to allow many users to create topics/polls*/
 onlyOwner
 {
@@ -87,6 +93,7 @@ onlyOwner
   validTopicOptions = _numberOfValidTopicOptions;
   topicMetaData = _newTopicMetaData;
 
+  emit newTopicCreated(_numberOfValidTopicOptions, _newTopicMetaData);
 }
 
 function createPoll(
@@ -98,7 +105,7 @@ function createPoll(
   uint _validVoteOptions,
   uint _topic
   )
-  public
+  external
   isValidTopicOption(_topic)
   /*Ideally will have multiple stewards for a forum to allow many users to create topics/polls*/
   onlyOwner
@@ -120,13 +127,13 @@ function createPoll(
 
   pollList[pollId] = current;
 
-  newPoll(current, pollId);
+  emit newPoll(current, pollId);
 
   pollId++;
 
 }
 
-function registerVoter_Forum()
+function registerVoter()
 external
 {
 
@@ -162,7 +169,7 @@ isDelegationExpirationIntervalOpen
 
 
 function revokeDelegationForTopic(uint _topic)
-public
+external
 isRegisteredVoter
 isValidTopicOption(_topic)
 isDelegationExpirationIntervalOpen
@@ -173,7 +180,7 @@ isDelegationExpirationIntervalOpen
 }
 
 function readDelegateForTopic(address _userAddress, uint _topic)
-public
+external
 view
 isDelegationExpirationIntervalOpen
 returns (address _delegateAddress)
@@ -201,7 +208,7 @@ returns (address _endDelegateAddress)
 
 /* if we can make this a view function, that would be ideal*/
 function finalDecision(address _pollAddress)
-public
+external
 view
 returns (uint _finalDecision, uint _finalDecisionTally)
 {
