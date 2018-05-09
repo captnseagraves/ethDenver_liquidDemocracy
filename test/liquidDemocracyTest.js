@@ -78,13 +78,13 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
     const deployForum = async () => {
 
         const instance =
-            await liquidDemocracyForumContract.new( 8, EMPTY_BYTES32_HASH, 2, -1, { from: OWNER, gas: 4000000 });
+            await liquidDemocracyForumContract.new( 8, EMPTY_BYTES32_HASH, 2, -1, { from: OWNER, gas: 40000000 });
 
         const web3ContractInstance =
             web3.eth.contract(instance.abi).at(instance.address);
 
         liquidForum = new LiquidDemocracyForum(
-            web3ContractInstance, { from: OWNER, gas: 4000000 });
+            web3ContractInstance, { from: OWNER, gas: 40000000 });
 
     };
 
@@ -195,7 +195,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
 
       it("should log new poll", async () => {
 
-      let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, 8, 3, { from: OWNER, gas: 4000000 })
+      let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, 8, 3, { from: OWNER, gas: 40000000 })
 
         await web3.eth.getTransactionReceipt(txHash, async (err, result) => {
           const [newPollLog] = ABIDecoder.decodeLogs(result.logs);
@@ -213,7 +213,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       const contractInstance = await web3.eth.contract(LiquidDemocracyPoll.abi).at(liquidPollAddress);
 
       liquidPoll = await new LiquidDemocracyPoll(
-               contractInstance, { from: OWNER, gas: 4000000 });
+               contractInstance, { from: OWNER, gas: 40000000 });
       });
 
   });

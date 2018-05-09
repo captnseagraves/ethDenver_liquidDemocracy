@@ -44,50 +44,56 @@ contract LiquidDemocracyPoll is LDPollInterface {
 
   /*verifies delegate period open*/
   modifier delegatePeriodOpen(){
-    require(block.timestamp < delegatePeriodEnd);
+    require(block.timestamp < delegatePeriodEnd, "Delegate Period Closed");
     _;
   }
 
   /*verifies vote period open*/
   modifier votePeriodOpen(){
-    require(block.timestamp < votePeriodEnd);
+    require(block.timestamp < votePeriodEnd, "Vote Period Closed");
     _;
   }
 
   /*would clean and reduce modifiers and helper functions for production*/
   /*verifies voter is registered*/
     modifier isRegisteredVoter() {
-        require(_isRegisteredVoter(msg.sender) == true);
+        require(_isRegisteredVoter(msg.sender) == true, "Voter is not registered");
       _;
     }
     /*verifies delegate is valid*/
     modifier isValidDelegate(address _delegateAddress) {
-      require(_isValidDelegate(_delegateAddress) == true);
+      require(_isValidDelegate(_delegateAddress) == true, "Delegate is not a valid delegate for this poll");
       _;
     }
-    /*verifies if vote is delegated*/
-    modifier isVoteDelegated() {
-      require(_isVoteDelegated(msg.sender) == false);
-      _;
-    }
+
     /*verifies if vote is delegated*/
     modifier isValidVoteOption(uint _vote) {
-      require(_vote <= validVoteOptions);
+      require(_vote <= validVoteOptions, "Invalid vote option");
       _;
     }
     modifier isValidChainDepthAndNonCircular() {
       bool bValid;
 
       (bValid,,) = _isValidChainDepthAndNonCircular(msg.sender, 0);
-      require(bValid);
+      require(bValid, "Chain depth is too deep or delegations are circular");
       _;
     }
     modifier isVoterDelegateAndDelegatePeriodOpen() {
       if (willingToBeDelegate[msg.sender] == true) {
-        require(block.timestamp < delegatePeriodEnd);
+        require(block.timestamp < delegatePeriodEnd, "Delegate Period Closed");
       }
       _;
     }
+
+    event newPollDelegate(address _newDelegate);
+    event directVote(address _voter, uint _value);
+    event voteDelegated(address _voter, address _delegateAddress);
+    event delegationRevoked(address _voter);
+    event voteWithdrawn(address _voter);
+
+    event forumAddressChanged(address _newForumAddress);
+
+
 
   constructor (
     uint _delegatePeriodEnd,
@@ -121,6 +127,8 @@ contract LiquidDemocracyPoll is LDPollInterface {
   delegatePeriodOpen
   {
     willingToBeDelegate[msg.sender] = true;
+
+    emit newPollDelegate(msg.sender);
   }
 
   /*allows user to vote a value*/
@@ -132,6 +140,9 @@ contract LiquidDemocracyPoll is LDPollInterface {
   votePeriodOpen
   {
     userVotes[msg.sender] = _value;
+
+    /* Ideally a vote would be anonymous */
+    emit directVote(msg.sender, _value);
   }
 
   /* allows user to delegate their vote to another user who is a valid delegeate*/
@@ -143,6 +154,8 @@ contract LiquidDemocracyPoll is LDPollInterface {
   delegatePeriodOpen
   {
     userToDelegate[msg.sender] = _delegateAddress;
+
+    emit voteDelegated(msg.sender, _delegateAddress);
   }
 
 
@@ -205,6 +218,8 @@ contract LiquidDemocracyPoll is LDPollInterface {
   votePeriodOpen
   {
     userToDelegate[msg.sender] = 0x0;
+
+    emit delegationRevoked(msg.sender);
   }
 
 
@@ -215,6 +230,8 @@ contract LiquidDemocracyPoll is LDPollInterface {
   votePeriodOpen
   {
     userVotes[msg.sender] = 0;
+
+    emit voteWithdrawn(msg.sender);
   }
 
 function readPctQuorum()
@@ -239,7 +256,8 @@ function changeForumAddress(address _newForumAddress)
 
 {
   forumAddress = _newForumAddress;
-  /*event*/
+
+  emit forumAddressChanged(_newForumAddress);
 }
 
  function _isValidChainDepthAndNonCircular(address _userAddress, uint _recursionCount)
@@ -271,20 +289,6 @@ function changeForumAddress(address _newForumAddress)
 
   /*these addtional functions allow me to test contract. would remove bottom two for production and implement in modifier*/
 
-  function _isVoteDelegated(address _userAddress)
-   view
-   internal
-   returns (bool _voteStatus)
-  {
-
-     address forumDelegate = LDForumInterface(forumAddress).readDelegateForTopic(_userAddress, topic);
-
-    if (userToDelegate[_userAddress] != 0x0 || forumDelegate != 0x0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
 
   function _isRegisteredVoter(address _userAddress)
    view

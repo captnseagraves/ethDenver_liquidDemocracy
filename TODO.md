@@ -68,3 +68,28 @@ Refactor/Additions:
      topics/polls
 
 - figure out how to call resetDelegationExpirationInterval() automatically
+
+
+
+
+modifier isVoteDelegated() {
+  require(_isVoteDelegated(msg.sender) == false, );
+  _;
+}
+
+
+
+  function _isVoteDelegated(address _userAddress)
+   view
+   internal
+   returns (bool _voteStatus)
+  {
+
+     address forumDelegate = LDForumInterface(forumAddress).readDelegateForTopic(_userAddress, topic);
+
+    if (userToDelegate[_userAddress] != 0x0 || forumDelegate != 0x0) {
+      return true;
+    } else {
+      return false;
+    }
+  }

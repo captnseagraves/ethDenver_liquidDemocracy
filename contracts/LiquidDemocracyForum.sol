@@ -31,36 +31,42 @@ expirationInterval -> userAddress -> topic -> bool */
 mapping (uint => mapping (address => mapping (uint => bool))) public willingtoBeTopicDelegate;
 
 modifier isDelegationExpirationIntervalOpen() {
-  require(block.timestamp < delegationExpiration);
+  require(block.timestamp < delegationExpiration, "Delegation Expiration Interval Closed");
   _;
 }
 
 /*would clean and reduce modifiers and helper functions for production*/
 /*verifies voter is registered*/
   modifier isRegisteredVoter() {
-      require(verifyVoter(msg.sender) == true);
+      require(verifyVoter(msg.sender) == true, "Voter is not registered");
     _;
   }
   /*verifies delegate is valid*/
   modifier isValidDelegateForTopic(address _delegateAddress, uint _topic) {
-    require(_isValidDelegateForTopic(_delegateAddress, _topic) == true);
+    require(_isValidDelegateForTopic(_delegateAddress, _topic) == true, "Delegate is not a vaild delegate for this topic");
     _;
   }
   /*verifies if vote is delegated*/
   modifier isValidTopicOption(uint _topic) {
-    require(_topic <= validTopicOptions);
+    require(_topic <= validTopicOptions, "Topic is not a valid topic");
     _;
   }
   modifier isValidChainDepthAndNonCircular(uint _topic) {
     bool bValid;
     (bValid,,) =_isValidChainDepthAndNonCircular(msg.sender, _topic, 0);
-    require(bValid);
+    require(bValid, "Chain depth is too deep or delegations are circular");
     _;
   }
 
   event newPoll(address _newPollAddress, uint _pollId);
   event delegationExpirationIntervalReset(uint _delegationExpiration);
   event newTopicCreated(uint _numberOfValidTopicOptions, bytes32 _newTopicMetaData);
+  event voterRegistered(address _newVoterAddress);
+  event newTopicDelegate(address _newDelegate, uint _topic);
+  event voteDelegatedByTopic(address _voter, uint _topic, address _delegateAddress);
+  event topicDelegationRevoked(address _voter, uint _topic);
+
+
 
 
 
@@ -78,7 +84,7 @@ function resetDelegationExpirationInterval(uint _numberOfDays)
 /*anyone can call this function, time lock is sufficient and desireable*/
  external
 {
-  require(block.timestamp > delegationExpiration);
+  require(block.timestamp > delegationExpiration, "Delegation Expiration Interval is still open");
   delegationExpiration = block.timestamp + (_numberOfDays * 1 days);
 
   emit delegationExpirationIntervalReset(delegationExpiration);
@@ -137,11 +143,12 @@ function registerVoter()
 external
 {
 
-  require(registeredVotersMap[msg.sender] == false);
+  require(registeredVotersMap[msg.sender] == false, "Voter already registered");
 
   registeredVotersArray.push(msg.sender);
   registeredVotersMap[msg.sender] = true;
 
+  emit voterRegistered(msg.sender);
 }
 
   /*allows user to offer themselves as a delegate*/
@@ -152,6 +159,8 @@ isValidTopicOption(_topic)
 isDelegationExpirationIntervalOpen
 {
   willingtoBeTopicDelegate[delegationExpiration][msg.sender][_topic] = true;
+
+  emit newTopicDelegate(msg.sender, _topic);
 }
 
 function delegateVoteForTopic(uint _topic, address _delegateAddress)
@@ -165,6 +174,7 @@ isDelegationExpirationIntervalOpen
 
   delegatesForUser[delegationExpiration][msg.sender][_topic] = _delegateAddress;
 
+  emit voteDelegatedByTopic(msg.sender, _topic, _delegateAddress);
 }
 
 
@@ -177,6 +187,7 @@ isDelegationExpirationIntervalOpen
 
   delegatesForUser[delegationExpiration][msg.sender][_topic] = 0x0;
 
+  emit topicDelegationRevoked(msg.sender, _topic);
 }
 
 function readDelegateForTopic(address _userAddress, uint _topic)

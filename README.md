@@ -1,5 +1,9 @@
 # ethDenver_liquidDemocracy
 
+*** Contracts have not been assessed or optimized for gas ***
+
+To run without gas issues I've been using: ganache-cli -s 1 -i 50 -l 100000000
+
 - A user can create a forum to hold the decision making activities of a community.
 
 - In the forum users can:
