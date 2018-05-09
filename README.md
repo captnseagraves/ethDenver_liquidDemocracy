@@ -2,8 +2,16 @@
 
 *** Contracts have not been assessed or optimized for gas ***
 
-To run without gas issues I've been using: ganache-cli -s 1 -i 50 -l 100000000
+To Run:
+Truffle v4.1.8 (core: 4.1.8)
+Solidity v0.4.23 (solc-js)w
+- npm i
+- To avoid gas issues: ganache-cli -s 1 -i 50 -l 100000000
+- truffle compile
+- truffle migrate
+- truffle test
 
+Funtionality and intended use
 - A user can create a forum to hold the decision making activities of a community.
 
 - In the forum users can:
@@ -33,7 +41,7 @@ To run without gas issues I've been using: ganache-cli -s 1 -i 50 -l 100000000
   -- read percentage needed for quorum
   -- read percentage needed for a valid vote
 
-
+See TODO.md for necessary further work
 
 Glossary:
 
