@@ -32,7 +32,7 @@ Refactor/Additions:
     -- cant return variable length array
   -- if tied, auto-generate run-off poll
 
-- refactor to use registered voters in forum / examine pros and cons of doing so
+X - refactor to use registered voters in forum / examine pros and cons of doing so
   -- cant return variable length array to poll for use in tallying
   -- could tally/finalDecision from forum
 
