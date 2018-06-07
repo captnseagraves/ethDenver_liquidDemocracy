@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.23;
 
 import "./LiquidDemocracyPoll.sol";
 import "./LDForumInterface.sol";
@@ -31,36 +31,46 @@ expirationInterval -> userAddress -> topic -> bool */
 mapping (uint => mapping (address => mapping (uint => bool))) public willingtoBeTopicDelegate;
 
 modifier isDelegationExpirationIntervalOpen() {
-  require(block.timestamp < delegationExpiration);
+  require(block.timestamp < delegationExpiration, "Delegation Expiration Interval Closed");
   _;
 }
 
 /*would clean and reduce modifiers and helper functions for production*/
 /*verifies voter is registered*/
   modifier isRegisteredVoter() {
-      require(verifyVoter(msg.sender) == true);
+      require(verifyVoter(msg.sender) == true, "Voter is not registered");
     _;
   }
   /*verifies delegate is valid*/
   modifier isValidDelegateForTopic(address _delegateAddress, uint _topic) {
-    require(_isValidDelegateForTopic(_delegateAddress, _topic) == true);
+    require(_isValidDelegateForTopic(_delegateAddress, _topic) == true, "Delegate is not a vaild delegate for this topic");
     _;
   }
   /*verifies if vote is delegated*/
   modifier isValidTopicOption(uint _topic) {
-    require(_topic <= validTopicOptions);
+    require(_topic <= validTopicOptions, "Topic is not a valid topic");
     _;
   }
   modifier isValidChainDepthAndNonCircular(uint _topic) {
     bool bValid;
     (bValid,,) =_isValidChainDepthAndNonCircular(msg.sender, _topic, 0);
-    require(bValid);
+    require(bValid, "Chain depth is too deep or delegations are circular");
     _;
   }
 
   event newPoll(address _newPollAddress, uint _pollId);
+  event delegationExpirationIntervalReset(uint _delegationExpiration);
+  event newTopicCreated(uint _numberOfValidTopicOptions, bytes32 _newTopicMetaData);
+  event voterRegistered(address _newVoterAddress);
+  event newTopicDelegate(address _newDelegate, uint _topic);
+  event voteDelegatedByTopic(address _voter, uint _topic, address _delegateAddress);
+  event topicDelegationRevoked(address _voter, uint _topic);
 
-function LiquidDemocracyForum(uint _validTopicOptions, bytes32 _topicMetaData, uint _delegationDepth, uint _delegationExpirationInDays) public {
+
+
+
+
+constructor (uint _validTopicOptions, bytes32 _topicMetaData, uint _delegationDepth, uint _delegationExpirationInDays) public {
   validTopicOptions = _validTopicOptions;
   topicMetaData = _topicMetaData;
   delegationDepth = _delegationDepth;
@@ -72,14 +82,16 @@ function LiquidDemocracyForum(uint _validTopicOptions, bytes32 _topicMetaData, u
 
 function resetDelegationExpirationInterval(uint _numberOfDays)
 /*anyone can call this function, time lock is sufficient and desireable*/
- public
+ external
 {
-  require(block.timestamp > delegationExpiration);
+  require(block.timestamp > delegationExpiration, "Delegation Expiration Interval is still open");
   delegationExpiration = block.timestamp + (_numberOfDays * 1 days);
+
+  emit delegationExpirationIntervalReset(delegationExpiration);
 }
 
 function createNewTopic(uint _numberOfValidTopicOptions, bytes32 _newTopicMetaData)
-public
+external
 /*Ideally will have multiple stewards for a forum to allow many users to create topics/polls*/
 onlyOwner
 {
@@ -87,6 +99,7 @@ onlyOwner
   validTopicOptions = _numberOfValidTopicOptions;
   topicMetaData = _newTopicMetaData;
 
+  emit newTopicCreated(_numberOfValidTopicOptions, _newTopicMetaData);
 }
 
 function createPoll(
@@ -98,7 +111,7 @@ function createPoll(
   uint _validVoteOptions,
   uint _topic
   )
-  public
+  external
   isValidTopicOption(_topic)
   /*Ideally will have multiple stewards for a forum to allow many users to create topics/polls*/
   onlyOwner
@@ -120,21 +133,22 @@ function createPoll(
 
   pollList[pollId] = current;
 
-  newPoll(current, pollId);
+  emit newPoll(current, pollId);
 
   pollId++;
 
 }
 
-function registerVoter_Forum()
+function registerVoter()
 external
 {
 
-  require(registeredVotersMap[msg.sender] == false);
+  require(registeredVotersMap[msg.sender] == false, "Voter already registered");
 
   registeredVotersArray.push(msg.sender);
   registeredVotersMap[msg.sender] = true;
 
+  emit voterRegistered(msg.sender);
 }
 
   /*allows user to offer themselves as a delegate*/
@@ -145,6 +159,8 @@ isValidTopicOption(_topic)
 isDelegationExpirationIntervalOpen
 {
   willingtoBeTopicDelegate[delegationExpiration][msg.sender][_topic] = true;
+
+  emit newTopicDelegate(msg.sender, _topic);
 }
 
 function delegateVoteForTopic(uint _topic, address _delegateAddress)
@@ -158,11 +174,12 @@ isDelegationExpirationIntervalOpen
 
   delegatesForUser[delegationExpiration][msg.sender][_topic] = _delegateAddress;
 
+  emit voteDelegatedByTopic(msg.sender, _topic, _delegateAddress);
 }
 
 
 function revokeDelegationForTopic(uint _topic)
-public
+external
 isRegisteredVoter
 isValidTopicOption(_topic)
 isDelegationExpirationIntervalOpen
@@ -170,10 +187,11 @@ isDelegationExpirationIntervalOpen
 
   delegatesForUser[delegationExpiration][msg.sender][_topic] = 0x0;
 
+  emit topicDelegationRevoked(msg.sender, _topic);
 }
 
 function readDelegateForTopic(address _userAddress, uint _topic)
-public
+external
 view
 isDelegationExpirationIntervalOpen
 returns (address _delegateAddress)
@@ -201,7 +219,7 @@ returns (address _endDelegateAddress)
 
 /* if we can make this a view function, that would be ideal*/
 function finalDecision(address _pollAddress)
-public
+external
 view
 returns (uint _finalDecision, uint _finalDecisionTally)
 {
