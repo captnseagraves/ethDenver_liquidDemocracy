@@ -525,7 +525,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       const DELEGATE_PERIOD = timestamp.add(time, "-1h");
       const VOTE_PERIOD = timestamp.add(time, "+1h");
 
-    let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, EIGHT_OPTION_VOTE_ARRAY, 1, { from: OWNER, gas: 4000000 })
+    let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, 8, 1, { from: OWNER, gas: 4000000 })
 
       await web3.eth.getTransactionReceipt(txHash, async (err, result) => {
         const [newPollLog] = ABIDecoder.decodeLogs(result.logs);
@@ -649,7 +649,7 @@ contract("Liquid Democracy Forum", (ACCOUNTS) => {
       const DELEGATE_PERIOD = timestamp.add(time, "-2h");
       const VOTE_PERIOD = timestamp.add(time, "-1h");
 
-    let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, EIGHT_OPTION_VOTE_ARRAY, 1, { from: OWNER, gas: 4000000 })
+    let txHash = await liquidForum.createPoll.sendTransaction(DELEGATE_PERIOD, VOTE_PERIOD, 75, 51, EMPTY_BYTES32_HASH, 8, 1, { from: OWNER, gas: 4000000 })
 
       await web3.eth.getTransactionReceipt(txHash, async (err, result) => {
         const [newPollLog] = ABIDecoder.decodeLogs(result.logs);
