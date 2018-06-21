@@ -31,7 +31,7 @@ expirationInterval -> userAddress -> topic -> bool */
 mapping (uint => mapping (address => mapping (uint => bool))) public willingtoBeTopicDelegate;
 
 modifier isDelegationExpirationIntervalOpen() {
-  require(block.timestamp < delegationExpiration, "Delegation Expiration Interval Closed");
+  require(now < delegationExpiration, "Delegation Expiration Interval Closed");
   _;
 }
 
@@ -53,7 +53,7 @@ modifier isDelegationExpirationIntervalOpen() {
   }
   modifier isValidChainDepthAndNonCircular(uint _topic) {
     bool bValid;
-    (bValid,,) =_isValidChainDepthAndNonCircular(msg.sender, _topic, 0);
+    (bValid,,) = _isValidChainDepthAndNonCircular(msg.sender, _topic, 0);
     require(bValid, "Chain depth is too deep or delegations are circular");
     _;
   }

@@ -11,7 +11,16 @@ Solidity v0.4.23 (solc-js)w
 - truffle migrate
 - truffle test
 
+** need to refactor to more gas efficient contracts **
+
 To test test-coverage run solidity-coverage: ./node_modules/.bin/solidity-coverage
+
+  ** solidity-coverage currently supports solidity up to version 0.4.21 and breaks mid-way through tests **
+
+To test with Mythril:
+- install Mythril: https://github.com/ConsenSys/mythril/wiki/Install-from-Pypi-on-Mac-OS
+- truffle compile
+- myth truffle
 
 Funtionality and intended use
 - A user can create a forum to hold the decision making activities of a community.
