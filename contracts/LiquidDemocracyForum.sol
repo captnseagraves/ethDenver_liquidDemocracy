@@ -7,56 +7,59 @@ import "./Ownable.sol";
 
 contract LiquidDemocracyForum is LDForumInterface, Ownable {
 
-uint public validTopicOptions;
-bytes32 public topicMetaData;
-/*limits number of delegates removed from original user*/
-uint public delegationDepth;
-uint public pollId;
-uint public delegationExpiration;
+    uint public validTopicOptions;
+    bytes32 public topicMetaData;
+    /*limits number of delegates removed from original user*/
+    uint public delegationDepth;
+    uint public pollId;
+    uint public delegationExpiration;
 
-mapping(uint => LiquidDemocracyPoll) public pollList;
+    mapping(uint => LiquidDemocracyPoll) public pollList;
 
-mapping (address => bool) internal registeredVotersMap;
+    mapping (address => bool) internal registeredVotersMap;
 
-address[] internal registeredVotersArray;
+    address[] internal registeredVotersArray;
 
 
 
-/* This mapping contains a user's topic delegation per epiration interval
- expirationInterval -> userAddress -> topic -> delegateAddress */
-mapping (uint => mapping (address => mapping (uint => address))) public delegatesForUser;
+    /* This mapping contains a user's topic delegation per epiration interval
+    expirationInterval -> userAddress -> topic -> delegateAddress */
+    mapping (uint => mapping (address => mapping (uint => address))) public delegatesForUser;
 
-/* This mapping contains a user's willingness to be a delegate per epiration interval
-expirationInterval -> userAddress -> topic -> bool */
-mapping (uint => mapping (address => mapping (uint => bool))) public willingtoBeTopicDelegate;
+    /* This mapping contains a user's willingness to be a delegate per epiration interval
+    expirationInterval -> userAddress -> topic -> bool */
+    mapping (uint => mapping (address => mapping (uint => bool))) public willingtoBeTopicDelegate;
 
-modifier isDelegationExpirationIntervalOpen() {
-  require(now < delegationExpiration, "Delegation Expiration Interval Closed");
-  _;
-}
+    modifier isDelegationExpirationIntervalOpen() {
+        require(block.timestamp < delegationExpiration, "Delegation Expiration Interval Closed");
+      _;
+    }
 
-/*would clean and reduce modifiers and helper functions for production*/
-/*verifies voter is registered*/
-  modifier isRegisteredVoter() {
-      require(verifyVoter(msg.sender) == true, "Voter is not registered");
-    _;
-  }
-  /*verifies delegate is valid*/
-  modifier isValidDelegateForTopic(address _delegateAddress, uint _topic) {
-    require(_isValidDelegateForTopic(_delegateAddress, _topic) == true, "Delegate is not a vaild delegate for this topic");
-    _;
-  }
-  /*verifies if vote is delegated*/
-  modifier isValidTopicOption(uint _topic) {
-    require(_topic <= validTopicOptions, "Topic is not a valid topic");
-    _;
-  }
-  modifier isValidChainDepthAndNonCircular(uint _topic) {
-    bool bValid;
-    (bValid,,) = _isValidChainDepthAndNonCircular(msg.sender, _topic, 0);
-    require(bValid, "Chain depth is too deep or delegations are circular");
-    _;
-  }
+    /*would clean and reduce modifiers and helper functions for production*/
+    /*verifies voter is registered*/
+    modifier isRegisteredVoter() {
+        require(verifyVoter(msg.sender) == true, "Voter is not registered");
+        _;
+    }
+
+    /*verifies delegate is valid*/
+    modifier isValidDelegateForTopic(address _delegateAddress, uint _topic) {
+        require(_isValidDelegateForTopic(_delegateAddress, _topic) == true, "Delegate is not a vaild delegate for this topic");
+        _;
+    }
+
+    /*verifies if vote is delegated*/
+    modifier isValidTopicOption(uint _topic) {
+        require(_topic <= validTopicOptions, "Topic is not a valid topic");
+        _;
+    }
+
+    modifier isValidChainDepthAndNonCircular(uint _topic) {
+        bool bValid;
+        (bValid,,) = _isValidChainDepthAndNonCircular(msg.sender, _topic, 0);
+        require(bValid, "Chain depth is too deep or delegations are circular");
+        _;
+    }
 
   event newPoll(address _newPollAddress, uint _pollId);
   event delegationExpirationIntervalReset(uint _delegationExpiration);
@@ -274,7 +277,7 @@ returns (uint[256] _votes, uint _totalVotes, uint _emptyVotes)
   //todo: how to handle vote validation and initialization
   for (uint i = 0; i < registeredVotersArray.length; i++){
     uint vote;
-  (vote,)  = LDPollInterface(_pollAddress).readVoteAndEndVoter(registeredVotersArray[i], 0);
+  (vote,) = LDPollInterface(_pollAddress).readVoteAndEndVoter(registeredVotersArray[i], 0);
     _votes[vote]++;
 
     if(vote > 0){
